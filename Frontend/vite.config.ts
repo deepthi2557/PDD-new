@@ -13,6 +13,9 @@ export default defineConfig({
   cloudflare: false,
   tanstackStart: {
     server: { entry: "server" },
+    router: {
+      routeFileIgnorePattern: ".*",
+    },
   },
   vite: {
     plugins: [
