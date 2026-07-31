@@ -1,101 +1,384 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from "lucide-react";
-import { activity, mentors } from "@/lib/data";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
+import { activity, mentors } from '../lib/data';
 
-export const Route = createFileRoute("/activity")({
-  component: Activity,
-  head: () => ({ meta: [{ title: "My Activity — SkillSwap" }] }),
-});
+const tabs = ['Learning', 'Teaching', 'Upcoming', 'Completed'] as const;
 
-const tabs = ["Learning", "Teaching", "Upcoming", "Completed"] as const;
-
-function Activity() {
-  const [tab, setTab] = useState<typeof tabs[number]>("Learning");
+export default function Activity() {
+  const navigation = useNavigation<any>();
+  const [tab, setTab] = useState<typeof tabs[number]>('Learning');
 
   const getItems = () => {
-    if (tab === "Learning") return activity.learning;
-    if (tab === "Teaching") return activity.teaching;
-    if (tab === "Upcoming") return [...activity.learning, ...activity.teaching].filter((x) => x.status === "upcoming");
-    return [...activity.learning, ...activity.teaching].filter((x) => x.status === "completed");
+    if (tab === 'Learning') return activity.learning;
+    if (tab === 'Teaching') return activity.teaching;
+    if (tab === 'Upcoming') return [...activity.learning, ...activity.teaching].filter((x) => x.status === 'upcoming');
+    return [...activity.learning, ...activity.teaching].filter((x) => x.status === 'completed');
   };
 
   return (
-    <div className="px-5 pt-12">
-      <h1 className="text-2xl font-bold mb-4">My Activity</h1>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Title */}
+      <Text style={styles.title}>My Activity</Text>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="glass-card rounded-2xl p-4">
-          <p className="text-xs text-muted-foreground">Trust score</p>
-          <p className="text-2xl font-bold text-gradient">96</p>
-          <p className="text-[10px] text-[var(--online)] mt-1">⭐ Top tier</p>
-        </div>
-        <div className="glass-card rounded-2xl p-4">
-          <p className="text-xs text-muted-foreground">Attendance</p>
-          <p className="text-2xl font-bold">98%</p>
-          <p className="text-[10px] text-muted-foreground mt-1">0 missed sessions</p>
-        </div>
-      </div>
+      {/* Grid Stats */}
+      <View style={styles.gridStats}>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Trust score</Text>
+          <Text style={[styles.statValue, styles.statValuePurple]}>96</Text>
+          <Text style={styles.statSubTextOnline}>⭐ Top tier</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Attendance</Text>
+          <Text style={styles.statValue}>98%</Text>
+          <Text style={styles.statSubTextMuted}>0 missed sessions</Text>
+        </View>
+      </View>
 
-      <div className="glass-card rounded-2xl p-1.5 flex gap-1 mb-5 overflow-x-auto no-scrollbar">
-        {tabs.map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 min-w-fit px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-              tab === t ? "gradient-primary text-primary-foreground shadow-soft" : "text-muted-foreground"
-            }`}>
-            {t}
-          </button>
-        ))}
-      </div>
+      {/* Navigation Tabs */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabScrollContent}
+        style={styles.tabScrollWrapper}
+      >
+        <View style={styles.tabContainer}>
+          {tabs.map((t) => {
+            const active = tab === t;
+            return (
+              <TouchableOpacity
+                key={t}
+                onPress={() => setTab(t)}
+                style={[
+                  styles.tabButton,
+                  active ? styles.tabButtonActive : null,
+                ]}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.tabButtonText,
+                    active ? styles.tabButtonTextActive : styles.tabButtonTextInactive,
+                  ]}
+                >
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
 
-      <div className="space-y-3">
+      {/* List Items */}
+      <View style={styles.itemList}>
         {getItems().map((it) => (
-          <div key={it.id} className="glass-card rounded-2xl p-4 flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-              it.status === "upcoming" ? "gradient-primary text-primary-foreground" : "bg-[var(--color-mint)]/50"
-            }`}>
-              {it.status === "upcoming" ? <Clock className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5 text-[var(--online)]" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">{it.skill}</p>
-              <p className="text-xs text-muted-foreground truncate">with {it.with}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{it.time}</p>
-            </div>
+          <View key={it.id} style={styles.itemCard}>
+            <View
+              style={[
+                styles.itemIconBox,
+                it.status === 'upcoming' ? styles.iconBoxPurple : styles.iconBoxMint,
+              ]}
+            >
+              {it.status === 'upcoming' ? (
+                <Clock color="#ffffff" size={20} />
+              ) : (
+                <CheckCircle2 color="#22C55E" size={20} />
+              )}
+            </View>
+
+            <View style={styles.itemInfo}>
+              <Text style={styles.itemTitle} numberOfLines={1}>{it.skill}</Text>
+              <Text style={styles.itemSubtitle} numberOfLines={1}>with {it.with}</Text>
+              <Text style={styles.itemTime}>{it.time}</Text>
+            </View>
+
             {it.rating > 0 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50">
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                <span className="text-xs font-semibold text-amber-700">{it.rating}</span>
-              </div>
+              <View style={styles.ratingBadge}>
+                <Star color="#F59E0B" size={10} fill="#F59E0B" />
+                <Text style={styles.ratingText}>{it.rating}</Text>
+              </View>
             )}
-          </div>
+          </View>
         ))}
-      </div>
+      </View>
 
-      <h2 className="font-semibold mt-8 mb-3 flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-primary" /> Suggested for you
-      </h2>
-      <div className="space-y-2">
+      {/* Suggested For You Header */}
+      <View style={styles.sectionHeader}>
+        <Sparkles color="#8b5cf6" size={16} style={styles.sectionIcon} />
+        <Text style={styles.sectionTitle}>Suggested for you</Text>
+      </View>
+
+      {/* Suggested List */}
+      <View style={styles.suggestedList}>
         {mentors.slice(0, 2).map((m) => (
-          <div key={m.id} className="glass-card rounded-2xl p-3 flex items-center gap-3">
-            <img src={m.avatar} className="w-10 h-10 rounded-xl bg-secondary" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{m.name}</p>
-              <p className="text-xs text-muted-foreground truncate">Matches your interest in {m.tags[0]}</p>
-            </div>
-            <button className="text-xs font-semibold text-primary">View</button>
-          </div>
+          <View key={m.id} style={styles.suggestedCard}>
+            <Image source={{ uri: m.avatar }} style={styles.suggestedAvatar} />
+            <View style={styles.suggestedInfo}>
+              <Text style={styles.suggestedName} numberOfLines={1}>{m.name}</Text>
+              <Text style={styles.suggestedExpertise} numberOfLines={1}>
+                Matches interest in {m.tags[0]}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ProfileDetails', { id: m.id })}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.suggestedViewLink}>View</Text>
+            </TouchableOpacity>
+          </View>
         ))}
-      </div>
+      </View>
 
-      <div className="glass-card rounded-2xl p-4 mt-6 mb-4 border border-amber-200 bg-amber-50/60">
-        <div className="flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-amber-900">Reliability reminder</p>
-            <p className="text-xs text-amber-800 mt-0.5">Missing 3+ sessions flags your profile as low reliability.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Caution Reminder Banner */}
+      <View style={styles.cautionBanner}>
+        <AlertTriangle color="#D97706" size={20} style={styles.cautionIcon} />
+        <View style={styles.cautionContent}>
+          <Text style={styles.cautionTitle}>Reliability reminder</Text>
+          <Text style={styles.cautionDesc}>
+            Missing 3+ sessions flags your profile as low reliability.
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 110,
+    backgroundColor: '#FAF9FC',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 16,
+  },
+  gridStats: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  statValuePurple: {
+    color: '#8b5cf6',
+  },
+  statSubTextOnline: {
+    fontSize: 10,
+    color: '#22C55E',
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  statSubTextMuted: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 4,
+  },
+  tabScrollWrapper: {
+    marginHorizontal: -20,
+    marginBottom: 20,
+  },
+  tabScrollContent: {
+    paddingHorizontal: 20,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 6,
+  },
+  tabButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  tabButtonActive: {
+    backgroundColor: '#8b5cf6',
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tabButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tabButtonTextActive: {
+    color: '#ffffff',
+  },
+  tabButtonTextInactive: {
+    color: '#8C8797',
+  },
+  itemList: {
+    marginBottom: 24,
+  },
+  itemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+  },
+  itemIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  iconBoxPurple: {
+    backgroundColor: '#8b5cf6',
+  },
+  iconBoxMint: {
+    backgroundColor: 'rgba(167, 243, 208, 0.5)',
+  },
+  itemInfo: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  itemTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  itemSubtitle: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  itemTime: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 4,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 99,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#B45309',
+    marginLeft: 4,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionIcon: {
+    marginRight: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  suggestedList: {
+    marginBottom: 24,
+  },
+  suggestedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 8,
+  },
+  suggestedAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#F3F0F6',
+    marginRight: 12,
+  },
+  suggestedInfo: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  suggestedName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  suggestedExpertise: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  suggestedViewLink: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8b5cf6',
+  },
+  cautionBanner: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(254, 243, 199, 0.6)',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  cautionIcon: {
+    marginRight: 12,
+  },
+  cautionContent: {
+    flex: 1,
+  },
+  cautionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#78350F',
+  },
+  cautionDesc: {
+    fontSize: 12,
+    color: '#92400E',
+    marginTop: 2,
+  },
+});

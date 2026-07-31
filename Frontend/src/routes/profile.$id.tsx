@@ -1,181 +1,628 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from "lucide-react";
-import { mentors, reviews } from "@/lib/data";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from 'lucide-react-native';
+import { mentors, reviews } from '../lib/data';
 
-export const Route = createFileRoute("/profile/$id")({
-  component: Profile,
-});
-
-function Profile() {
-  const { id } = useParams({ from: "/profile/$id" });
+export default function Profile() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const id = route.params?.id;
   const m = mentors.find((x) => x.id === id) || mentors[0];
+
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [reviewText, setReviewText] = useState("");
+  const [reviewText, setReviewText] = useState('');
 
   return (
-    <div className="pb-10">
-      <div className="relative gradient-hero rounded-b-[40px] px-5 pt-12 pb-20">
-        <Link to="/home" className="inline-flex items-center gap-2 text-sm font-medium mb-6">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </Link>
-      </div>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header Banner */}
+      <View style={styles.headerHero}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft color="#342F3D" size={16} style={styles.backIcon} />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
 
-      <div className="-mt-16 px-5">
-        <div className="glass-card rounded-3xl p-5 shadow-glow">
-          <div className="flex items-end gap-4 -mt-12">
-            <img src={m.avatar} alt={m.name} className="w-24 h-24 rounded-3xl bg-secondary border-4 border-card shadow-soft" />
-            <div className="pb-2 flex-1 min-w-0">
-              <h1 className="text-xl font-bold">{m.name}</h1>
-              <p className="text-xs text-muted-foreground">{m.expertise}</p>
-            </div>
-          </div>
+      <View style={styles.profileSection}>
+        {/* Main Info Card */}
+        <View style={styles.mainCard}>
+          <View style={styles.profileHeader}>
+            <Image source={{ uri: m.avatar }} style={styles.avatar} />
+            <View style={styles.headerTitleContainer}>
+              <Text style={styles.name}>{m.name}</Text>
+              <Text style={styles.expertise} numberOfLines={1}>{m.expertise}</Text>
+            </View>
+          </View>
 
-          <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{m.bio}</p>
+          <Text style={styles.bio}>{m.bio}</Text>
 
-          <div className="grid grid-cols-3 gap-2 mt-5">
+          {/* Stats Row */}
+          <View style={styles.statsRow}>
             <Stat label="Sessions" value={m.sessions} />
             <Stat label="Followers" value={m.followers} />
             <Stat label="Rating" value={m.rating} />
-          </div>
+          </View>
 
-          <div className="flex gap-2 mt-5">
-            <Link to="/chat/$id" params={{ id: m.id }} className="flex-1 glass rounded-2xl py-3 flex items-center justify-center gap-2 text-sm font-semibold">
-              <MessageCircle className="w-4 h-4" /> Chat
-            </Link>
-            <Link to="/book" className="flex-1 gradient-primary text-primary-foreground rounded-2xl py-3 flex items-center justify-center gap-2 text-sm font-semibold shadow-soft">
-              <CalendarPlus className="w-4 h-4" /> Book
-            </Link>
-            <button className="w-12 h-12 glass rounded-2xl flex items-center justify-center">
-              <UserPlus className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+          {/* Action Row */}
+          <View style={styles.actionsRow}>
+            <TouchableOpacity
+              style={styles.chatBtn}
+              onPress={() => navigation.navigate('ChatDetails', { id: m.id })}
+              activeOpacity={0.7}
+            >
+              <MessageCircle color="#342F3D" size={16} style={styles.btnIcon} />
+              <Text style={styles.chatBtnText}>Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.bookBtn}
+              onPress={() => navigation.navigate('Book')}
+              activeOpacity={0.7}
+            >
+              <CalendarPlus color="#ffffff" size={16} style={styles.btnIcon} />
+              <Text style={styles.bookBtnText}>Book</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.followBtn} activeOpacity={0.7}>
+              <UserPlus color="#342F3D" size={16} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
+        {/* Can teach section */}
         <Section title="Can teach">
-          <div className="flex flex-wrap gap-2">
-            {m.tags.map((t) => <Chip key={t}>{t}</Chip>)}
-          </div>
+          <View style={styles.chipRow}>
+            {m.tags.map((t) => (
+              <Chip key={t}>{t}</Chip>
+            ))}
+          </View>
         </Section>
 
+        {/* Wants to learn section */}
         <Section title="Wants to learn">
-          <div className="flex flex-wrap gap-2">
-            <Chip>Product Strategy</Chip><Chip>Spanish</Chip><Chip>Music Theory</Chip>
-          </div>
+          <View style={styles.chipRow}>
+            <Chip>Product Strategy</Chip>
+            <Chip>Spanish</Chip>
+            <Chip>Music Theory</Chip>
+          </View>
         </Section>
 
+        {/* Experience & Certifications */}
         <Section title="Experience & Certifications">
-          <div className="space-y-2">
+          <View style={styles.certsContainer}>
             <Cert title="ML Engineer · NovaLabs" sub="2021 — Present" />
             <Cert title="Google ML Specialization" sub="Certified · 2022" />
-          </div>
+          </View>
         </Section>
 
+        {/* Achievements */}
         <Section title="Achievements">
-          <div className="flex flex-wrap gap-2">
+          <View style={styles.chipRow}>
             <Badge>🌟 Top Mentor</Badge>
             <Badge>🔥 Consistent</Badge>
             <Badge>🏆 Skill Expert</Badge>
-          </div>
+          </View>
         </Section>
 
+        {/* Availability Calendar */}
         <Section title="Availability">
-          <div className="grid grid-cols-7 gap-1.5">
-            {["M","T","W","T","F","S","S"].map((d, i) => (
-              <div key={i} className="text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">{d}</p>
-                <div className={`aspect-square rounded-xl flex items-center justify-center text-xs font-semibold ${
-                  [1,3,5].includes(i) ? "gradient-primary text-primary-foreground" : "glass"
-                }`}>{i+12}</div>
-              </div>
-            ))}
-          </div>
+          <View style={styles.calendarGrid}>
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => {
+              const active = [1, 3, 5].includes(i);
+              return (
+                <View key={i} style={styles.calendarColumn}>
+                  <Text style={styles.calendarDayText}>{d}</Text>
+                  <View
+                    style={[
+                      styles.calendarDateBox,
+                      active ? styles.dateBoxActive : styles.dateBoxInactive,
+                    ]}
+                  >
+                    <Text style={[styles.calendarDateText, active ? styles.dateTextActive : styles.dateTextInactive]}>
+                      {i + 12}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
         </Section>
 
+        {/* Reviews Section */}
         <Section title="Reviews">
-          <div className="space-y-3">
+          <View style={styles.reviewsList}>
             {reviews.map((r) => (
-              <div key={r.id} className="glass-card rounded-2xl p-3">
-                <div className="flex items-center gap-2">
-                  <img src={r.avatar} className="w-8 h-8 rounded-full bg-secondary" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">{r.user}</p>
-                    <p className="text-[10px] text-muted-foreground">{r.date} ago</p>
-                  </div>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-3 h-3 ${i < r.rating ? "fill-amber-400 text-amber-400" : "text-muted"}`} />
+              <View key={r.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <Image source={{ uri: r.avatar }} style={styles.reviewAvatar} />
+                  <View style={styles.reviewUser}>
+                    <Text style={styles.reviewUserName}>{r.user}</Text>
+                    <Text style={styles.reviewDate}>{r.date} ago</Text>
+                  </View>
+                  <View style={styles.starsRow}>
+                    {[...Array(5)].map((_, idx) => (
+                      <Star
+                        key={idx}
+                        color="#F59E0B"
+                        size={10}
+                        fill={idx < r.rating ? '#F59E0B' : 'transparent'}
+                        style={styles.starIcon}
+                      />
                     ))}
-                  </div>
-                </div>
-                <p className="text-sm mt-2 text-muted-foreground">{r.text}</p>
-              </div>
+                  </View>
+                </View>
+                <Text style={styles.reviewText}>{r.text}</Text>
+              </View>
             ))}
-          </div>
+          </View>
         </Section>
 
+        {/* Leave Review Form */}
         <Section title="Leave a review">
           {submitted ? (
-            <div className="glass-card rounded-2xl p-4 flex items-center gap-2 text-sm font-medium">
-              <CheckCircle2 className="w-5 h-5 text-[var(--online)]" /> Feedback Submitted Successfully
-            </div>
+            <View style={styles.submittedCard}>
+              <CheckCircle2 color="#22C55E" size={20} style={styles.submittedIcon} />
+              <Text style={styles.submittedText}>Feedback Submitted Successfully</Text>
+            </View>
           ) : (
-            <div className="glass-card rounded-2xl p-4 space-y-3">
-              <div className="flex gap-1 justify-center">
-                {[1,2,3,4,5].map((n) => (
-                  <button key={n} onClick={() => setRating(n)}>
-                    <Star className={`w-7 h-7 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-muted"}`} />
-                  </button>
+            <View style={styles.formCard}>
+              <View style={styles.ratingFormRow}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <TouchableOpacity key={n} onPress={() => setRating(n)} activeOpacity={0.7}>
+                    <Star
+                      color="#F59E0B"
+                      size={28}
+                      fill={n <= rating ? '#F59E0B' : 'transparent'}
+                      style={styles.formStarIcon}
+                    />
+                  </TouchableOpacity>
                 ))}
-              </div>
-              <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)}
-                placeholder="Share your experience..." rows={3}
-                className="w-full bg-secondary/50 rounded-2xl p-3 text-sm outline-none resize-none" />
-              <button onClick={() => setSubmitted(true)}
-                className="w-full gradient-primary text-primary-foreground rounded-2xl py-3 font-semibold flex items-center justify-center gap-2">
-                <Send className="w-4 h-4" /> Submit Review
-              </button>
-            </div>
+              </View>
+              <TextInput
+                value={reviewText}
+                onChangeText={setReviewText}
+                placeholder="Share your experience..."
+                placeholderTextColor="#8C8797"
+                multiline
+                numberOfLines={3}
+                style={styles.reviewInput}
+              />
+              <TouchableOpacity style={styles.submitReviewBtn} onPress={() => setSubmitted(true)} activeOpacity={0.7}>
+                <Send color="#ffffff" size={16} style={styles.btnIcon} />
+                <Text style={styles.submitReviewText}>Submit Review</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </Section>
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: any }) {
   return (
-    <div className="text-center glass rounded-2xl py-3">
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
-    </div>
+    <View style={styles.statContainer}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
   );
 }
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-6">
-      <h3 className="font-semibold mb-3">{title}</h3>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
       {children}
-    </div>
+    </View>
   );
 }
+
 function Chip({ children }: { children: React.ReactNode }) {
-  return <span className="px-3 py-1.5 rounded-full glass-card text-xs font-medium">{children}</span>;
+  return (
+    <View style={styles.chip}>
+      <Text style={styles.chipText}>{children}</Text>
+    </View>
+  );
 }
+
 function Badge({ children }: { children: React.ReactNode }) {
-  return <span className="px-3 py-1.5 rounded-2xl bg-[var(--color-mint)]/40 text-sm font-medium">{children}</span>;
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{children}</Text>
+    </View>
+  );
 }
+
 function Cert({ title, sub }: { title: string; sub: string }) {
   return (
-    <div className="glass-card rounded-2xl p-3 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-        <Award className="w-5 h-5 text-primary-foreground" />
-      </div>
-      <div>
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="text-xs text-muted-foreground">{sub}</p>
-      </div>
-    </div>
+    <View style={styles.certCard}>
+      <View style={styles.certIconBox}>
+        <Award color="#ffffff" size={20} />
+      </View>
+      <View style={styles.certInfo}>
+        <Text style={styles.certTitle}>{title}</Text>
+        <Text style={styles.certSub}>{sub}</Text>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#FAF9FC',
+    paddingBottom: 40,
+  },
+  headerHero: {
+    height: 140,
+    backgroundColor: '#ebdfff', // mapped from gradient-hero colors
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    paddingHorizontal: 20,
+    paddingTop: 48,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  backIcon: {
+    marginRight: 4,
+  },
+  backText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  profileSection: {
+    paddingHorizontal: 20,
+  },
+  mainCard: {
+    marginTop: -64,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 24,
+    padding: 16,
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+    marginBottom: 8,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginTop: -48,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    backgroundColor: '#F3F0F6',
+    borderWidth: 4,
+    borderColor: '#ffffff',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    marginLeft: 12,
+    paddingBottom: 4,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  expertise: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  bio: {
+    fontSize: 14,
+    color: '#8C8797',
+    lineHeight: 20,
+    marginTop: 16,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 20,
+  },
+  statContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  statLabel: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 20,
+  },
+  chatBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    paddingVertical: 12,
+  },
+  chatBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  bookBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 16,
+    paddingVertical: 12,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  bookBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  btnIcon: {
+    marginRight: 6,
+  },
+  followBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  section: {
+    marginTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 12,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 99,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#342F3D',
+  },
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'rgba(167, 243, 208, 0.4)',
+  },
+  badgeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#065F46',
+  },
+  certsContainer: {
+    width: '100%',
+    gap: 8,
+  },
+  certCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 12,
+  },
+  certIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#8b5cf6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  certInfo: {
+    flex: 1,
+  },
+  certTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  certSub: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  calendarColumn: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  calendarDayText: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginBottom: 4,
+  },
+  calendarDateBox: {
+    width: '85%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateBoxInactive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  dateBoxActive: {
+    backgroundColor: '#8b5cf6',
+  },
+  calendarDateText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  dateTextInactive: {
+    color: '#342F3D',
+  },
+  dateTextActive: {
+    color: '#ffffff',
+  },
+  reviewsList: {
+    gap: 12,
+  },
+  reviewCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 12,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reviewAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F0F6',
+    marginRight: 10,
+  },
+  reviewUser: {
+    flex: 1,
+  },
+  reviewUserName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  reviewDate: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 1,
+  },
+  starsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  starIcon: {
+    marginRight: 2,
+  },
+  reviewText: {
+    fontSize: 14,
+    color: '#8C8797',
+    marginTop: 8,
+    lineHeight: 18,
+  },
+  submittedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  submittedIcon: {
+    marginRight: 8,
+  },
+  submittedText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#342F3D',
+  },
+  formCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  ratingFormRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  formStarIcon: {
+    marginHorizontal: 2,
+  },
+  reviewInput: {
+    backgroundColor: 'rgba(243, 240, 246, 0.5)',
+    borderRadius: 16,
+    padding: 12,
+    fontSize: 14,
+    color: '#342F3D',
+    textAlignVertical: 'top',
+    height: 80,
+  },
+  submitReviewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 16,
+    paddingVertical: 12,
+  },
+  submitReviewText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+});

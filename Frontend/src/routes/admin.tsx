@@ -1,89 +1,302 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Users, Calendar, Star, TrendingUp, Flag, MessageSquare, Activity as ActIcon, BarChart3 } from "lucide-react";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import React from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { Users, Calendar, Star, TrendingUp, Flag, MessageSquare, Activity as ActIcon, BarChart3 } from 'lucide-react-native';
 
-export const Route = createFileRoute("/admin")({
-  component: Admin,
-  head: () => ({ meta: [{ title: "Admin — SkillSwap" }] }),
-});
+export default function Admin() {
+  const navigation = useNavigation<any>();
 
-function Admin() {
   return (
-    <div className="px-5 pt-12">
-      <p className="text-xs text-muted-foreground">Admin Dashboard</p>
-      <h1 className="text-2xl font-bold mb-5">Overview</h1>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Back button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
+      >
+        <ArrowLeft color="#8C8797" size={16} style={styles.backIcon} />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <Text style={styles.headerSubtitle}>Admin Dashboard</Text>
+      <Text style={styles.title}>Overview</Text>
+
+      {/* Grid Stats */}
+      <View style={styles.gridStats}>
         <Stat icon={Users} label="Total Users" value="12,480" trend="+8.2%" />
         <Stat icon={Calendar} label="Active Sessions" value="342" trend="+3.1%" />
         <Stat icon={Star} label="Avg Rating" value="4.78" trend="+0.04" />
         <Stat icon={TrendingUp} label="User Growth" value="+12%" trend="this month" />
-      </div>
+      </View>
 
-      <div className="glass-card rounded-3xl p-5 mb-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Engagement</h3>
-          <BarChart3 className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <div className="flex items-end gap-2 h-32">
+      {/* Engagement Chart */}
+      <View style={styles.chartCard}>
+        <View style={styles.chartHeader}>
+          <Text style={styles.chartTitle}>Engagement</Text>
+          <BarChart3 color="#8C8797" size={16} />
+        </View>
+        <View style={styles.chartContainer}>
           {[40, 65, 50, 78, 60, 90, 75].map((h, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full gradient-primary rounded-t-xl shadow-soft" style={{ height: `${h}%` }} />
-              <span className="text-[10px] text-muted-foreground">{["M","T","W","T","F","S","S"][i]}</span>
-            </div>
+            <View key={i} style={styles.chartColumn}>
+              <View style={styles.chartBarWrapper}>
+                <View style={[styles.chartBar, { height: `${h}%` }]} />
+              </View>
+              <Text style={styles.chartColumnLabel}>{['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}</Text>
+            </View>
           ))}
-        </div>
-      </div>
+        </View>
+      </View>
 
-      <div className="glass-card rounded-3xl p-5 mb-5">
-        <h3 className="font-semibold mb-3">Popular skills</h3>
+      {/* Popular Skills Progress Meters */}
+      <View style={styles.progressCard}>
+        <Text style={styles.chartTitle}>Popular skills</Text>
         {[
-          { name: "AI & ML", pct: 86 },
-          { name: "UI/UX", pct: 72 },
-          { name: "Coding", pct: 64 },
-          { name: "Public Speaking", pct: 41 },
+          { name: 'AI & ML', pct: 86 },
+          { name: 'UI/UX', pct: 72 },
+          { name: 'Coding', pct: 64 },
+          { name: 'Public Speaking', pct: 41 },
         ].map((s) => (
-          <div key={s.name} className="mb-3 last:mb-0">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="font-medium">{s.name}</span>
-              <span className="text-muted-foreground">{s.pct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full gradient-primary rounded-full" style={{ width: `${s.pct}%` }} />
-            </div>
-          </div>
+          <View key={s.name} style={styles.progressRow}>
+            <View style={styles.progressLabelRow}>
+              <Text style={styles.progressName}>{s.name}</Text>
+              <Text style={styles.progressPct}>{s.pct}%</Text>
+            </View>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${s.pct}%` }]} />
+            </View>
+          </View>
         ))}
-      </div>
+      </View>
 
-      <h3 className="font-semibold mb-3">Manage</h3>
-      <div className="grid grid-cols-2 gap-3 mb-10">
+      {/* Manage Grid */}
+      <Text style={styles.sectionTitle}>Manage</Text>
+      <View style={styles.manageGrid}>
         {[
-          { icon: Users, label: "Users", count: 12480 },
-          { icon: Calendar, label: "Sessions", count: 8412 },
-          { icon: Flag, label: "Reports", count: 14 },
-          { icon: Star, label: "Reviews", count: 6291 },
-          { icon: MessageSquare, label: "Community", count: 932 },
-          { icon: ActIcon, label: "Categories", count: 28 },
+          { icon: Users, label: 'Users', count: 12480 },
+          { icon: Calendar, label: 'Sessions', count: 8412 },
+          { icon: Flag, label: 'Reports', count: 14 },
+          { icon: Star, label: 'Reviews', count: 6291 },
+          { icon: MessageSquare, label: 'Community', count: 932 },
+          { icon: ActIcon, label: 'Categories', count: 28 },
         ].map((m) => (
-          <button key={m.label} className="glass-card rounded-2xl p-4 text-left">
-            <m.icon className="w-5 h-5 text-primary mb-2" />
-            <p className="text-xs text-muted-foreground">{m.label}</p>
-            <p className="text-lg font-bold">{m.count.toLocaleString()}</p>
-          </button>
+          <TouchableOpacity key={m.label} style={styles.manageCard} activeOpacity={0.7}>
+            <m.icon color="#8b5cf6" size={20} style={styles.manageIcon} />
+            <Text style={styles.manageLabel}>{m.label}</Text>
+            <Text style={styles.manageCount}>{m.count.toLocaleString()}</Text>
+          </TouchableOpacity>
         ))}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 }
 
-function Stat({ icon: Icon, label, value, trend }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; trend: string }) {
+import { ArrowLeft } from 'lucide-react-native';
+
+function Stat({ icon: Icon, label, value, trend }: { icon: any; label: string; value: string; trend: string }) {
   return (
-    <div className="glass-card rounded-2xl p-4">
-      <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center mb-2">
-        <Icon className="w-4 h-4 text-primary-foreground" />
-      </div>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
-      <p className="text-xl font-bold">{value}</p>
-      <p className="text-[10px] text-[var(--online)] mt-0.5">{trend}</p>
-    </div>
+    <View style={styles.statCard}>
+      <View style={styles.statIconBox}>
+        <Icon color="#ffffff" size={16} />
+      </View>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statTrend}>{trend}</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 40,
+    backgroundColor: '#FAF9FC',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+  },
+  backIcon: {
+    marginRight: 6,
+  },
+  backText: {
+    fontSize: 14,
+    color: '#8C8797',
+    fontWeight: '500',
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginBottom: 2,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 20,
+  },
+  gridStats: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 20,
+  },
+  statCard: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 12,
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+  },
+  statIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#8b5cf6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  statLabel: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginBottom: 2,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  statTrend: {
+    fontSize: 10,
+    color: '#22C55E',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  chartCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  chartContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-around',
+    height: 128,
+  },
+  chartColumn: {
+    flex: 1,
+    alignItems: 'center',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  chartBarWrapper: {
+    flex: 1,
+    width: '60%',
+    justifyContent: 'flex-end',
+    marginBottom: 6,
+  },
+  chartBar: {
+    width: '100%',
+    backgroundColor: '#8b5cf6',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  chartColumnLabel: {
+    fontSize: 10,
+    color: '#8C8797',
+  },
+  progressCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+  },
+  progressRow: {
+    marginTop: 12,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  progressName: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#342F3D',
+  },
+  progressPct: {
+    fontSize: 12,
+    color: '#8C8797',
+  },
+  progressBarBg: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F3F0F6',
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 4,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 12,
+  },
+  manageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 40,
+  },
+  manageCard: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  manageIcon: {
+    marginBottom: 8,
+  },
+  manageLabel: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginBottom: 2,
+  },
+  manageCount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+});

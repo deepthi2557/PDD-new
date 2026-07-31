@@ -20,7 +20,7 @@ export type Mentor = {
   sessions: number;
 };
 
-const avatars = (seed: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`;
+const avatars = (seed: string) => `https://api.dicebear.com/7.x/avataaars/png?seed=${seed}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`;
 
 export const mentors: Mentor[] = [
   {

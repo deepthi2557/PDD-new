@@ -1,33 +1,114 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { notifications } from "@/lib/data";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import React from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { ArrowLeft } from 'lucide-react-native';
+import { notifications } from '../lib/data';
 
-export const Route = createFileRoute("/notifications")({
-  component: Notifs,
-  head: () => ({ meta: [{ title: "Notifications — SkillSwap" }] }),
-});
+export default function Notifs() {
+  const navigation = useNavigation<any>();
 
-function Notifs() {
   return (
-    <div className="px-5 pt-12">
-      <Link to="/home" className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back
-      </Link>
-      <h1 className="text-2xl font-bold mb-5">Notifications</h1>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
+      >
+        <ArrowLeft color="#8C8797" size={16} style={styles.backIcon} />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
 
-      <div className="space-y-2">
+      {/* Title */}
+      <Text style={styles.title}>Notifications</Text>
+
+      {/* Notifications List */}
+      <View style={styles.notifList}>
         {notifications.map((n) => (
-          <div key={n.id} className="glass-card rounded-2xl p-4 flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl gradient-hero flex items-center justify-center text-lg">
-              {n.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">{n.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{n.time} ago</p>
-            </div>
-          </div>
+          <View key={n.id} style={styles.notifCard}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconEmoji}>{n.icon}</Text>
+            </View>
+            <View style={styles.notifContent}>
+              <Text style={styles.notifTitle}>{n.title}</Text>
+              <Text style={styles.notifTime}>{n.time} ago</Text>
+            </View>
+          </View>
         ))}
-      </div>
-    </div>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 40,
+    backgroundColor: '#FAF9FC',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+  },
+  backIcon: {
+    marginRight: 6,
+  },
+  backText: {
+    fontSize: 14,
+    color: '#8C8797',
+    fontWeight: '500',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 20,
+  },
+  notifList: {
+    width: '100%',
+  },
+  notifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 8,
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: '#ebdfff', // mapped from gradient-hero background
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  iconEmoji: {
+    fontSize: 18,
+  },
+  notifContent: {
+    flex: 1,
+  },
+  notifTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#342F3D',
+    lineHeight: 18,
+  },
+  notifTime: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+});
