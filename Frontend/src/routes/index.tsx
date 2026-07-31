@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/')({
+  component: Login,
+});
 
 export default function Login() {
   const navigation = useNavigation<any>();

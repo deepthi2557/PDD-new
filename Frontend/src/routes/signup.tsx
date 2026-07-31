@@ -2,6 +2,11 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award } from 'lucide-react-native';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/signup')({
+  component: Signup,
+});
 
 const roles = [
   { id: 'student', label: 'Student', icon: GraduationCap },
@@ -56,7 +61,7 @@ export default function Signup() {
                 keyboardType={f.keyboard}
                 autoCapitalize={f.key === 'email' ? 'none' : 'words'}
                 value={formState[f.key] || ''}
-                onChangeText={(val) => setFormState(prev => ({ ...prev, [f.key]: val }))}
+                onChangeText={(val: string) => setFormState(prev => ({ ...prev, [f.key]: val }))}
                 style={styles.input}
               />
             </View>

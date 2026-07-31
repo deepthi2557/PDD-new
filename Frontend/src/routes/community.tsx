@@ -2,6 +2,11 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React from 'react';
 import { Heart, MessageSquare, Sparkles, Plus } from 'lucide-react-native';
 import { community } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/community')({
+  component: Community,
+});
 
 export default function Community() {
   return (

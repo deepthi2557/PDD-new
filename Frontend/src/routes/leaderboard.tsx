@@ -2,6 +2,11 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { Trophy, TrendingUp, Crown } from 'lucide-react-native';
 import { leaderboard } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/leaderboard')({
+  component: Board,
+});
 
 const tabs = ['Mentors', 'Learners', 'Skills'] as const;
 

@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import { mentors } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/book')({
+  component: Book,
+});
 
 const days = Array.from({ length: 7 }, (_, i) => i);
 const times = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM'];

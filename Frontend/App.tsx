@@ -60,7 +60,7 @@ function TabNavigator() {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Home color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -68,7 +68,7 @@ function TabNavigator() {
         component={ActivityScreen}
         options={{
           tabBarLabel: 'Activity',
-          tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Calendar color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -76,7 +76,7 @@ function TabNavigator() {
         component={ChatListScreen}
         options={{
           tabBarLabel: 'Chat',
-          tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <MessageCircle color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -84,7 +84,7 @@ function TabNavigator() {
         component={LeaderboardScreen}
         options={{
           tabBarLabel: 'Rank',
-          tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Trophy color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -93,7 +93,7 @@ function TabNavigator() {
         initialParams={{ id: 'me' }}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => <User color={color} size={size} />,
         }}
       />
     </Tab.Navigator>

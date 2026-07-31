@@ -6,6 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { nitro } from "nitro/vite";
+import path from "path";
 
 // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
 // @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
@@ -15,6 +16,17 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: {
+      alias: [
+        { find: /^react-native$/, replacement: "react-native-web" },
+        { find: "react-native", replacement: "react-native-web" },
+        { find: "lucide-react-native", replacement: "lucide-react" },
+        { find: "@react-navigation/native", replacement: path.resolve(__dirname, "./src/lib/navigation-bridge.ts") },
+        { find: "@react-navigation/bottom-tabs", replacement: path.resolve(__dirname, "./src/lib/navigation-bridge.ts") },
+        { find: "@react-navigation/native-stack", replacement: path.resolve(__dirname, "./src/lib/navigation-bridge.ts") },
+        { find: "@expo/vector-icons", replacement: path.resolve(__dirname, "./src/lib/expo-icons-bridge.tsx") },
+      ],
+    },
     plugins: [
       nitro({
         preset: "vercel",
@@ -22,3 +34,4 @@ export default defineConfig({
     ],
   },
 });
+
