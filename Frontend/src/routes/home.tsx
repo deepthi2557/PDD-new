@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy } from 'lucide-react-native';
 import { mentors, categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/home')({
+  component: Home,
+});
 
 export default function Home() {
   const navigation = useNavigation<any>();

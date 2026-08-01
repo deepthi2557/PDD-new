@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "App.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "App.tsx"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",
@@ -20,7 +20,13 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "react-native": ["./src/types/native.d.ts"],
+      "lucide-react-native": ["./src/types/native.d.ts"],
+      "@react-navigation/native": ["./src/lib/navigation-bridge.ts"],
+      "@react-navigation/bottom-tabs": ["./src/lib/navigation-bridge.ts"],
+      "@react-navigation/native-stack": ["./src/lib/navigation-bridge.ts"],
+      "@expo/vector-icons": ["./src/types/native.d.ts"]
     }
   }
 }

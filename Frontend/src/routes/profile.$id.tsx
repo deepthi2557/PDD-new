@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from 'lucide-react-native';
 import { mentors, reviews } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/profile/$id')({
+  component: Profile,
+});
 
 export default function Profile() {
   const navigation = useNavigation<any>();

@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
 import { activity, mentors } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/activity')({
+  component: Activity,
+});
 
 const tabs = ['Learning', 'Teaching', 'Upcoming', 'Completed'] as const;
 

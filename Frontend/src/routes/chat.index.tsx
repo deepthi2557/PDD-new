@@ -3,6 +3,11 @@ import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
 import { chats } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/chat/')({
+  component: ChatList,
+});
 
 export default function ChatList() {
   const navigation = useNavigation<any>();

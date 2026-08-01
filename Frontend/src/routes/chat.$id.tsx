@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send } from 'lucide-react-native';
 import { mentors } from '../lib/data';
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/chat/$id')({
+  component: ChatRoom,
+});
 
 const initialMsgs = [
   { from: 'them', text: 'Hey! Excited about our session tomorrow 🚀', time: '10:24' },
