@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { createFileRoute } from '@tanstack/react-router';
+import { supabase } from '../lib/supabase';
 
 export const Route = createFileRoute('/')({
   component: Login,
@@ -13,10 +14,60 @@ export default function Login() {
   const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = () => {
-    // Preserves routing behavior: navigate to main App navigation structure
-    navigation.navigate('Main');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setErrorMessage('Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        Alert.alert('Login Error', error.message);
+        return;
+      }
+
+      // Preserves routing behavior: navigate to main App navigation structure
+      navigation.navigate('Main');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred');
+      Alert.alert('Error', err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMessage('');
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        }
+      });
+      if (error) {
+        setErrorMessage(error.message);
+        Alert.alert('Google Sign-In Error', error.message);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred');
+      Alert.alert('Error', err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,6 +88,10 @@ export default function Login() {
 
       {/* Login Form */}
       <View style={styles.form}>
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
+
         <View style={styles.inputContainer}>
           <Mail color="#8C8797" size={20} style={styles.inputIcon} />
           <TextInput
@@ -47,6 +102,7 @@ export default function Login() {
             autoCapitalize="none"
             keyboardType="email-address"
             style={styles.input}
+            editable={!loading}
           />
         </View>
 
@@ -59,16 +115,28 @@ export default function Login() {
             onChangeText={setPassword}
             secureTextEntry
             style={styles.input}
+            editable={!loading}
           />
         </View>
 
-        <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7} disabled={loading}>
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
-          <Text style={styles.loginButtonText}>Log in</Text>
-          <ArrowRight color="#ffffff" size={16} />
+        <TouchableOpacity 
+          style={[styles.loginButton, loading && styles.disabledButton]} 
+          onPress={handleLogin} 
+          activeOpacity={0.8}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <>
+              <Text style={styles.loginButtonText}>Log in</Text>
+              <ArrowRight color="#ffffff" size={16} />
+            </>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -81,9 +149,10 @@ export default function Login() {
 
       {/* Social Logins */}
       <TouchableOpacity
-        style={styles.googleButton}
-        onPress={handleLogin}
+        style={[styles.googleButton, loading && styles.disabledButton]}
+        onPress={handleGoogleLogin}
         activeOpacity={0.8}
+        disabled={loading}
       >
         <FontAwesome name="google" size={20} color="#EA4335" />
         <Text style={styles.googleButtonText}>Continue with Google</Text>
@@ -254,5 +323,15 @@ const styles = StyleSheet.create({
   signupLink: {
     color: '#8b5cf6',
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

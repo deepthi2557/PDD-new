@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award } from 'lucide-react-native';
 import { createFileRoute } from '@tanstack/react-router';
+import { supabase } from '../lib/supabase';
 
 export const Route = createFileRoute('/signup')({
   component: Signup,
@@ -19,9 +20,61 @@ export default function Signup() {
   const navigation = useNavigation<any>();
   const [role, setRole] = useState('student');
   const [formState, setFormState] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSignup = () => {
-    navigation.navigate('Main');
+  const handleSignup = async () => {
+    const { name, phone, email, password, confirmPassword } = formState;
+
+    if (!name || !phone || !email || !password || !confirmPassword) {
+      setErrorMessage('Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+        options: {
+          data: {
+            full_name: name,
+            phone: phone,
+            role: role,
+          },
+          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        },
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        Alert.alert('Signup Error', error.message);
+        return;
+      }
+
+      if (data.session) {
+        Alert.alert('Success', 'Account created successfully!');
+        navigation.navigate('Main');
+      } else {
+        Alert.alert(
+          'Verification Required',
+          'Registration successful! Please check your email to confirm your account.'
+        );
+        navigation.navigate('Login');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred');
+      Alert.alert('Error', err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fields = [
@@ -49,6 +102,10 @@ export default function Signup() {
 
       {/* Form Fields */}
       <View style={styles.form}>
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
+
         {fields.map((f, i) => {
           const Icon = f.icon;
           return (
@@ -63,6 +120,7 @@ export default function Signup() {
                 value={formState[f.key] || ''}
                 onChangeText={(val: string) => setFormState(prev => ({ ...prev, [f.key]: val }))}
                 style={styles.input}
+                editable={!loading}
               />
             </View>
           );
@@ -96,8 +154,17 @@ export default function Signup() {
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSignup} activeOpacity={0.8}>
-          <Text style={styles.submitButtonText}>Create account</Text>
+        <TouchableOpacity 
+          style={[styles.submitButton, loading && styles.disabledButton]} 
+          onPress={handleSignup} 
+          activeOpacity={0.8}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.submitButtonText}>Create account</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -234,5 +301,15 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
