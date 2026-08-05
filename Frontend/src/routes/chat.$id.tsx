@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send } from 'lucide-react-native';
-import { mentors } from '../lib/data';
+import { mentors, type Mentor } from '../lib/data';
+import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/chat/$id')({
@@ -20,7 +21,32 @@ export default function ChatRoom() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const id = route.params?.id;
-  const m = mentors.find((x) => x.id === id) || mentors[0];
+  const [m, setM] = useState<Mentor | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    if (!id) return;
+    let active = true;
+    setLoading(true);
+    fetchMentorById(id)
+      .then((data) => {
+        if (active) {
+          setM(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          const fallback = mentors.find((x) => x.id === id) || mentors[0];
+          setM(fallback);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const [msgs, setMsgs] = useState(initialMsgs);
   const [text, setText] = useState('');
@@ -31,6 +57,14 @@ export default function ChatRoom() {
     setMsgs([...msgs, { from: 'me', text, time: 'now' }]);
     setText('');
   };
+
+  if (loading || !m) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from 'lucide-react-native';
-import { mentors, reviews } from '../lib/data';
+import { mentors, reviews, type Mentor } from '../lib/data';
+import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/profile/$id')({
@@ -13,11 +14,44 @@ export default function Profile() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const id = route.params?.id;
-  const m = mentors.find((x) => x.id === id) || mentors[0];
+  const [m, setM] = useState<Mentor | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    if (!id) return;
+    let active = true;
+    setLoading(true);
+    fetchMentorById(id)
+      .then((data) => {
+        if (active) {
+          setM(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          const fallback = mentors.find((x) => x.id === id) || mentors[0];
+          setM(fallback);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [reviewText, setReviewText] = useState('');
+
+  if (loading || !m) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', minHeight: 400 }]}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>

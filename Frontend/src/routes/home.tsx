@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy } from 'lucide-react-native';
-import { mentors, categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
+import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
+import { fetchMentors } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/home')({
@@ -14,6 +15,39 @@ export default function Home() {
   const [cat, setCat] = useState('Programming');
   const [sort, setSort] = useState('Top Rated');
   const [sortOpen, setSortOpen] = useState(false);
+  const [mentorsList, setMentorsList] = useState<Mentor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  React.useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetchMentors({
+      name: search,
+      tag: cat,
+    })
+      .then((data) => {
+        if (active) {
+          let sorted = [...data];
+          if (sort === 'Top Rated') {
+            sorted.sort((a, b) => b.rating - a.rating);
+          } else if (sort === 'Newest') {
+            sorted.sort((a, b) => b.followers - a.followers);
+          } else if (sort === 'Most Active') {
+            sorted.sort((a, b) => b.sessions - a.sessions);
+          }
+          setMentorsList(sorted);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [cat, search, sort]);
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -39,6 +73,8 @@ export default function Home() {
         <TextInput
           placeholder="Search skills, mentors..."
           placeholderTextColor="#8C8797"
+          value={search}
+          onChangeText={setSearch}
           style={styles.searchInput}
         />
       </View>
@@ -134,9 +170,15 @@ export default function Home() {
 
       {/* Mentors Card List */}
       <View style={styles.cardList}>
-        {mentors.map((m) => (
-          <MentorCard key={m.id} m={m} />
-        ))}
+        {loading ? (
+          <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
+        ) : mentorsList.length === 0 ? (
+          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 32 }}>
+            No mentors found matching your search.
+          </Text>
+        ) : (
+          mentorsList.map((m) => <MentorCard key={m.id} m={m} />)
+        )}
       </View>
     </ScrollView>
   );

@@ -85,6 +85,25 @@ public class User {
     @Builder.Default
     private Integer sessionsCompleted = 0;
 
+    @Column(name = "teaches")
+    @Builder.Default
+    private Integer teaches = 0;
+
+    @Column(name = "rating")
+    @Builder.Default
+    private Double rating = 5.0;
+
+    @Column(name = "reviews")
+    @Builder.Default
+    private Integer reviews = 0;
+
+    @Column(name = "confidence")
+    private String confidence; // "High", "Medium", "Beginner Friendly"
+
+    @Column(name = "positive")
+    @Builder.Default
+    private Integer positive = 100;
+
     @Column(name = "expo_push_token")
     private String expoPushToken;
 }

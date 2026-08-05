@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
-import { activity, mentors } from '../lib/data';
+import { activity, mentors, type Mentor } from '../lib/data';
+import { fetchMentors } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/activity')({
@@ -14,6 +15,17 @@ const tabs = ['Learning', 'Teaching', 'Upcoming', 'Completed'] as const;
 export default function Activity() {
   const navigation = useNavigation<any>();
   const [tab, setTab] = useState<typeof tabs[number]>('Learning');
+  const [suggestedList, setSuggestedList] = useState<Mentor[]>([]);
+
+  React.useEffect(() => {
+    fetchMentors()
+      .then((data) => {
+        setSuggestedList(data.slice(0, 2));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const getItems = () => {
     if (tab === 'Learning') return activity.learning;
@@ -116,7 +128,7 @@ export default function Activity() {
 
       {/* Suggested List */}
       <View style={styles.suggestedList}>
-        {mentors.slice(0, 2).map((m) => (
+        {(suggestedList.length > 0 ? suggestedList : mentors.slice(0, 2)).map((m) => (
           <View key={m.id} style={styles.suggestedCard}>
             <Image source={{ uri: m.avatar }} style={styles.suggestedAvatar} />
             <View style={styles.suggestedInfo}>

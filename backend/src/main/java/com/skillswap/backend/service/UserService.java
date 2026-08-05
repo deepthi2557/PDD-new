@@ -53,6 +53,11 @@ public class UserService {
         if (updatedProfile.getLevel() != null) existingUser.setLevel(updatedProfile.getLevel());
         if (updatedProfile.getMode() != null) existingUser.setMode(updatedProfile.getMode());
         if (updatedProfile.getBadge() != null) existingUser.setBadge(updatedProfile.getBadge());
+        if (updatedProfile.getTeaches() != null) existingUser.setTeaches(updatedProfile.getTeaches());
+        if (updatedProfile.getRating() != null) existingUser.setRating(updatedProfile.getRating());
+        if (updatedProfile.getReviews() != null) existingUser.setReviews(updatedProfile.getReviews());
+        if (updatedProfile.getConfidence() != null) existingUser.setConfidence(updatedProfile.getConfidence());
+        if (updatedProfile.getPositive() != null) existingUser.setPositive(updatedProfile.getPositive());
         
         return userRepository.save(existingUser);
     }

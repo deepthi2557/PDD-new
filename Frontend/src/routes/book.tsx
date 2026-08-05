@@ -2,7 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
-import { mentors } from '../lib/data';
+import { mentors, type Mentor } from '../lib/data';
+import { fetchMentors } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/book')({
@@ -15,6 +16,21 @@ const times = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM'
 export default function Book() {
   const navigation = useNavigation<any>();
   const [skill, setSkill] = useState(mentors[0].tags[0]);
+  const [mentorsList, setMentorsList] = useState<Mentor[]>([]);
+
+  React.useEffect(() => {
+    fetchMentors()
+      .then((data) => {
+        setMentorsList(data);
+        if (data.length > 0 && data[0].tags.length > 0) {
+          setSkill(data[0].tags[0]);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
   const [day, setDay] = useState(2);
   const [time, setTime] = useState('3:00 PM');
   const [type, setType] = useState<'Online' | 'Offline'>('Online');
@@ -55,12 +71,12 @@ export default function Book() {
       </TouchableOpacity>
 
       <Text style={styles.title}>Book a session</Text>
-      <Text style={styles.subtitle}>with Aria Shah</Text>
+      <Text style={styles.subtitle}>with {mentorsList[0]?.name || 'Aria Shah'}</Text>
 
       {/* Select Skill */}
       <Label>Select skill</Label>
       <View style={styles.chipRow}>
-        {['Python', 'TensorFlow', 'Data Science', 'ML Basics'].map((s) => {
+        {(mentorsList[0]?.tags || ['Python', 'TensorFlow', 'Data Science', 'ML Basics']).map((s) => {
           const active = skill === s;
           return (
             <TouchableOpacity
