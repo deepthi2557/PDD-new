@@ -70,9 +70,9 @@ public class UserService {
     }
 
     public List<User> searchMentors(String name, String level, String mode, String tag) {
-        if (tag != null && !tag.isEmpty()) {
-            return userRepository.findMentorsByTag("mentor", tag);
+        if (tag != null && !tag.isEmpty() && !tag.equalsIgnoreCase("All")) {
+            return userRepository.findMentorsByTag(tag);
         }
-        return userRepository.findMentorsWithFilters("mentor", name, level, mode);
+        return userRepository.findMentorsWithFilters(name, level, mode);
     }
 }

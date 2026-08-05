@@ -12,7 +12,7 @@ export const Route = createFileRoute('/home')({
 
 export default function Home() {
   const navigation = useNavigation<any>();
-  const [cat, setCat] = useState('Programming');
+  const [cat, setCat] = useState('All');
   const [sort, setSort] = useState('Top Rated');
   const [sortOpen, setSortOpen] = useState(false);
   const [mentorsList, setMentorsList] = useState<Mentor[]>([]);

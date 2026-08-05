@@ -14,17 +14,16 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findByRole(String role);
 
-    @Query("SELECT u FROM User u WHERE u.role = :role " +
-           "AND (:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+    @Query("SELECT u FROM User u WHERE " +
+           "(:name IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
            "AND (:level IS NULL OR u.level = :level) " +
            "AND (:mode IS NULL OR u.mode = :mode)")
     List<User> findMentorsWithFilters(
-            @Param("role") String role,
             @Param("name") String name,
             @Param("level") String level,
             @Param("mode") String mode
     );
 
-    @Query("SELECT u FROM User u JOIN u.tags t WHERE u.role = :role AND t = :tag")
-    List<User> findMentorsByTag(@Param("role") String role, @Param("tag") String tag);
+    @Query("SELECT u FROM User u JOIN u.tags t WHERE t = :tag")
+    List<User> findMentorsByTag(@Param("tag") String tag);
 }

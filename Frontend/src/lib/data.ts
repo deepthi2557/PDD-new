@@ -79,7 +79,7 @@ export const mentors: Mentor[] = [
   },
 ];
 
-export const categories = ["Programming", "Design", "Business", "Communication", "Mathematics", "AI", "Languages"];
+export const categories = ["All", "Programming", "Design", "Business", "Communication", "Mathematics", "AI", "Languages"];
 export const sortOptions = ["Top Rated", "Newest", "Most Active", "Popular Skills", "Nearby Mentors"];
 export const searchSuggestions = ["Coding", "UI/UX", "Mathematics", "Video Editing", "AI & ML", "Public Speaking"];
 
