@@ -1,8 +1,17 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, MessageSquare, Sparkles, Plus } from 'lucide-react-native';
 import { community } from '../lib/data';
 import { createFileRoute } from '@tanstack/react-router';
+
+interface Submission {
+  id: number;
+  author: string;
+  title: string;
+  link: string;
+  votes: number;
+  userVoted: boolean;
+}
 
 export const Route = createFileRoute('/community')({
   component: Community,
@@ -12,7 +21,7 @@ export default function Community() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newLink, setNewLink] = useState('');
-  const [submissions, setSubmissions] = useState([
+  const [submissions, setSubmissions] = useState<Submission[]>([
     { id: 1, author: 'Tara L.', title: 'Interactive Figma Landing Page', link: 'figma.com/file/1234', votes: 12, userVoted: false },
     { id: 2, author: 'Jamal R.', title: 'Figma Auto-Layout Portfolio template', link: 'figma.com/file/5678', votes: 8, userVoted: false },
   ]);

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle } from 'lucide-react-native';
+import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle2 } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -262,7 +262,7 @@ export default function VideoRoom() {
           <View style={styles.modalCard}>
             {submitted ? (
               <View style={styles.successWrapper}>
-                <CheckCircle color="#22c55e" size={48} />
+                <CheckCircle2 color="#22c55e" size={48} />
                 <Text style={styles.successTitle}>Swap Completed!</Text>
                 <Text style={styles.successSub}>Thank you for sharing your skills.</Text>
               </View>

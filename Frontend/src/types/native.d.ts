@@ -56,13 +56,18 @@ declare module 'lucide-react-native' {
   export const BarChart3: any;
   export const ArrowLeft: any;
   export const Phone: any;
+  export const PhoneOff: any;
   export const Video: any;
+  export const VideoOff: any;
   export const Smile: any;
   export const Paperclip: any;
   export const Mic: any;
+  export const MicOff: any;
   export const Send: any;
   export const Heart: any;
   export const Plus: any;
+  export const Palette: any;
+  export const RotateCcw: any;
   export const Crown: any;
   export const UserPlus: any;
   export const GraduationCap: any;
