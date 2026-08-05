@@ -27,6 +27,10 @@ export function useNavigation<T = any>() {
         navigate({ to: "/profile/$id", params: { id: String(params.id) } });
         return;
       }
+      if (screenName === "VideoDetails" && params?.id) {
+        navigate({ to: "/video/$id", params: { id: String(params.id) } });
+        return;
+      }
 
       const targetPath = routeMap[screenName] || "/home";
       navigate({ to: targetPath });

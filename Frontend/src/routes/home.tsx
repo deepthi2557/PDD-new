@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy } from 'lucide-react-native';
+import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy, Sparkles } from 'lucide-react-native';
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -196,6 +196,15 @@ const badgeIcon = {
   'Trending Mentor': Flame,
 };
 
+export function calculateMatchScore(mentorTags: string[]): number {
+  const myInterests = ['Python', 'React', 'Figma', 'Communication', 'Calculus', 'TypeScript', 'TensorFlow'];
+  const matches = mentorTags.filter(tag => myInterests.includes(tag)).length;
+  if (matches > 0) {
+    return Math.min(65 + matches * 10, 98);
+  }
+  return 55 + (mentorTags.length % 3) * 8;
+}
+
 export function MentorCard({ m }: { m: Mentor }) {
   const navigation = useNavigation<any>();
   const Icon = badgeIcon[m.badge];
@@ -241,6 +250,10 @@ export function MentorCard({ m }: { m: Mentor }) {
 
       {/* Badges and Mode */}
       <View style={styles.badgesContainer}>
+        <View style={styles.badgeMatch}>
+          <Sparkles color="#8b5cf6" size={11} style={styles.badgeIcon} />
+          <Text style={styles.badgeMatchText}>{calculateMatchScore(m.tags)}% Match</Text>
+        </View>
         <View style={styles.badgeMint}>
           <Icon color="#22C55E" size={12} style={styles.badgeIcon} />
           <Text style={styles.badgeMintText}>{m.badge}</Text>
@@ -627,6 +640,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
     color: '#5B21B6',
+  },
+  badgeMatch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 99,
+    marginRight: 6,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.25)',
+  },
+  badgeMatchText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8b5cf6',
   },
   unavailableBanner: {
     marginTop: 12,

@@ -70,6 +70,31 @@ public class UserService {
     }
 
     public List<User> searchMentors(String name, String level, String mode, String tag) {
-        return userRepository.findMentorsWithFilters(name, level, mode);
+        java.util.List<String> subTags = null;
+        if (tag != null && !tag.isEmpty() && !tag.equalsIgnoreCase("All")) {
+            subTags = getSubTagsForCategory(tag);
+        }
+        return userRepository.findUsersByTagsAndName(subTags, name, level, mode);
+    }
+
+    private java.util.List<String> getSubTagsForCategory(String category) {
+        switch (category.toLowerCase()) {
+            case "programming":
+                return java.util.Arrays.asList("Python", "React", "Node.js", "TypeScript", "Java", "C++");
+            case "design":
+                return java.util.Arrays.asList("Figma", "Prototyping", "Illustrator", "Photoshop", "UI/UX Basics");
+            case "business":
+                return java.util.Arrays.asList("Project Management", "Startup Strategy", "Marketing", "Sales");
+            case "communication":
+                return java.util.Arrays.asList("Public Speaking", "Technical Writing", "Storytelling");
+            case "mathematics":
+                return java.util.Arrays.asList("Calculus", "Linear Algebra", "Statistics");
+            case "ai":
+                return java.util.Arrays.asList("TensorFlow", "PyTorch", "Prompt Engineering", "Machine Learning");
+            case "languages":
+                return java.util.Arrays.asList("Spanish", "French", "German", "Japanese");
+            default:
+                return java.util.Arrays.asList(category);
+        }
     }
 }

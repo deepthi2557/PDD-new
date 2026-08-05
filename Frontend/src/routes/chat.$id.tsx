@@ -84,7 +84,11 @@ export default function ChatRoom() {
         <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7}>
           <Phone color="#342F3D" size={16} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionIconBtn, styles.videoBtn]} activeOpacity={0.7}>
+        <TouchableOpacity 
+          style={[styles.actionIconBtn, styles.videoBtn]} 
+          onPress={() => navigation.navigate('VideoDetails', { id: m.id })}
+          activeOpacity={0.7}
+        >
           <Video color="#ffffff" size={16} />
         </TouchableOpacity>
       </View>

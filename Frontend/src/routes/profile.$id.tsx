@@ -10,12 +10,29 @@ export const Route = createFileRoute('/profile/$id')({
   component: Profile,
 });
 
+export function calculateMatchScore(mentorTags: string[]): number {
+  const myInterests = ['Python', 'React', 'Figma', 'Communication', 'Calculus', 'TypeScript', 'TensorFlow'];
+  const matches = mentorTags.filter(tag => myInterests.includes(tag)).length;
+  if (matches > 0) {
+    return Math.min(65 + matches * 10, 98);
+  }
+  return 55 + (mentorTags.length % 3) * 8;
+}
+
+const badgesList = [
+  { name: 'Top Mentor', icon: '🌟', desc: 'Maintained a rating above 4.8 for 50+ completed swap sessions.' },
+  { name: 'Consistent', icon: '🔥', desc: 'Completed at least 3 swaps per week for 4 consecutive weeks.' },
+  { name: 'Skill Expert', icon: '🏆', desc: 'Highest verified knowledge score in their subject area.' },
+  { name: 'Friendly Helper', icon: '🤝', desc: 'Earned 95%+ positive recommendations from learners.' }
+];
+
 export default function Profile() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const id = route.params?.id;
   const [m, setM] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedBadge, setSelectedBadge] = useState<{ name: string; desc: string; icon: string } | null>(null);
 
   React.useEffect(() => {
     if (!id) return;
@@ -87,6 +104,16 @@ export default function Profile() {
             <Stat label="Rating" value={m.rating} />
           </View>
 
+          {/* Compatibility Details */}
+          <View style={styles.matchDetailRow}>
+            <View style={styles.matchMeterOuter}>
+              <View style={[styles.matchMeterInner, { width: `${calculateMatchScore(m.tags)}%` }]} />
+            </View>
+            <Text style={styles.matchDetailText}>
+              ⚡ {calculateMatchScore(m.tags)}% Compatibility Match based on your learning interests!
+            </Text>
+          </View>
+
           {/* Action Row */}
           <View style={styles.actionsRow}>
             <TouchableOpacity
@@ -140,9 +167,15 @@ export default function Profile() {
         {/* Achievements */}
         <Section title="Achievements">
           <View style={styles.chipRow}>
-            <Badge>🌟 Top Mentor</Badge>
-            <Badge>🔥 Consistent</Badge>
-            <Badge>🏆 Skill Expert</Badge>
+            {badgesList.map((badge) => (
+              <TouchableOpacity
+                key={badge.name}
+                onPress={() => setSelectedBadge(badge)}
+                activeOpacity={0.7}
+              >
+                <Badge>{badge.icon} {badge.name}</Badge>
+              </TouchableOpacity>
+            ))}
           </View>
         </Section>
 
@@ -237,6 +270,23 @@ export default function Profile() {
           )}
         </Section>
       </View>
+
+      {/* Achievements Info Modal */}
+      {selectedBadge && (
+        <View style={styles.badgeModalOverlay}>
+          <View style={styles.badgeModalCard}>
+            <Text style={styles.badgeModalIcon}>{selectedBadge.icon}</Text>
+            <Text style={styles.badgeModalTitle}>{selectedBadge.name}</Text>
+            <Text style={styles.badgeModalDesc}>{selectedBadge.desc}</Text>
+            <TouchableOpacity
+              style={styles.badgeCloseBtn}
+              onPress={() => setSelectedBadge(null)}
+            >
+              <Text style={styles.badgeCloseText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -294,6 +344,82 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#FAF9FC',
     paddingBottom: 40,
+  },
+  matchDetailRow: {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(139, 92, 246, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.15)',
+  },
+  matchMeterOuter: {
+    height: 6,
+    backgroundColor: '#E8E5EC',
+    borderRadius: 99,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  matchMeterInner: {
+    height: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 99,
+  },
+  matchDetailText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8b5cf6',
+  },
+  badgeModalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(52, 47, 61, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 99,
+  },
+  badgeModalCard: {
+    width: 300,
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: 'rgba(94, 84, 112, 0.25)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 1,
+    shadowRadius: 48,
+    elevation: 8,
+  },
+  badgeModalIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  badgeModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 8,
+  },
+  badgeModalDesc: {
+    fontSize: 13,
+    color: '#8C8797',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  badgeCloseBtn: {
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: '#8b5cf6',
+  },
+  badgeCloseText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '600',
   },
   headerHero: {
     height: 140,

@@ -16,12 +16,24 @@ const roles = [
   { id: 'expert', label: 'Expert', icon: Brain },
 ];
 
+const categoriesWithCourses = {
+  Programming: ["Python", "React", "Node.js", "TypeScript", "Java", "C++"],
+  Design: ["Figma", "Prototyping", "Illustrator", "Photoshop", "UI/UX Basics"],
+  Business: ["Project Management", "Startup Strategy", "Marketing", "Sales"],
+  Communication: ["Public Speaking", "Technical Writing", "Storytelling"],
+  Mathematics: ["Calculus", "Linear Algebra", "Statistics"],
+  AI: ["TensorFlow", "PyTorch", "Prompt Engineering", "Machine Learning"],
+  Languages: ["Spanish", "French", "German", "Japanese"]
+};
+
 export default function Signup() {
   const navigation = useNavigation<any>();
   const [role, setRole] = useState('student');
   const [formState, setFormState] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [currentCategory, setCurrentCategory] = useState<keyof typeof categoriesWithCourses>('Programming');
 
   const handleSignup = async () => {
     const { name, phone, email, password, confirmPassword } = formState;
@@ -33,6 +45,11 @@ export default function Signup() {
 
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match');
+      return;
+    }
+
+    if (selectedSkills.length === 0) {
+      setErrorMessage('Please select at least one skill/course');
       return;
     }
 
@@ -48,6 +65,7 @@ export default function Signup() {
             full_name: name,
             phone: phone,
             role: role,
+            tags: selectedSkills,
           },
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
@@ -151,6 +169,80 @@ export default function Signup() {
               );
             })}
           </View>
+        </View>
+
+        {/* Skills Selection Dropdown/Pills Board */}
+        <View style={styles.skillsSectionContainer}>
+          <Text style={styles.skillsTitle}>Select your skills</Text>
+          <Text style={styles.skillsSubtitle}>Choose multiple courses to list on your profile</Text>
+
+          {/* Categories Horizontal Scroll */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
+            {Object.keys(categoriesWithCourses).map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                onPress={() => setCurrentCategory(cat as any)}
+                style={[
+                  styles.catTab,
+                  currentCategory === cat ? styles.catTabActive : styles.catTabInactive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.catTabText,
+                    currentCategory === cat ? styles.catTabTextActive : styles.catTabTextInactive,
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Sub-courses Grid */}
+          <View style={styles.coursesGrid}>
+            {categoriesWithCourses[currentCategory].map((course) => {
+              const isSelected = selectedSkills.includes(course);
+              return (
+                <TouchableOpacity
+                  key={course}
+                  onPress={() => {
+                    if (isSelected) {
+                      setSelectedSkills(prev => prev.filter(x => x !== course));
+                    } else {
+                      setSelectedSkills(prev => [...prev, course]);
+                    }
+                  }}
+                  style={[
+                    styles.courseCard,
+                    isSelected ? styles.courseCardActive : styles.courseCardInactive,
+                  ]}
+                >
+                  <Text style={[styles.courseText, isSelected ? styles.courseTextActive : styles.courseTextInactive]}>
+                    {isSelected ? '✓ ' : ''}{course}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Selected Skills Pills */}
+          {selectedSkills.length > 0 && (
+            <View style={styles.selectedContainer}>
+              <Text style={styles.selectedLabel}>Selected Courses ({selectedSkills.length}):</Text>
+              <View style={styles.pillsRow}>
+                {selectedSkills.map((skill) => (
+                  <TouchableOpacity
+                    key={skill}
+                    onPress={() => setSelectedSkills(prev => prev.filter(x => x !== skill))}
+                    style={styles.pill}
+                  >
+                    <Text style={styles.pillText}>{skill} ✕</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Submit Button */}
@@ -311,5 +403,103 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  skillsSectionContainer: {
+    marginTop: 24,
+  },
+  skillsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+    marginBottom: 2,
+  },
+  skillsSubtitle: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginBottom: 12,
+  },
+  catScroll: {
+    marginBottom: 12,
+  },
+  catTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  catTabActive: {
+    backgroundColor: '#8b5cf6',
+  },
+  catTabInactive: {
+    backgroundColor: '#FAF9FC',
+    borderWidth: 1,
+    borderColor: '#E8E5EC',
+  },
+  catTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  catTabTextActive: {
+    color: '#ffffff',
+  },
+  catTabTextInactive: {
+    color: '#5E5470',
+  },
+  coursesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  courseCard: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  courseCardActive: {
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderColor: 'rgba(139, 92, 246, 0.25)',
+  },
+  courseCardInactive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  courseText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  courseTextActive: {
+    color: '#8b5cf6',
+  },
+  courseTextInactive: {
+    color: '#5E5470',
+  },
+  selectedContainer: {
+    marginBottom: 16,
+  },
+  selectedLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8b5cf6',
+    marginBottom: 6,
+  },
+  pillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  pill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#FAF9FC',
+    borderWidth: 1,
+    borderColor: '#E8E5EC',
+  },
+  pillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#5E5470',
   },
 });

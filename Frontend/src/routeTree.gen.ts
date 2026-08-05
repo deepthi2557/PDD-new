@@ -20,6 +20,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
+import { Route as VideoIdRouteImport } from './routes/video.$id'
 import { Route as ProfileIdRouteImport } from './routes/profile.$id'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 
@@ -78,6 +79,11 @@ const ChatIndexRoute = ChatIndexRouteImport.update({
   path: '/chat/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VideoIdRoute = VideoIdRouteImport.update({
+  id: '/video/$id',
+  path: '/video/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileIdRoute = ProfileIdRouteImport.update({
   id: '/profile/$id',
   path: '/profile/$id',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
   '/profile/$id': typeof ProfileIdRoute
+  '/video/$id': typeof VideoIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
   '/profile/$id': typeof ProfileIdRoute
+  '/video/$id': typeof VideoIdRoute
   '/chat': typeof ChatIndexRoute
 }
 export interface FileRoutesById {
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
   '/profile/$id': typeof ProfileIdRoute
+  '/video/$id': typeof VideoIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/chat/$id'
     | '/profile/$id'
+    | '/video/$id'
     | '/chat/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/chat/$id'
     | '/profile/$id'
+    | '/video/$id'
     | '/chat'
   id:
     | '__root__'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/chat/$id'
     | '/profile/$id'
+    | '/video/$id'
     | '/chat/'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   ChatIdRoute: typeof ChatIdRoute
   ProfileIdRoute: typeof ProfileIdRoute
+  VideoIdRoute: typeof VideoIdRoute
   ChatIndexRoute: typeof ChatIndexRoute
 }
 
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/video/$id': {
+      id: '/video/$id'
+      path: '/video/$id'
+      fullPath: '/video/$id'
+      preLoaderRoute: typeof VideoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/$id': {
       id: '/profile/$id'
       path: '/profile/$id'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   ChatIdRoute: ChatIdRoute,
   ProfileIdRoute: ProfileIdRoute,
+  VideoIdRoute: VideoIdRoute,
   ChatIndexRoute: ChatIndexRoute,
 }
 export const routeTree = rootRouteImport

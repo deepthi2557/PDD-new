@@ -1,6 +1,6 @@
 import { Mentor } from './data';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://pdd-new.onrender.com';
 
 export function mapIdToUuid(id: string): string {
   const map: Record<string, string> = {
