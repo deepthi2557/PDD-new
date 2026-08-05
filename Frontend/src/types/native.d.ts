@@ -19,6 +19,8 @@ declare module 'react-native' {
   export const TextInput: any;
   export const ScrollView: any;
   export const Image: any;
+  export const ActivityIndicator: any;
+  export const Alert: any;
   export type ViewStyle = any;
   export type TextStyle = any;
   export type ImageStyle = any;
@@ -74,4 +76,12 @@ declare module '@expo/vector-icons' {
   export const Ionicons: any;
   export const MaterialIcons: any;
   export const Feather: any;
+}
+
+interface ImportMetaEnv {
+  readonly [key: string]: string | undefined;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }
