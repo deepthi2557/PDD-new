@@ -1,6 +1,5 @@
 import { Mentor } from './data';
-
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://pdd-new.onrender.com';
+import { supabase } from './supabase';
 
 export function mapIdToUuid(id: string): string {
   const map: Record<string, string> = {
@@ -14,31 +13,53 @@ export function mapIdToUuid(id: string): string {
   return map[id] || id;
 }
 
-export async function fetchMentors(filters?: { name?: string; level?: string; mode?: string; tag?: string }): Promise<Mentor[]> {
-  const params = new URLSearchParams();
-  if (filters) {
-    if (filters.name) params.append('name', filters.name);
-    if (filters.level && filters.level !== 'All') params.append('level', filters.level);
-    if (filters.mode && filters.mode !== 'All') params.append('mode', filters.mode);
-    if (filters.tag && filters.tag !== 'All') params.append('tag', filters.tag);
+function getSubTagsForCategory(category: string): string[] {
+  switch (category.toLowerCase()) {
+    case 'programming':
+      return ['Python', 'React', 'Node.js', 'TypeScript', 'Java', 'C++'];
+    case 'design':
+      return ['Figma', 'Prototyping', 'Illustrator', 'Photoshop', 'UI/UX Basics'];
+    case 'business':
+      return ['Project Management', 'Startup Strategy', 'Marketing', 'Sales'];
+    case 'communication':
+      return ['Public Speaking', 'Technical Writing', 'Storytelling'];
+    case 'mathematics':
+      return ['Calculus', 'Linear Algebra', 'Statistics'];
+    case 'ai':
+      return ['TensorFlow', 'PyTorch', 'Prompt Engineering', 'Machine Learning'];
+    case 'languages':
+      return ['Spanish', 'French', 'German', 'Japanese'];
+    default:
+      return [category];
   }
+}
 
-  const response = await fetch(`${API_BASE_URL}/api/mentors?${params.toString()}`);
-  if (!response.ok) {
+export async function fetchMentors(filters?: { name?: string; level?: string; mode?: string; tag?: string }): Promise<Mentor[]> {
+  const { data, error } = await supabase
+    .from('users')
+    .select(`
+      *,
+      user_tags (
+        tag
+      )
+    `);
+
+  if (error || !data) {
+    console.error('Supabase fetch error:', error);
     throw new Error('Failed to fetch mentors');
   }
-  const data = await response.json();
-  return data.map((u: any) => ({
+
+  let filtered = data.map((u: any) => ({
     id: u.id,
     name: u.name,
     avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
     expertise: u.expertise || 'Expertise pending',
     level: u.level || 'Intermediate',
-    teaches: u.teaches || u.tags?.length || 0,
+    teaches: u.teaches || u.user_tags?.length || 0,
     rating: u.rating || 5.0,
     reviews: u.reviews || 0,
     status: u.status || 'offline',
-    tags: u.tags || [],
+    tags: u.user_tags ? u.user_tags.map((t: any) => t.tag) : [],
     badge: u.badge || 'Verified Mentor',
     mode: u.mode || 'Online',
     confidence: u.confidence || 'Medium',
@@ -49,26 +70,59 @@ export async function fetchMentors(filters?: { name?: string; level?: string; mo
     followers: u.followers || 0,
     sessions: u.sessionsCompleted || 0,
   }));
+
+  if (filters) {
+    if (filters.name) {
+      const searchStr = filters.name.toLowerCase();
+      filtered = filtered.filter(m => m.name.toLowerCase().includes(searchStr));
+    }
+    if (filters.level && filters.level !== 'All') {
+      filtered = filtered.filter(m => m.level === filters.level);
+    }
+    if (filters.mode && filters.mode !== 'All') {
+      filtered = filtered.filter(m => m.mode === filters.mode);
+    }
+    if (filters.tag && filters.tag !== 'All') {
+      const subTags = getSubTagsForCategory(filters.tag).map(t => t.toLowerCase());
+      filtered = filtered.filter(m => 
+        m.tags.some((tag: string) => subTags.includes(tag.toLowerCase()))
+      );
+    }
+  }
+
+  return filtered;
 }
 
 export async function fetchMentorById(id: string): Promise<Mentor> {
   const targetId = mapIdToUuid(id);
-  const response = await fetch(`${API_BASE_URL}/api/mentors/${targetId}`);
-  if (!response.ok) {
+  const { data, error } = await supabase
+    .from('users')
+    .select(`
+      *,
+      user_tags (
+        tag
+      )
+    `)
+    .eq('id', targetId)
+    .single();
+
+  if (error || !data) {
+    console.error('Supabase fetch error:', error);
     throw new Error('Failed to fetch mentor details');
   }
-  const u = await response.json();
+
+  const u = data;
   return {
     id: u.id,
     name: u.name,
     avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
     expertise: u.expertise || 'Expertise pending',
     level: u.level || 'Intermediate',
-    teaches: u.teaches || u.tags?.length || 0,
+    teaches: u.teaches || u.user_tags?.length || 0,
     rating: u.rating || 5.0,
     reviews: u.reviews || 0,
     status: u.status || 'offline',
-    tags: u.tags || [],
+    tags: u.user_tags ? u.user_tags.map((t: any) => t.tag) : [],
     badge: u.badge || 'Verified Mentor',
     mode: u.mode || 'Online',
     confidence: u.confidence || 'Medium',
