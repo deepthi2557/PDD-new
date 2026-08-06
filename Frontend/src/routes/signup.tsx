@@ -38,7 +38,7 @@ export default function Signup() {
   const handleSignup = async () => {
     const { name, phone, email, password, confirmPassword, avatarUrl } = formState;
 
-    if (!name || !phone || !email || !password || !confirmPassword) {
+    if (!name || !phone || !email || !password || !confirmPassword || !avatarUrl) {
       setErrorMessage('Please fill in all fields');
       return;
     }
@@ -100,7 +100,7 @@ export default function Signup() {
     { key: 'name', icon: User, ph: 'Full name', secure: false, keyboard: 'default' as const },
     { key: 'phone', icon: Phone, ph: 'Phone number', secure: false, keyboard: 'phone-pad' as const },
     { key: 'email', icon: Mail, ph: 'Email', secure: false, keyboard: 'email-address' as const },
-    { key: 'avatarUrl', icon: Camera, ph: 'Profile image URL (Optional)', secure: false, keyboard: 'default' as const },
+    { key: 'avatarUrl', icon: Camera, ph: 'Profile image URL', secure: false, keyboard: 'default' as const },
     { key: 'password', icon: Lock, ph: 'Password', secure: true, keyboard: 'default' as const },
     { key: 'confirmPassword', icon: Lock, ph: 'Confirm password', secure: true, keyboard: 'default' as const },
   ];

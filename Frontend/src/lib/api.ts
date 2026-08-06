@@ -35,6 +35,9 @@ function getSubTagsForCategory(category: string): string[] {
 }
 
 export async function fetchMentors(filters?: { name?: string; level?: string; mode?: string; tag?: string }): Promise<Mentor[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const currentUserId = userData?.user?.id;
+
   const { data, error } = await supabase
     .from('users')
     .select(`
@@ -70,6 +73,10 @@ export async function fetchMentors(filters?: { name?: string; level?: string; mo
     followers: u.followers || 0,
     sessions: u.sessionsCompleted || 0,
   }));
+
+  if (currentUserId) {
+    filtered = filtered.filter(m => m.id !== currentUserId);
+  }
 
   if (filters) {
     if (filters.name) {
