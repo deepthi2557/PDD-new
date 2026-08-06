@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, Monitor, PhoneOff, MicOff, Volume2, MessageSquare, X } from 'lucide-react-native';
+import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, Monitor, PhoneOff, MicOff, Volume2, MessageSquare, X, Calendar } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -50,7 +50,7 @@ export default function ChatRoom() {
 
   const [msgs, setMsgs] = useState<any[]>([]);
   const [text, setText] = useState('');
-  const [typing, setTyping] = useState(true);
+  const [typing, setTyping] = useState(false);
 
   // Calling / Screen Sharing states
   const [activeCallMode, setActiveCallMode] = useState<'none' | 'voice' | 'screenshare'>('none');
@@ -59,17 +59,126 @@ export default function ChatRoom() {
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
 
-  // Persistence of Messages
+  // Attachment Actions Panel state
+  const [showAttachmentActions, setShowAttachmentActions] = useState(false);
+
+  // Incoming Call state
+  const [incomingCall, setIncomingCall] = useState<{ type: 'voice' | 'video' | 'screenshare'; mentorId: string } | null>(null);
+
+  // 1-second auto live polling from localStorage
   useEffect(() => {
-    if (!id) return;
-    const localMsgs = localStorage.getItem(`chat_msgs_${id}`);
-    if (localMsgs) {
-      setMsgs(JSON.parse(localMsgs));
+    const poll = setInterval(() => {
+      if (id) {
+        // Poll messages
+        const localMsgs = localStorage.getItem(`chat_msgs_${id}`);
+        if (localMsgs) {
+          const parsed = JSON.parse(localMsgs);
+          if (JSON.stringify(parsed) !== JSON.stringify(msgs)) {
+            setMsgs(parsed);
+          }
+        }
+        
+        // Poll incoming call status
+        const callData = localStorage.getItem('incoming_call');
+        if (callData) {
+          try {
+            const parsedCall = JSON.parse(callData);
+            if (parsedCall.mentorId === id) {
+              setIncomingCall(parsedCall);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        } else {
+          setIncomingCall(null);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(poll);
+  }, [id, msgs]);
+
+  // Scheduler for mock responses and calls
+  const [secondsSinceLastMsg, setSecondsSinceLastMsg] = useState(-1);
+  const [incomingCallScheduled, setIncomingCallScheduled] = useState(false);
+
+  useEffect(() => {
+    if (msgs.length === 0) return;
+    const lastMsg = msgs[msgs.length - 1];
+    if (lastMsg.from === 'me') {
+      setSecondsSinceLastMsg(0);
     } else {
-      setMsgs(initialMsgs);
-      localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(initialMsgs));
+      setSecondsSinceLastMsg(-1);
     }
-  }, [id]);
+  }, [msgs]);
+
+  useEffect(() => {
+    let timer: any;
+    if (secondsSinceLastMsg >= 0) {
+      timer = setInterval(() => {
+        setSecondsSinceLastMsg((prev) => {
+          const next = prev + 1;
+          if (next === 2) {
+            setTyping(true);
+          }
+          if (next === 4) {
+            setTyping(false);
+            const userMsg = msgs[msgs.length - 1]?.text || '';
+            let replyText = "Perfect! Let me review this and we can discuss. Let's jump on a quick call to align.";
+            let isBooking = false;
+            
+            if (userMsg.toLowerCase().includes('book') || userMsg.toLowerCase().includes('session') || userMsg.toLowerCase().includes('notes:')) {
+              replyText = "Awesome! I've received your session booking request. Let's do a quick voice call now to touch base. Calling you in a second...";
+              isBooking = true;
+            } else if (userMsg.toLowerCase().includes('hello') || userMsg.toLowerCase().includes('hi')) {
+              replyText = "Hey! Great to connect with you. How can I help you today? We can also jump on a video call if it's easier.";
+            } else if (userMsg.toLowerCase().includes('video') || userMsg.toLowerCase().includes('call') || userMsg.toLowerCase().includes('screenshare')) {
+              replyText = "Sure, I can call you right now! Checking if you're ready...";
+              isBooking = true;
+            }
+
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const replyMsg = { from: 'them', text: replyText, time: timeNow };
+            const updated = [...msgs, replyMsg];
+            setMsgs(updated);
+            localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+
+            const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
+            const chatIdx = chatsList.findIndex((c: any) => c.id === id);
+            if (chatIdx > -1) {
+              chatsList[chatIdx].last = replyText;
+              chatsList[chatIdx].time = 'now';
+              localStorage.setItem('chats_list', JSON.stringify(chatsList));
+            }
+
+            if (isBooking) {
+              setIncomingCallScheduled(true);
+            }
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [secondsSinceLastMsg, msgs, id]);
+
+  useEffect(() => {
+    let timer: any;
+    if (incomingCallScheduled) {
+      timer = setTimeout(() => {
+        const type = Math.random() > 0.5 ? 'video' : 'voice';
+        const callObj = { type, mentorId: id };
+        localStorage.setItem('incoming_call', JSON.stringify(callObj));
+        setIncomingCall(callObj as any);
+        setIncomingCallScheduled(false);
+      }, 3000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [incomingCallScheduled, id]);
 
   // Call duration timer
   useEffect(() => {
@@ -145,6 +254,124 @@ export default function ChatRoom() {
           />
           <TouchableOpacity onPress={send} style={styles.drawerSendBtn} activeOpacity={0.7}>
             <Send color="#ffffff" size={14} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  const renderIncomingCallOverlay = () => {
+    if (!incomingCall) return null;
+    const isVideo = incomingCall.type === 'video';
+    const isShare = incomingCall.type === 'screenshare';
+    
+    return (
+      <View style={styles.incomingCallOverlay}>
+        <View style={styles.incomingCallCard}>
+          <Text style={styles.ringingLabel}>🔔 Ringing...</Text>
+          <Image source={{ uri: m.avatar }} style={styles.incomingAvatar} />
+          <Text style={styles.incomingName}>{m.name}</Text>
+          <Text style={styles.incomingType}>
+            Incoming {isVideo ? 'Video Call' : isShare ? 'Screen Share Session' : 'Voice Call'}...
+          </Text>
+          
+          <View style={styles.incomingActions}>
+            <TouchableOpacity 
+              style={[styles.incomingBtn, styles.declineBtn]}
+              onPress={() => {
+                localStorage.removeItem('incoming_call');
+                setIncomingCall(null);
+              }}
+              activeOpacity={0.8}
+            >
+              <PhoneOff color="#ffffff" size={20} />
+              <Text style={styles.incomingBtnText}>Decline</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.incomingBtn, styles.acceptBtn]}
+              onPress={() => {
+                localStorage.removeItem('incoming_call');
+                setIncomingCall(null);
+                if (isVideo) {
+                  navigation.navigate('VideoDetails', { id: m.id });
+                } else if (isShare) {
+                  setActiveCallMode('screenshare');
+                } else {
+                  setActiveCallMode('voice');
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <Phone color="#ffffff" size={20} />
+              <Text style={styles.incomingBtnText}>Accept</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderAttachmentPanel = () => {
+    if (!showAttachmentActions) return null;
+    return (
+      <View style={styles.attachmentPanel}>
+        <Text style={styles.attachmentTitle}>Start call / session</Text>
+        <View style={styles.attachmentRow}>
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              setActiveCallMode('voice');
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#e0e7ff' }]}>
+              <Phone color="#4f46e5" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Voice Call</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              navigation.navigate('VideoDetails', { id: m.id });
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#f3e8ff' }]}>
+              <Video color="#9333ea" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Video Call</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              setActiveCallMode('screenshare');
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#ecfdf5' }]}>
+              <Monitor color="#059669" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Share Screen</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              navigation.navigate('Book', { id: m.id });
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#fff7ed' }]}>
+              <Calendar color="#ea580c" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Book Session</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -369,14 +596,21 @@ export default function ChatRoom() {
         )}
       </ScrollView>
 
+      {/* Attachment panel drawer options */}
+      {renderAttachmentPanel()}
+
       {/* Input area */}
       <View style={styles.inputStickyWrapper}>
         <View style={styles.inputContainer}>
           <TouchableOpacity style={styles.utilityBtn} activeOpacity={0.7}>
             <Smile color="#8C8797" size={20} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.utilityBtn} activeOpacity={0.7}>
-            <Paperclip color="#8C8797" size={20} />
+          <TouchableOpacity 
+            style={[styles.utilityBtn, showAttachmentActions && styles.utilityBtnActive]} 
+            onPress={() => setShowAttachmentActions(!showAttachmentActions)}
+            activeOpacity={0.7}
+          >
+            <Paperclip color={showAttachmentActions ? "#8b5cf6" : "#8C8797"} size={20} />
           </TouchableOpacity>
 
           <TextInput
@@ -399,6 +633,9 @@ export default function ChatRoom() {
           )}
         </View>
       </View>
+
+      {/* Incoming Call alert ringing dialog overlay */}
+      {renderIncomingCallOverlay()}
     </View>
   );
 }
@@ -844,5 +1081,125 @@ const styles = StyleSheet.create({
     backgroundColor: '#8b5cf6',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  incomingCallOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(52, 47, 61, 0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 200,
+  },
+  incomingCallCard: {
+    width: 280,
+    backgroundColor: '#ffffff',
+    borderRadius: 28,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: 'rgba(94, 84, 112, 0.25)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 1,
+    shadowRadius: 48,
+    elevation: 8,
+  },
+  ringingLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#8b5cf6',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 16,
+  },
+  incomingAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    marginBottom: 12,
+  },
+  incomingName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#342F3D',
+    marginBottom: 4,
+  },
+  incomingType: {
+    fontSize: 12,
+    color: '#8C8797',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  incomingActions: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+  },
+  incomingBtn: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 16,
+    gap: 6,
+  },
+  declineBtn: {
+    backgroundColor: '#ef4444',
+  },
+  acceptBtn: {
+    backgroundColor: '#22c55e',
+  },
+  incomingBtnText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  attachmentPanel: {
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+    padding: 16,
+    paddingBottom: 8,
+    zIndex: 10,
+  },
+  attachmentTitle: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#8C8797',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 12,
+  },
+  attachmentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  attachmentActionCard: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  attachmentIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    shadowColor: 'rgba(0, 0, 0, 0.02)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  attachmentLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#5E5470',
+  },
+  utilityBtnActive: {
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
   },
 });

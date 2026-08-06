@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
 import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
 import { activity, mentors, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
@@ -14,8 +14,10 @@ const tabs = ['Learning', 'Teaching', 'Upcoming', 'Completed'] as const;
 
 export default function Activity() {
   const navigation = useNavigation<any>();
+  const isFocused = useIsFocused();
   const [tab, setTab] = useState<typeof tabs[number]>('Learning');
   const [suggestedList, setSuggestedList] = useState<Mentor[]>([]);
+  const [localBookings, setLocalBookings] = useState<any[]>([]);
 
   React.useEffect(() => {
     fetchMentors()
@@ -27,13 +29,18 @@ export default function Activity() {
       });
   }, []);
 
-  const getItems = () => {
-    let localBookings = [];
-    try {
-      localBookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
-    } catch (e) {
-      console.warn('Failed to parse local bookings:', e);
+  React.useEffect(() => {
+    if (isFocused) {
+      try {
+        const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+        setLocalBookings(bookings);
+      } catch (e) {
+        console.warn('Failed to parse local bookings:', e);
+      }
     }
+  }, [isFocused]);
+
+  const getItems = () => {
     const mergedLearning = [...localBookings, ...activity.learning];
 
     if (tab === 'Learning') return mergedLearning;

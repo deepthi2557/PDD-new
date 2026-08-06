@@ -1,5 +1,9 @@
 import { useNavigate, useLocation, useParams } from "@tanstack/react-router";
 
+export function useIsFocused() {
+  return true;
+}
+
 export function useNavigation<T = any>() {
   const navigate = useNavigate();
 
@@ -19,20 +23,25 @@ export function useNavigation<T = any>() {
         Community: "/community",
       };
 
-      if (screenName === "ChatDetails" && params?.id) {
+      let targetScreen = screenName;
+      if (screenName === "Main" && params?.screen) {
+        targetScreen = params.screen;
+      }
+
+      if (targetScreen === "ChatDetails" && params?.id) {
         navigate({ to: "/chat/$id", params: { id: String(params.id) } });
         return;
       }
-      if (screenName === "ProfileDetails" && params?.id) {
+      if (targetScreen === "ProfileDetails" && params?.id) {
         navigate({ to: "/profile/$id", params: { id: String(params.id) } });
         return;
       }
-      if (screenName === "VideoDetails" && params?.id) {
+      if (targetScreen === "VideoDetails" && params?.id) {
         navigate({ to: "/video/$id", params: { id: String(params.id) } });
         return;
       }
 
-      const targetPath = routeMap[screenName] || "/home";
+      const targetPath = routeMap[targetScreen] || "/home";
       navigate({ to: targetPath });
     },
     goBack: () => {
