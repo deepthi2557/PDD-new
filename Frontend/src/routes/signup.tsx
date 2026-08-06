@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award } from 'lucide-react-native';
+import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award, Camera } from 'lucide-react-native';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
 
@@ -36,7 +36,7 @@ export default function Signup() {
   const [currentCategory, setCurrentCategory] = useState<keyof typeof categoriesWithCourses>('Programming');
 
   const handleSignup = async () => {
-    const { name, phone, email, password, confirmPassword } = formState;
+    const { name, phone, email, password, confirmPassword, avatarUrl } = formState;
 
     if (!name || !phone || !email || !password || !confirmPassword) {
       setErrorMessage('Please fill in all fields');
@@ -66,6 +66,7 @@ export default function Signup() {
             phone: phone,
             role: role,
             tags: selectedSkills,
+            avatar_url: avatarUrl || '',
           },
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
@@ -99,6 +100,7 @@ export default function Signup() {
     { key: 'name', icon: User, ph: 'Full name', secure: false, keyboard: 'default' as const },
     { key: 'phone', icon: Phone, ph: 'Phone number', secure: false, keyboard: 'phone-pad' as const },
     { key: 'email', icon: Mail, ph: 'Email', secure: false, keyboard: 'email-address' as const },
+    { key: 'avatarUrl', icon: Camera, ph: 'Profile image URL (Optional)', secure: false, keyboard: 'default' as const },
     { key: 'password', icon: Lock, ph: 'Password', secure: true, keyboard: 'default' as const },
     { key: 'confirmPassword', icon: Lock, ph: 'Confirm password', secure: true, keyboard: 'default' as const },
   ];

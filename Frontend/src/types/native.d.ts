@@ -74,6 +74,7 @@ declare module 'lucide-react-native' {
   export const BookOpen: any;
   export const Brain: any;
   export const Award: any;
+  export const Camera: any;
 }
 
 declare module '@expo/vector-icons' {
