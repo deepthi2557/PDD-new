@@ -40,6 +40,15 @@ export function useNavigation<T = any>() {
         navigate({ to: "/video/$id", params: { id: String(params.id) } });
         return;
       }
+      if (targetScreen === "Book") {
+        if (params?.id) {
+          localStorage.setItem('selected_mentor_id', String(params.id));
+          navigate({ to: "/book", search: { id: params.id } as any });
+        } else {
+          navigate({ to: "/book" });
+        }
+        return;
+      }
 
       const targetPath = routeMap[targetScreen] || "/home";
       navigate({ to: targetPath });
@@ -58,8 +67,17 @@ export function useRoute<T = any>(): { params: T; name: string } {
   const location = useLocation();
   const routeParams = useParams({ strict: false });
 
+  let searchObj: Record<string, any> = {};
+  if (typeof window !== 'undefined') {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.forEach((value, key) => {
+      searchObj[key] = value;
+    });
+  }
+
   return {
     params: {
+      ...searchObj,
       ...((location.search as Record<string, any>) || {}),
       ...(routeParams || {}),
     } as T,

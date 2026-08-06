@@ -34,6 +34,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [selectedBadge, setSelectedBadge] = useState<{ name: string; desc: string; icon: string } | null>(null);
 
+  const [following, setFollowing] = useState(false);
+  const [localFollowers, setLocalFollowers] = useState(0);
+
   React.useEffect(() => {
     if (!id) return;
     let active = true;
@@ -42,6 +45,7 @@ export default function Profile() {
       .then((data) => {
         if (active) {
           setM(data);
+          setLocalFollowers(data.followers);
           setLoading(false);
         }
       })
@@ -50,6 +54,7 @@ export default function Profile() {
         if (active) {
           const fallback = mentors.find((x) => x.id === id) || mentors[0];
           setM(fallback);
+          setLocalFollowers(fallback.followers);
           setLoading(false);
         }
       });
@@ -100,7 +105,7 @@ export default function Profile() {
           {/* Stats Row */}
           <View style={styles.statsRow}>
             <Stat label="Sessions" value={m.sessions} />
-            <Stat label="Followers" value={m.followers} />
+            <Stat label="Followers" value={localFollowers} />
             <Stat label="Rating" value={m.rating} />
           </View>
 
@@ -132,8 +137,22 @@ export default function Profile() {
               <CalendarPlus color="#ffffff" size={16} style={styles.btnIcon} />
               <Text style={styles.bookBtnText}>Book</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.followBtn} activeOpacity={0.7}>
-              <UserPlus color="#342F3D" size={16} />
+            <TouchableOpacity
+              style={[styles.followBtn, following && styles.followBtnActive]}
+              onPress={() => {
+                if (following) {
+                  setLocalFollowers((prev) => prev - 1);
+                } else {
+                  setLocalFollowers((prev) => prev + 1);
+                }
+                setFollowing(!following);
+              }}
+              activeOpacity={0.7}
+            >
+              <UserPlus color={following ? '#ffffff' : '#342F3D'} size={16} style={styles.btnIcon} />
+              <Text style={[styles.followBtnText, following && styles.followBtnTextActive]}>
+                {following ? 'Following' : 'Follow'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -567,14 +586,27 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   followBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 16,
+    paddingVertical: 12,
+  },
+  followBtnActive: {
+    backgroundColor: '#8b5cf6',
+    borderColor: '#8b5cf6',
+  },
+  followBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  followBtnTextActive: {
+    color: '#ffffff',
   },
   section: {
     marginTop: 24,

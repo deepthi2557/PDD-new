@@ -41,12 +41,13 @@ export default function Activity() {
   }, [isFocused]);
 
   const getItems = () => {
-    const mergedLearning = [...localBookings, ...activity.learning];
+    const mergedLearning = localBookings;
+    const mergedTeaching: any[] = [];
 
     if (tab === 'Learning') return mergedLearning;
-    if (tab === 'Teaching') return activity.teaching;
-    if (tab === 'Upcoming') return [...mergedLearning, ...activity.teaching].filter((x) => x.status === 'upcoming');
-    return [...mergedLearning, ...activity.teaching].filter((x) => x.status === 'completed');
+    if (tab === 'Teaching') return mergedTeaching;
+    if (tab === 'Upcoming') return [...mergedLearning, ...mergedTeaching].filter((x) => x.status === 'upcoming');
+    return [...mergedLearning, ...mergedTeaching].filter((x) => x.status === 'completed');
   };
 
   return (

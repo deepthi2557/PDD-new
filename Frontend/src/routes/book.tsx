@@ -17,7 +17,7 @@ const times = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM'
 export default function Book() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const targetMentorId = route.params?.id;
+  const targetMentorId = route.params?.id || localStorage.getItem('selected_mentor_id');
 
   const [skill, setSkill] = useState('');
   const [targetMentor, setTargetMentor] = useState<Mentor | null>(null);
