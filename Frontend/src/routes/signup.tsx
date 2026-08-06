@@ -34,12 +34,53 @@ export default function Signup() {
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [currentCategory, setCurrentCategory] = useState<keyof typeof categoriesWithCourses>('Programming');
+  const fileInputRef = React.useRef<any>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const triggerFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileUpload = async (e: any) => {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setErrorMessage('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormState(prev => ({ ...prev, avatarUrl: publicUrl }));
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setErrorMessage(err.message || 'Failed to upload profile picture');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSignup = async () => {
     const { name, phone, email, password, confirmPassword, avatarUrl } = formState;
 
     if (!name || !phone || !email || !password || !confirmPassword || !avatarUrl) {
-      setErrorMessage('Please fill in all fields');
+      setErrorMessage('Please fill in all fields (including profile picture)');
       return;
     }
 
@@ -100,7 +141,6 @@ export default function Signup() {
     { key: 'name', icon: User, ph: 'Full name', secure: false, keyboard: 'default' as const },
     { key: 'phone', icon: Phone, ph: 'Phone number', secure: false, keyboard: 'phone-pad' as const },
     { key: 'email', icon: Mail, ph: 'Email', secure: false, keyboard: 'email-address' as const },
-    { key: 'avatarUrl', icon: Camera, ph: 'Profile image URL', secure: false, keyboard: 'default' as const },
     { key: 'password', icon: Lock, ph: 'Password', secure: true, keyboard: 'default' as const },
     { key: 'confirmPassword', icon: Lock, ph: 'Confirm password', secure: true, keyboard: 'default' as const },
   ];
@@ -125,6 +165,41 @@ export default function Signup() {
         {errorMessage ? (
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
+
+        {/* Hidden file input for web upload */}
+        {typeof window !== 'undefined' && (
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept="image/*"
+            style={{ display: 'none' }}
+          />
+        )}
+
+        {/* Profile Image Picker */}
+        <View style={styles.avatarPickerContainer}>
+          <TouchableOpacity 
+            style={styles.avatarPickerFrame} 
+            onPress={triggerFileSelect} 
+            activeOpacity={0.8}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <ActivityIndicator color="#8b5cf6" size="small" />
+            ) : formState.avatarUrl ? (
+              <Image source={{ uri: formState.avatarUrl }} style={styles.avatarPreview} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Camera color="#8C8797" size={32} />
+                <Text style={styles.avatarPlaceholderText}>Upload</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <Text style={styles.avatarLabel}>
+            {formState.avatarUrl ? 'Profile Picture Uploaded ✓' : 'Upload Profile Picture *'}
+          </Text>
+        </View>
 
         {fields.map((f, i) => {
           const Icon = f.icon;
@@ -405,6 +480,50 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  avatarPickerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  avatarPickerFrame: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 2,
+    borderColor: '#E8E5EC',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 1,
+  },
+  avatarPreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarPlaceholderText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#8C8797',
+    marginTop: 4,
+  },
+  avatarLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#5E5470',
+    marginTop: 8,
   },
   skillsSectionContainer: {
     marginTop: 24,
