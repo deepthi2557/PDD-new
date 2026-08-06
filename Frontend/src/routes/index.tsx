@@ -140,24 +140,6 @@ export default function Login() {
         </TouchableOpacity>
       </View>
 
-      {/* Divider */}
-      <View style={styles.dividerContainer}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      {/* Social Logins */}
-      <TouchableOpacity
-        style={[styles.googleButton, loading && styles.disabledButton]}
-        onPress={handleGoogleLogin}
-        activeOpacity={0.8}
-        disabled={loading}
-      >
-        <FontAwesome name="google" size={20} color="#EA4335" />
-        <Text style={styles.googleButtonText}>Continue with Google</Text>
-      </TouchableOpacity>
-
       {/* Signup Redirection */}
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>
