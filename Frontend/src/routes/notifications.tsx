@@ -11,6 +11,17 @@ export const Route = createFileRoute('/notifications')({
 
 export default function Notifs() {
   const navigation = useNavigation<any>();
+  const [notifList, setNotifList] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const localNotifs = localStorage.getItem('my_notifications');
+    if (localNotifs) {
+      setNotifList(JSON.parse(localNotifs));
+    } else {
+      setNotifList(notifications);
+      localStorage.setItem('my_notifications', JSON.stringify(notifications));
+    }
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -29,7 +40,7 @@ export default function Notifs() {
 
       {/* Notifications List */}
       <View style={styles.notifList}>
-        {notifications.map((n) => (
+        {notifList.map((n) => (
           <View key={n.id} style={styles.notifCard}>
             <View style={styles.iconContainer}>
               <Text style={styles.iconEmoji}>{n.icon}</Text>

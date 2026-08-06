@@ -299,7 +299,7 @@ export function MentorCard({ m }: { m: Mentor }) {
             unavailable ? styles.bookButtonDisabled : styles.bookButtonActive,
           ]}
           disabled={unavailable}
-          onPress={() => navigation.navigate('Book')}
+          onPress={() => navigation.navigate('Book', { id: m.id })}
           activeOpacity={0.7}
         >
           <CalendarPlus color={unavailable ? '#8C8797' : '#ffffff'} size={18} />

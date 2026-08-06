@@ -11,6 +11,17 @@ export const Route = createFileRoute('/chat/')({
 
 export default function ChatList() {
   const navigation = useNavigation<any>();
+  const [chatsList, setChatsList] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const localChats = localStorage.getItem('chats_list');
+    if (localChats) {
+      setChatsList(JSON.parse(localChats));
+    } else {
+      setChatsList(chats);
+      localStorage.setItem('chats_list', JSON.stringify(chats));
+    }
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -29,7 +40,7 @@ export default function ChatList() {
 
       {/* Conversations List */}
       <View style={styles.chatList}>
-        {chats.map((c) => (
+        {chatsList.map((c) => (
           <TouchableOpacity
             key={c.id}
             onPress={() => navigation.navigate('ChatDetails', { id: c.id })}

@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, TextInput } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle2 } from 'lucide-react-native';
+import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle2, Send } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -27,6 +27,50 @@ export default function VideoRoom() {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  const [showChat, setShowChat] = useState(false);
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [chatText, setChatText] = useState('');
+
+  useEffect(() => {
+    if (!id) return;
+    const localMsgs = localStorage.getItem(`chat_msgs_${id}`);
+    if (localMsgs) {
+      setMsgs(JSON.parse(localMsgs));
+    }
+  }, [id]);
+
+  const sendChatMessage = () => {
+    if (!chatText.trim() || !id) return;
+    const newMsg = {
+      from: 'me',
+      text: chatText,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+    setChatText('');
+    
+    // Update last message in chat list
+    const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
+    const chatIdx = chatsList.findIndex((c: any) => c.id === id);
+    if (chatIdx > -1) {
+      chatsList[chatIdx].last = chatText;
+      chatsList[chatIdx].time = 'now';
+      localStorage.setItem('chats_list', JSON.stringify(chatsList));
+    }
+  };
+
+  const getVideoContainerStyle = () => {
+    if (showWhiteboard && showChat) {
+      return { width: '25%' };
+    }
+    if (showWhiteboard) {
+      return styles.videoContainerMini;
+    }
+    return styles.videoContainerFull;
+  };
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawing = useRef(false);
@@ -152,7 +196,7 @@ export default function VideoRoom() {
       {/* Main Content (Split screen style: Video and Canvas) */}
       <View style={styles.contentSplit}>
         {/* Left Side: Video Streams */}
-        <View style={[styles.videoContainer, showWhiteboard ? styles.videoContainerMini : styles.videoContainerFull]}>
+        <View style={[styles.videoContainer, getVideoContainerStyle()]}>
           {/* Peer Stream (Mentor) */}
           <View style={styles.peerVideoCard}>
             {videoOff ? (
@@ -221,6 +265,45 @@ export default function VideoRoom() {
             </View>
           </View>
         )}
+
+        {/* Right Side / Drawer: Chat Panel */}
+        {showChat && (
+          <View style={styles.chatDrawerContainer}>
+            <View style={styles.chatDrawerHeader}>
+              <Text style={styles.chatDrawerTitle}>Live Chat</Text>
+            </View>
+            <ScrollView 
+              style={styles.chatDrawerMessages}
+              contentContainerStyle={{ paddingBottom: 16 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {msgs.map((msg, i) => {
+                const me = msg.from === 'me';
+                return (
+                  <View key={i} style={[styles.msgWrapper, me ? styles.msgRight : styles.msgLeft]}>
+                    <View style={[styles.msgBubble, me ? styles.bubbleMe : styles.bubbleThem]}>
+                      <Text style={[styles.msgText, me ? styles.textMe : styles.textThem]}>{msg.text}</Text>
+                      <Text style={[styles.msgTime, me ? styles.timeMe : styles.timeThem]}>{msg.time}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <View style={styles.chatDrawerInputWrapper}>
+              <TextInput
+                value={chatText}
+                onChangeText={setChatText}
+                onSubmitEditing={sendChatMessage}
+                placeholder="Type message..."
+                placeholderTextColor="#8C8797"
+                style={styles.chatDrawerInput}
+              />
+              <TouchableOpacity onPress={sendChatMessage} style={styles.chatDrawerSendBtn}>
+                <Send color="#ffffff" size={14} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Footer Controls */}
@@ -245,6 +328,15 @@ export default function VideoRoom() {
         >
           <Text style={[styles.whiteboardToggleText, showWhiteboard ? styles.whiteboardToggleTextActive : null]}>
             {showWhiteboard ? 'Hide Board' : 'Show Whiteboard'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setShowChat(!showChat)}
+          style={[styles.whiteboardToggleBtn, showChat ? styles.whiteboardToggleBtnActive : null, { marginLeft: 8 }]}
+        >
+          <Text style={[styles.whiteboardToggleText, showChat ? styles.whiteboardToggleTextActive : null]}>
+            {showChat ? 'Hide Chat' : 'Show Chat'}
           </Text>
         </TouchableOpacity>
 
@@ -659,6 +751,111 @@ const styles = StyleSheet.create({
   },
   successSub: {
     fontSize: 13,
+    color: '#8C8797',
+  },
+  chatDrawerContainer: {
+    width: 280,
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#F3F0F6',
+    overflow: 'hidden',
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 2,
+    height: '100%',
+    justifyContent: 'space-between',
+  },
+  chatDrawerHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#F3F0F6',
+    backgroundColor: '#ffffff',
+  },
+  chatDrawerTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#342F3D',
+  },
+  chatDrawerMessages: {
+    flex: 1,
+    padding: 12,
+    backgroundColor: '#FAF9FC',
+  },
+  chatDrawerInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderTopWidth: 1,
+    borderColor: '#F3F0F6',
+    backgroundColor: '#ffffff',
+    gap: 8,
+  },
+  chatDrawerInput: {
+    flex: 1,
+    backgroundColor: '#FAF9FC',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 13,
+    color: '#342F3D',
+  },
+  chatDrawerSendBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#8b5cf6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  msgWrapper: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    width: '100%',
+  },
+  msgLeft: {
+    justifyContent: 'flex-start',
+  },
+  msgRight: {
+    justifyContent: 'flex-end',
+  },
+  msgBubble: {
+    maxWidth: '85%',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  bubbleMe: {
+    backgroundColor: '#8b5cf6',
+    borderBottomRightRadius: 2,
+  },
+  bubbleThem: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#E8E5EC',
+    borderBottomLeftRadius: 2,
+  },
+  msgText: {
+    fontSize: 13,
+  },
+  textMe: {
+    color: '#ffffff',
+  },
+  textThem: {
+    color: '#342F3D',
+  },
+  msgTime: {
+    fontSize: 8,
+    marginTop: 2,
+    alignSelf: 'flex-end',
+  },
+  timeMe: {
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  timeThem: {
     color: '#8C8797',
   },
 });

@@ -126,7 +126,7 @@ export default function Profile() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.bookBtn}
-              onPress={() => navigation.navigate('Book')}
+              onPress={() => navigation.navigate('Book', { id: m.id })}
               activeOpacity={0.7}
             >
               <CalendarPlus color="#ffffff" size={16} style={styles.btnIcon} />

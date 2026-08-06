@@ -197,8 +197,18 @@ export default function Signup() {
             )}
           </TouchableOpacity>
           <Text style={styles.avatarLabel}>
-            {formState.avatarUrl ? 'Profile Picture Uploaded ✓' : 'Upload Profile Picture *'}
+            {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Upload Profile Picture *'}
           </Text>
+          <View style={styles.urlInputContainer}>
+            <TextInput
+              placeholder="Or paste image URL directly..."
+              placeholderTextColor="#8C8797"
+              value={formState.avatarUrl || ''}
+              onChangeText={(val: string) => setFormState(prev => ({ ...prev, avatarUrl: val }))}
+              style={styles.urlInput}
+              editable={!loading}
+            />
+          </View>
         </View>
 
         {fields.map((f, i) => {
@@ -486,6 +496,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     marginTop: 10,
+    width: '100%',
+  },
+  urlInputContainer: {
+    width: '100%',
+    marginTop: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: 'rgba(94, 84, 112, 0.04)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  urlInput: {
+    fontSize: 12,
+    color: '#342F3D',
+    padding: 0,
+    textAlign: 'center',
   },
   avatarPickerFrame: {
     width: 90,

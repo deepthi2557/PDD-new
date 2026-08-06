@@ -28,10 +28,18 @@ export default function Activity() {
   }, []);
 
   const getItems = () => {
-    if (tab === 'Learning') return activity.learning;
+    let localBookings = [];
+    try {
+      localBookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+    } catch (e) {
+      console.warn('Failed to parse local bookings:', e);
+    }
+    const mergedLearning = [...localBookings, ...activity.learning];
+
+    if (tab === 'Learning') return mergedLearning;
     if (tab === 'Teaching') return activity.teaching;
-    if (tab === 'Upcoming') return [...activity.learning, ...activity.teaching].filter((x) => x.status === 'upcoming');
-    return [...activity.learning, ...activity.teaching].filter((x) => x.status === 'completed');
+    if (tab === 'Upcoming') return [...mergedLearning, ...activity.teaching].filter((x) => x.status === 'upcoming');
+    return [...mergedLearning, ...activity.teaching].filter((x) => x.status === 'completed');
   };
 
   return (

@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
-import { fetchMentors } from '../lib/api';
+import { fetchMentors, fetchMentorById } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/book')({
@@ -15,27 +16,184 @@ const times = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM'
 
 export default function Book() {
   const navigation = useNavigation<any>();
-  const [skill, setSkill] = useState(mentors[0].tags[0]);
-  const [mentorsList, setMentorsList] = useState<Mentor[]>([]);
+  const route = useRoute<any>();
+  const targetMentorId = route.params?.id;
+
+  const [skill, setSkill] = useState('');
+  const [targetMentor, setTargetMentor] = useState<Mentor | null>(null);
+  const [loadingMentor, setLoadingMentor] = useState(true);
 
   React.useEffect(() => {
-    fetchMentors()
-      .then((data) => {
-        setMentorsList(data);
-        if (data.length > 0 && data[0].tags.length > 0) {
-          setSkill(data[0].tags[0]);
+    let active = true;
+    setLoadingMentor(true);
+    
+    const load = async () => {
+      try {
+        if (targetMentorId) {
+          const mData = await fetchMentorById(targetMentorId);
+          if (active) {
+            setTargetMentor(mData);
+            if (mData.tags && mData.tags.length > 0) {
+              setSkill(mData.tags[0]);
+            }
+          }
+        } else {
+          const mList = await fetchMentors();
+          if (active && mList.length > 0) {
+            setTargetMentor(mList[0]);
+            if (mList[0].tags && mList[0].tags.length > 0) {
+              setSkill(mList[0].tags[0]);
+            }
+          }
         }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, []);
+      } catch (err) {
+        console.error('Error loading mentor for booking:', err);
+        const fallback = mentors.find(x => x.id === targetMentorId) || mentors[0];
+        if (active) {
+          setTargetMentor(fallback);
+          if (fallback.tags && fallback.tags.length > 0) {
+            setSkill(fallback.tags[0]);
+          }
+        }
+      } finally {
+        if (active) setLoadingMentor(false);
+      }
+    };
+    
+    load();
+    return () => { active = false; };
+  }, [targetMentorId]);
 
   const [day, setDay] = useState(2);
   const [time, setTime] = useState('3:00 PM');
   const [type, setType] = useState<'Online' | 'Offline'>('Online');
   const [notes, setNotes] = useState('');
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!targetMentor) return;
+    setSubmitting(true);
+
+    const bookingDate = new Date();
+    bookingDate.setDate(bookingDate.getDate() + (day - 2));
+    const dateString = bookingDate.toISOString().split('T')[0];
+
+    // 1. Try writing to Supabase
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const learnerId = userData?.user?.id;
+      if (learnerId) {
+        const { error } = await supabase
+          .from('bookings')
+          .insert([
+            {
+              learner_id: learnerId,
+              mentor_id: targetMentor.id,
+              skill: skill,
+              date: dateString,
+              time_slot: time,
+              type: type,
+              notes: notes,
+              status: 'UPCOMING'
+            }
+          ]);
+        if (error) console.warn('Supabase booking insert warning:', error);
+      }
+    } catch (err) {
+      console.warn('Supabase insert fail:', err);
+    }
+
+    // 2. Try writing to Spring Boot REST API
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (token) {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            mentorId: targetMentor.id,
+            skill: skill,
+            date: dateString,
+            timeSlot: time,
+            type: type,
+            notes: notes
+          })
+        });
+      }
+    } catch (err) {
+      console.warn('Backend server insert fail:', err);
+    }
+
+    // 3. Update localStorage to ensure UI updates are fully interactive
+    try {
+      const localBookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+      const newBooking = {
+        id: Math.random().toString(36).substring(2),
+        skill: skill,
+        with: targetMentor.name,
+        time: `${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]} · ${time}`,
+        rating: 0,
+        status: 'upcoming'
+      };
+      localBookings.push(newBooking);
+      localStorage.setItem('my_bookings', JSON.stringify(localBookings));
+
+      const localNotifs = JSON.parse(localStorage.getItem('my_notifications') || '[]');
+      localNotifs.unshift({
+        id: Date.now(),
+        type: 'booking',
+        title: `Session request sent to ${targetMentor.name} for ${skill}`,
+        time: '1s',
+        icon: '📩'
+      });
+      localStorage.setItem('my_notifications', JSON.stringify(localNotifs));
+
+      const localChats = JSON.parse(localStorage.getItem(`chat_msgs_${targetMentor.id}`) || '[]');
+      localChats.push({
+        from: 'me',
+        text: `Hello! I booked a session with you for ${skill} on ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]} at ${time}. Notes: ${notes || 'No extra notes.'}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      localStorage.setItem(`chat_msgs_${targetMentor.id}`, JSON.stringify(localChats));
+
+      const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
+      const chatIdx = chatsList.findIndex((c: any) => c.id === targetMentor.id);
+      const chatDetails = {
+        id: targetMentor.id,
+        name: targetMentor.name,
+        avatar: targetMentor.avatar,
+        last: `Requested session for ${skill}`,
+        time: 'now',
+        unread: 0,
+        online: true
+      };
+      if (chatIdx > -1) {
+        chatsList[chatIdx].last = `Requested session for ${skill}`;
+        chatsList[chatIdx].time = 'now';
+      } else {
+        chatsList.push(chatDetails);
+      }
+      localStorage.setItem('chats_list', JSON.stringify(chatsList));
+    } catch (err) {
+      console.error('LocalStorage booking sync error:', err);
+    }
+
+    setSubmitting(false);
+    setDone(true);
+  };
+
+  if (loadingMentor || !targetMentor) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', minHeight: 400 }]}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    );
+  }
 
   if (done) {
     return (
@@ -71,12 +229,12 @@ export default function Book() {
       </TouchableOpacity>
 
       <Text style={styles.title}>Book a session</Text>
-      <Text style={styles.subtitle}>with {mentorsList[0]?.name || 'Aria Shah'}</Text>
+      <Text style={styles.subtitle}>with {targetMentor.name}</Text>
 
       {/* Select Skill */}
       <Label>Select skill</Label>
       <View style={styles.chipRow}>
-        {(mentorsList[0]?.tags || ['Python', 'TensorFlow', 'Data Science', 'ML Basics']).map((s) => {
+        {(targetMentor.tags || []).map((s) => {
           const active = skill === s;
           return (
             <TouchableOpacity
@@ -182,11 +340,16 @@ export default function Book() {
 
       {/* Submit Button */}
       <TouchableOpacity
-        style={styles.confirmBtn}
-        onPress={() => setDone(true)}
+        style={[styles.confirmBtn, submitting && { opacity: 0.7 }]}
+        onPress={handleConfirm}
         activeOpacity={0.8}
+        disabled={submitting}
       >
-        <Text style={styles.confirmBtnText}>Confirm Session</Text>
+        {submitting ? (
+          <ActivityIndicator color="#ffffff" size="small" />
+        ) : (
+          <Text style={styles.confirmBtnText}>Confirm Session</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
