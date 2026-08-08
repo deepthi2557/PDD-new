@@ -21,6 +21,7 @@ export function useNavigation<T = any>() {
         Notifications: "/notifications",
         Book: "/book",
         Community: "/community",
+        ProfileSetup: "/profile/setup",
       };
 
       let targetScreen = screenName;

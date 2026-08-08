@@ -18,6 +18,7 @@ import BookScreen from './src/routes/book';
 import CommunityScreen from './src/routes/community';
 import NotificationsScreen from './src/routes/notifications';
 import VideoScreen from './src/routes/video.$id';
+import ProfileSetupScreen from './src/routes/profile.setup';
 
 // Navigation parameter types
 export type RootStackParamList = {
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   ProfileDetails: { id: string };
   Community: undefined;
   VideoDetails: { id: string };
+  ProfileSetup: undefined;
 };
 
 export type MainTabParamList = {
@@ -122,6 +124,7 @@ export default function App() {
           <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
           <Stack.Screen name="Community" component={CommunityScreen} />
           <Stack.Screen name="VideoDetails" component={VideoScreen} />
+          <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </QueryClientProvider>

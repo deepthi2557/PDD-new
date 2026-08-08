@@ -119,15 +119,12 @@ export default function Signup() {
         return;
       }
 
-      if (data.session) {
-        Alert.alert('Success', 'Account created successfully!');
-        navigation.navigate('Main');
+      if (data.session || data.user) {
+        Alert.alert('Success', 'Account created successfully! Please configure your profile and skills.');
+        navigation.navigate('ProfileSetup');
       } else {
-        Alert.alert(
-          'Verification Required',
-          'Registration successful! Please check your email to confirm your account.'
-        );
-        navigation.navigate('Login');
+        Alert.alert('Success', 'Registration successful! Please configure your profile.');
+        navigation.navigate('ProfileSetup');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred');

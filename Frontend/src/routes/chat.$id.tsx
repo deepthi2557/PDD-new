@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, Monitor, PhoneOff, MicOff, Volume2, MessageSquare, X, Calendar } from 'lucide-react-native';
+import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar } from 'lucide-react-native';
+import { Monitor, Volume2, X } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -64,6 +65,30 @@ export default function ChatRoom() {
 
   // Incoming Call state
   const [incomingCall, setIncomingCall] = useState<{ type: 'voice' | 'video' | 'screenshare'; mentorId: string } | null>(null);
+
+  const [outgoingCall, setOutgoingCall] = useState<{ type: 'voice' | 'video'; mentorId: string } | null>(null);
+
+  const initiateVoiceCall = () => {
+    setOutgoingCall({ type: 'voice', mentorId: id });
+    localStorage.setItem('incoming_call', JSON.stringify({ type: 'voice', mentorId: id, callerName: 'You' }));
+    
+    // Simulate other user accepting call after 3 seconds
+    setTimeout(() => {
+      setOutgoingCall(null);
+      setActiveCallMode('voice');
+    }, 3000);
+  };
+
+  const initiateVideoCall = () => {
+    setOutgoingCall({ type: 'video', mentorId: id });
+    localStorage.setItem('incoming_call', JSON.stringify({ type: 'video', mentorId: id, callerName: 'You' }));
+    
+    // Simulate other user accepting video call after 3 seconds
+    setTimeout(() => {
+      setOutgoingCall(null);
+      navigation.navigate('VideoDetails', { id });
+    }, 3000);
+  };
 
   // 1-second auto live polling from localStorage
   useEffect(() => {
@@ -269,8 +294,8 @@ export default function ChatRoom() {
       <View style={styles.incomingCallOverlay}>
         <View style={styles.incomingCallCard}>
           <Text style={styles.ringingLabel}>🔔 Ringing...</Text>
-          <Image source={{ uri: m.avatar }} style={styles.incomingAvatar} />
-          <Text style={styles.incomingName}>{m.name}</Text>
+          <Image source={{ uri: m?.avatar }} style={styles.incomingAvatar} />
+          <Text style={styles.incomingName}>{m?.name}</Text>
           <Text style={styles.incomingType}>
             Incoming {isVideo ? 'Video Call' : isShare ? 'Screen Share Session' : 'Voice Call'}...
           </Text>
@@ -294,7 +319,7 @@ export default function ChatRoom() {
                 localStorage.removeItem('incoming_call');
                 setIncomingCall(null);
                 if (isVideo) {
-                  navigation.navigate('VideoDetails', { id: m.id });
+                  navigation.navigate('VideoDetails', { id: m?.id });
                 } else if (isShare) {
                   setActiveCallMode('screenshare');
                 } else {
@@ -312,6 +337,35 @@ export default function ChatRoom() {
     );
   };
 
+  const renderOutgoingCallOverlay = () => {
+    if (!outgoingCall) return null;
+    const isVideo = outgoingCall.type === 'video';
+    return (
+      <View style={styles.incomingCallOverlay}>
+        <View style={styles.incomingCallCard}>
+          <Text style={styles.ringingLabel}>📞 Calling...</Text>
+          <Image source={{ uri: m?.avatar }} style={styles.incomingAvatar} />
+          <Text style={styles.incomingName}>{m?.name}</Text>
+          <Text style={styles.incomingType}>
+            Placing {isVideo ? 'Video' : 'Voice'} Call...
+          </Text>
+          
+          <TouchableOpacity 
+            style={[styles.incomingBtn, styles.declineBtn, { width: '80%', marginTop: 12 }]}
+            onPress={() => {
+              localStorage.removeItem('incoming_call');
+              setOutgoingCall(null);
+            }}
+            activeOpacity={0.8}
+          >
+            <PhoneOff color="#ffffff" size={20} />
+            <Text style={styles.incomingBtnText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   const renderAttachmentPanel = () => {
     if (!showAttachmentActions) return null;
     return (
@@ -322,7 +376,7 @@ export default function ChatRoom() {
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
-              setActiveCallMode('voice');
+              initiateVoiceCall();
             }}
             activeOpacity={0.7}
           >
@@ -336,7 +390,7 @@ export default function ChatRoom() {
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
-              navigation.navigate('VideoDetails', { id: m.id });
+              initiateVideoCall();
             }}
             activeOpacity={0.7}
           >
@@ -364,7 +418,7 @@ export default function ChatRoom() {
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
-              navigation.navigate('Book', { id: m.id });
+              navigation.navigate('Book', { id: m?.id });
             }}
             activeOpacity={0.7}
           >
@@ -544,7 +598,7 @@ export default function ChatRoom() {
         </View>
         <TouchableOpacity 
           style={styles.actionIconBtn} 
-          onPress={() => setActiveCallMode('voice')}
+          onPress={initiateVoiceCall}
           activeOpacity={0.7}
         >
           <Phone color="#342F3D" size={16} />
@@ -558,7 +612,7 @@ export default function ChatRoom() {
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.actionIconBtn, styles.videoBtn]} 
-          onPress={() => navigation.navigate('VideoDetails', { id: m.id })}
+          onPress={initiateVideoCall}
           activeOpacity={0.7}
         >
           <Video color="#ffffff" size={16} />
@@ -636,6 +690,9 @@ export default function ChatRoom() {
 
       {/* Incoming Call alert ringing dialog overlay */}
       {renderIncomingCallOverlay()}
+
+      {/* Outgoing Call ringing dialog overlay */}
+      {renderOutgoingCallOverlay()}
     </View>
   );
 }
