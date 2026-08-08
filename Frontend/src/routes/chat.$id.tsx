@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar } from 'lucide-react-native';
-import { Monitor, Volume2, X } from 'lucide-react';
+import { Monitor, Volume2, X, Play, Pause, FileText, Image as ImageIcon, Camera, Trash2 } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -17,6 +17,58 @@ const initialMsgs = [
   { from: 'them', text: "Just have a notebook ready. We'll build a tiny model together.", time: '10:26' },
   { from: 'me', text: 'Sounds perfect — see you then!', time: '10:27' },
 ];
+
+function VoiceMessagePlayer({ duration }: { duration: string }) {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+
+  React.useEffect(() => {
+    let timer: any;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 1.0) {
+            setIsPlaying(false);
+            clearInterval(timer);
+            return 0;
+          }
+          return prev + 0.1;
+        });
+      }, 300);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isPlaying]);
+
+  return (
+    <View style={styles.voicePlayer}>
+      <TouchableOpacity 
+        style={styles.voicePlayBtn} 
+        onPress={() => setIsPlaying(!isPlaying)}
+        activeOpacity={0.7}
+      >
+        {isPlaying ? <Pause color="#8b5cf6" size={14} /> : <Play color="#8b5cf6" size={14} fill="#8b5cf6" />}
+      </TouchableOpacity>
+      
+      <View style={styles.voiceWaveContainer}>
+        {[20, 35, 15, 50, 30, 40, 25, 35, 20, 30].map((h, idx) => {
+          const filled = progress > (idx / 10);
+          return (
+            <View 
+              key={idx} 
+              style={[
+                styles.waveBar, 
+                { height: h * 0.4, backgroundColor: filled ? '#8b5cf6' : '#c8c6cd' }
+              ]} 
+            />
+          );
+        })}
+      </View>
+      <Text style={styles.voiceDuration}>{duration}</Text>
+    </View>
+  );
+}
 
 export default function ChatRoom() {
   const navigation = useNavigation<any>();
@@ -67,6 +119,95 @@ export default function ChatRoom() {
   const [incomingCall, setIncomingCall] = useState<{ type: 'voice' | 'video' | 'screenshare'; mentorId: string } | null>(null);
 
   const [outgoingCall, setOutgoingCall] = useState<{ type: 'voice' | 'video'; mentorId: string } | null>(null);
+
+  // Voice recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recSeconds, setRecSeconds] = useState(0);
+
+  useEffect(() => {
+    let timer: any;
+    if (isRecording) {
+      timer = setInterval(() => {
+        setRecSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setRecSeconds(0);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isRecording]);
+
+  const sendVoiceMessage = () => {
+    const durationStr = `0:${recSeconds.toString().padStart(2, '0')}`;
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      from: 'me',
+      type: 'voice',
+      duration: durationStr,
+      time: timeNow
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+    setIsRecording(false);
+  };
+
+  const sendMockImage = (url: string) => {
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      from: 'me',
+      type: 'image',
+      mediaUrl: url,
+      time: timeNow
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+    setShowAttachmentActions(false);
+  };
+
+  const sendMockFile = (name: string, size: string) => {
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      from: 'me',
+      type: 'file',
+      fileName: name,
+      fileSize: size,
+      time: timeNow
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+    setShowAttachmentActions(false);
+  };
+
+  const isSessionBooked = () => {
+    try {
+      const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+      return bookings.some((b: any) => b.with === m?.name || b.mentorId === m?.id);
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const handleCallPress = (type: 'voice' | 'video' | 'screenshare') => {
+    if (!isSessionBooked()) {
+      Alert.alert(
+        'Swap Session Required',
+        `You can only place calls, video calls, or screen sharing after booking a swap session with ${m?.name || 'this mentor'}. Please schedule a session first.`
+      );
+      return;
+    }
+    
+    if (type === 'voice') {
+      initiateVoiceCall();
+    } else if (type === 'video') {
+      initiateVideoCall();
+    } else {
+      setActiveCallMode('screenshare');
+    }
+  };
 
   const initiateVoiceCall = () => {
     setOutgoingCall({ type: 'voice', mentorId: id });
@@ -149,17 +290,35 @@ export default function ChatRoom() {
           if (next === 4) {
             setTyping(false);
             const userMsg = msgs[msgs.length - 1]?.text || '';
-            let replyText = "Perfect! Let me review this and we can discuss. Let's jump on a quick call to align.";
+            let replyText = "I'd love to help you with that! Let's make sure we have a session scheduled. You can book one by tapping the Calendar icon at the top.";
             let isBooking = false;
             
-            if (userMsg.toLowerCase().includes('book') || userMsg.toLowerCase().includes('session') || userMsg.toLowerCase().includes('notes:')) {
-              replyText = "Awesome! I've received your session booking request. Let's do a quick voice call now to touch base. Calling you in a second...";
-              isBooking = true;
-            } else if (userMsg.toLowerCase().includes('hello') || userMsg.toLowerCase().includes('hi')) {
-              replyText = "Hey! Great to connect with you. How can I help you today? We can also jump on a video call if it's easier.";
-            } else if (userMsg.toLowerCase().includes('video') || userMsg.toLowerCase().includes('call') || userMsg.toLowerCase().includes('screenshare')) {
-              replyText = "Sure, I can call you right now! Checking if you're ready...";
-              isBooking = true;
+            const lowerMsg = userMsg.toLowerCase();
+            const booked = isSessionBooked();
+            
+            if (booked) {
+              if (lowerMsg.includes('python') || lowerMsg.includes('coding') || lowerMsg.includes('code')) {
+                replyText = "Python is a fantastic choice! We can discuss core syntax, machine learning integration, or backend framework options. I'm ready for our call!";
+              } else if (lowerMsg.includes('figma') || lowerMsg.includes('design') || lowerMsg.includes('ui') || lowerMsg.includes('ux')) {
+                replyText = "Figma is perfect for real-time swap sessions. We can collaborate on component variants, design systems, and advanced prototyping.";
+              } else if (lowerMsg.includes('spanish') || lowerMsg.includes('languages') || lowerMsg.includes('english')) {
+                replyText = "Great! Conversational practice is the fastest way to learn. We can structure our swap to split time between speaking both languages.";
+              } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+                replyText = `Hey! Thanks for booking a swap session with me. I'm ready to hop on a call whenever you are!`;
+              } else if (lowerMsg.includes('video') || lowerMsg.includes('call') || lowerMsg.includes('screenshare')) {
+                replyText = "Sure, let's jump on a quick voice/video call! Placing the call now...";
+                isBooking = true;
+              } else {
+                replyText = "That sounds perfect. Let's start our voice/video call session now to discuss these topics in detail!";
+              }
+            } else {
+              if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+                replyText = `Hello! I'm excited to swap skills with you. To initiate a voice or video call, please book a session first using the 'Book' option in the menu.`;
+              } else if (lowerMsg.includes('book') || lowerMsg.includes('session')) {
+                replyText = "Awesome! Simply click the '+' attachment menu or the calendar icon above to choose a day and time slot to confirm.";
+              } else {
+                replyText = `To access voice/video calls or receive personalized mentorship, please book a swap session first. Tap the Calendar icon above or in the '+' attachment menu.`;
+              }
             }
 
             const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -176,7 +335,7 @@ export default function ChatRoom() {
               localStorage.setItem('chats_list', JSON.stringify(chatsList));
             }
 
-            if (isBooking) {
+            if (isBooking && booked) {
               setIncomingCallScheduled(true);
             }
           }
@@ -370,13 +529,41 @@ export default function ChatRoom() {
     if (!showAttachmentActions) return null;
     return (
       <View style={styles.attachmentPanel}>
-        <Text style={styles.attachmentTitle}>Start call / session</Text>
+        <Text style={styles.attachmentTitle}>WhatsApp Options & Calls</Text>
         <View style={styles.attachmentRow}>
           <TouchableOpacity 
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
-              initiateVoiceCall();
+              sendMockFile('SkillSwap_Syllabus.pdf', '2.4 MB');
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#e0f2fe' }]}>
+              <FileText color="#0284c7" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Document</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              sendMockImage('https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&auto=format&fit=crop&q=80');
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#fdf2f8' }]}>
+              <Camera color="#db2777" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Camera</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
+              handleCallPress('voice');
             }}
             activeOpacity={0.7}
           >
@@ -390,7 +577,7 @@ export default function ChatRoom() {
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
-              initiateVideoCall();
+              handleCallPress('video');
             }}
             activeOpacity={0.7}
           >
@@ -398,20 +585,6 @@ export default function ChatRoom() {
               <Video color="#9333ea" size={20} />
             </View>
             <Text style={styles.attachmentLabel}>Video Call</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.attachmentActionCard} 
-            onPress={() => {
-              setShowAttachmentActions(false);
-              setActiveCallMode('screenshare');
-            }}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.attachmentIconBox, { backgroundColor: '#ecfdf5' }]}>
-              <Monitor color="#059669" size={20} />
-            </View>
-            <Text style={styles.attachmentLabel}>Share Screen</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -598,21 +771,21 @@ export default function ChatRoom() {
         </View>
         <TouchableOpacity 
           style={styles.actionIconBtn} 
-          onPress={initiateVoiceCall}
+          onPress={() => handleCallPress('voice')}
           activeOpacity={0.7}
         >
           <Phone color="#342F3D" size={16} />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.actionIconBtn} 
-          onPress={() => setActiveCallMode('screenshare')}
+          onPress={() => handleCallPress('screenshare')}
           activeOpacity={0.7}
         >
           <Monitor color="#342F3D" size={16} />
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.actionIconBtn, styles.videoBtn]} 
-          onPress={initiateVideoCall}
+          onPress={() => handleCallPress('video')}
           activeOpacity={0.7}
         >
           <Video color="#ffffff" size={16} />
@@ -629,9 +802,31 @@ export default function ChatRoom() {
                 style={[
                   styles.msgBubble,
                   me ? styles.bubbleMe : styles.bubbleThem,
+                  msg.type === 'image' && styles.bubbleImage,
                 ]}
               >
-                <Text style={[styles.msgText, me ? styles.textMe : styles.textThem]}>{msg.text}</Text>
+                {msg.type === 'voice' ? (
+                  <VoiceMessagePlayer duration={msg.duration} />
+                ) : msg.type === 'image' ? (
+                  <View style={styles.imageMsgContainer}>
+                    <Image source={{ uri: msg.mediaUrl }} style={styles.imageMsg} />
+                    <View style={styles.imageLabelRow}>
+                      <Text style={[styles.imageLabel, me ? styles.textMe : styles.textThem]}>Sent an image</Text>
+                    </View>
+                  </View>
+                ) : msg.type === 'file' ? (
+                  <View style={styles.fileMsgContainer}>
+                    <FileText color={me ? "#ffffff" : "#8b5cf6"} size={28} />
+                    <View style={styles.fileMsgInfo}>
+                      <Text style={[styles.fileMsgName, me ? styles.textMe : styles.textThem]} numberOfLines={1}>
+                        {msg.fileName}
+                      </Text>
+                      <Text style={styles.fileMsgSize}>{msg.fileSize}</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <Text style={[styles.msgText, me ? styles.textMe : styles.textThem]}>{msg.text}</Text>
+                )}
                 <Text style={[styles.msgTime, me ? styles.timeMe : styles.timeThem]}>{msg.time}</Text>
               </View>
             </View>
@@ -655,37 +850,73 @@ export default function ChatRoom() {
 
       {/* Input area */}
       <View style={styles.inputStickyWrapper}>
-        <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.utilityBtn} activeOpacity={0.7}>
-            <Smile color="#8C8797" size={20} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.utilityBtn, showAttachmentActions && styles.utilityBtnActive]} 
-            onPress={() => setShowAttachmentActions(!showAttachmentActions)}
-            activeOpacity={0.7}
-          >
-            <Paperclip color={showAttachmentActions ? "#8b5cf6" : "#8C8797"} size={20} />
-          </TouchableOpacity>
+        {isRecording ? (
+          <View style={styles.inputContainer}>
+            <TouchableOpacity 
+              style={styles.utilityBtn} 
+              onPress={() => setIsRecording(false)}
+              activeOpacity={0.7}
+            >
+              <Trash2 color="#ef4444" size={20} />
+            </TouchableOpacity>
+            
+            <View style={styles.recordingContainer}>
+              <View style={styles.recordingTimerRow}>
+                <View style={styles.pulseRedDot} />
+                <Text style={styles.recordingText}>Recording 0:{recSeconds.toString().padStart(2, '0')}</Text>
+              </View>
+              <Text style={{ color: '#8C8797', fontSize: 12 }}>Slide to cancel</Text>
+            </View>
 
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            onSubmitEditing={send}
-            placeholder="Message..."
-            placeholderTextColor="#8C8797"
-            style={styles.textInput}
-          />
-
-          {text.trim() ? (
-            <TouchableOpacity onPress={send} style={styles.sendBtn} activeOpacity={0.7}>
+            <TouchableOpacity onPress={sendVoiceMessage} style={styles.sendBtn} activeOpacity={0.7}>
               <Send color="#ffffff" size={16} />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.sendBtn} activeOpacity={0.7}>
-              <Mic color="#ffffff" size={16} />
+          </View>
+        ) : (
+          <View style={styles.inputContainer}>
+            <TouchableOpacity 
+              style={styles.utilityBtn} 
+              onPress={() => {
+                const emojis = ['👍', '🙌', '🔥', '💡', '💯', '🤔'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                setText(prev => prev + randomEmoji);
+              }}
+              activeOpacity={0.7}
+            >
+              <Smile color="#8C8797" size={20} />
             </TouchableOpacity>
-          )}
-        </View>
+            <TouchableOpacity 
+              style={[styles.utilityBtn, showAttachmentActions && styles.utilityBtnActive]} 
+              onPress={() => setShowAttachmentActions(!showAttachmentActions)}
+              activeOpacity={0.7}
+            >
+              <Paperclip color={showAttachmentActions ? "#8b5cf6" : "#8C8797"} size={20} />
+            </TouchableOpacity>
+
+            <TextInput
+              value={text}
+              onChangeText={setText}
+              onSubmitEditing={send}
+              placeholder="Message..."
+              placeholderTextColor="#8C8797"
+              style={styles.textInput}
+            />
+
+            {text.trim() ? (
+              <TouchableOpacity onPress={send} style={styles.sendBtn} activeOpacity={0.7}>
+                <Send color="#ffffff" size={16} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                onPress={() => setIsRecording(true)} 
+                style={styles.sendBtn} 
+                activeOpacity={0.7}
+              >
+                <Mic color="#ffffff" size={16} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Incoming Call alert ringing dialog overlay */}
@@ -1258,5 +1489,107 @@ const styles = StyleSheet.create({
   },
   utilityBtnActive: {
     backgroundColor: 'rgba(139, 92, 246, 0.1)',
+  },
+  voicePlayer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    gap: 12,
+    width: 200,
+  },
+  voicePlayBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(0, 0, 0, 0.05)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  voiceWaveContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 30,
+    gap: 2,
+  },
+  waveBar: {
+    flex: 1,
+    borderRadius: 1,
+    width: 3,
+  },
+  voiceDuration: {
+    fontSize: 10,
+    color: '#8C8797',
+    fontWeight: '500',
+  },
+  bubbleImage: {
+    padding: 4,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  imageMsgContainer: {
+    width: 200,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  imageMsg: {
+    width: '100%',
+    height: 150,
+    backgroundColor: '#FAF9FC',
+  },
+  imageLabelRow: {
+    padding: 8,
+  },
+  imageLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  fileMsgContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    width: 200,
+    paddingVertical: 4,
+  },
+  fileMsgInfo: {
+    flex: 1,
+  },
+  fileMsgName: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  fileMsgSize: {
+    fontSize: 10,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  recordingContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  recordingTimerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pulseRedDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ef4444',
+  },
+  recordingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ef4444',
   },
 });
