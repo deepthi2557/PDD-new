@@ -19,6 +19,7 @@ export default function VideoRoom() {
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(false);
   const [videoOff, setVideoOff] = useState(false);
+  const [peerVideoOff, setPeerVideoOff] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(true);
   const [drawColor, setDrawColor] = useState('#8b5cf6'); // Default violet
   const [lineWidth, setLineWidth] = useState(4);
@@ -197,9 +198,9 @@ export default function VideoRoom() {
       <View style={styles.contentSplit}>
         {/* Left Side: Video Streams */}
         <View style={[styles.videoContainer, getVideoContainerStyle()]}>
-          {/* Peer Stream (Mentor) */}
+           {/* Peer Stream (Mentor) */}
           <View style={styles.peerVideoCard}>
-            {videoOff ? (
+            {peerVideoOff ? (
               <View style={styles.videoOffPlaceholder}>
                 <Image source={{ uri: m.avatar }} style={styles.offlineAvatar} />
                 <Text style={styles.videoOffText}>{m.name}'s camera off</Text>
@@ -216,10 +217,18 @@ export default function VideoRoom() {
 
           {/* Self Stream */}
           <View style={styles.selfVideoCard}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80' }} style={styles.videoStreamMock} />
-            <View style={styles.nameBadge}>
-              <Text style={styles.nameBadgeText}>You (Alex)</Text>
-            </View>
+            {videoOff ? (
+              <View style={styles.videoOffPlaceholder}>
+                <Text style={[styles.videoOffText, { fontSize: 11 }]}>Your camera off</Text>
+              </View>
+            ) : (
+              <View style={styles.peerVideoOverlay}>
+                <Image source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80' }} style={styles.videoStreamMock} />
+                <View style={styles.nameBadge}>
+                  <Text style={styles.nameBadgeText}>You (Alex)</Text>
+                </View>
+              </View>
+            )}
           </View>
         </View>
 
