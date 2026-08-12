@@ -63,7 +63,7 @@ export async function fetchMentors(filters?: { name?: string; level?: string; mo
     return {
       id: u.id,
       name: u.name,
-      avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
+      avatar: u.avatar_url || u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
       expertise: u.expertise || 'Expertise pending',
       level: u.level || 'Intermediate',
       teaches: u.teaches || u.user_tags?.length || 0,
@@ -138,7 +138,7 @@ export async function fetchMentorById(id: string): Promise<Mentor> {
   return {
     id: u.id,
     name: u.name,
-    avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
+    avatar: u.avatar_url || u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
     expertise: u.expertise || 'Expertise pending',
     level: u.level || 'Intermediate',
     teaches: u.teaches || u.user_tags?.length || 0,

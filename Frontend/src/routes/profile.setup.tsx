@@ -118,7 +118,8 @@ export default function ProfileSetup() {
             bio: bio.trim(),
             mode: mode,
             reviews: 0,
-            teaches: selectedSkills.length
+            teaches: selectedSkills.length,
+            avatar_url: user?.user_metadata?.avatar_url || ''
           })
           .eq('id', currentUserId);
 
@@ -151,7 +152,8 @@ export default function ProfileSetup() {
               bio: bio.trim(),
               mode: mode,
               reviews: 0,
-              teaches: selectedSkills.length
+              teaches: selectedSkills.length,
+              avatarUrl: user?.user_metadata?.avatar_url || ''
             })
           });
         }
