@@ -67,6 +67,19 @@ export default function Profile() {
   const [submitted, setSubmitted] = useState(false);
   const [reviewText, setReviewText] = useState('');
 
+  const isSessionCompleted = () => {
+    if (!m || !m.name) return false;
+    try {
+      const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+      return bookings.some((b: any) => {
+        const matchesMentor = (b.with && b.with.toLowerCase() === m.name.toLowerCase()) || (b.mentorId === m.id);
+        return matchesMentor && b.status === 'completed';
+      });
+    } catch (e) {
+      return false;
+    }
+  };
+
   if (loading || !m) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', minHeight: 400 }]}>
@@ -252,42 +265,44 @@ export default function Profile() {
         </Section>
 
         {/* Leave Review Form */}
-        <Section title="Leave a review">
-          {submitted ? (
-            <View style={styles.submittedCard}>
-              <CheckCircle2 color="#22C55E" size={20} style={styles.submittedIcon} />
-              <Text style={styles.submittedText}>Feedback Submitted Successfully</Text>
-            </View>
-          ) : (
-            <View style={styles.formCard}>
-              <View style={styles.ratingFormRow}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <TouchableOpacity key={n} onPress={() => setRating(n)} activeOpacity={0.7}>
-                    <Star
-                      color="#F59E0B"
-                      size={28}
-                      fill={n <= rating ? '#F59E0B' : 'transparent'}
-                      style={styles.formStarIcon}
-                    />
-                  </TouchableOpacity>
-                ))}
+        {isSessionCompleted() && (
+          <Section title="Leave a review">
+            {submitted ? (
+              <View style={styles.submittedCard}>
+                <CheckCircle2 color="#22C55E" size={20} style={styles.submittedIcon} />
+                <Text style={styles.submittedText}>Feedback Submitted Successfully</Text>
               </View>
-              <TextInput
-                value={reviewText}
-                onChangeText={setReviewText}
-                placeholder="Share your experience..."
-                placeholderTextColor="#8C8797"
-                multiline
-                numberOfLines={3}
-                style={styles.reviewInput}
-              />
-              <TouchableOpacity style={styles.submitReviewBtn} onPress={() => setSubmitted(true)} activeOpacity={0.7}>
-                <Send color="#ffffff" size={16} style={styles.btnIcon} />
-                <Text style={styles.submitReviewText}>Submit Review</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </Section>
+            ) : (
+              <View style={styles.formCard}>
+                <View style={styles.ratingFormRow}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <TouchableOpacity key={n} onPress={() => setRating(n)} activeOpacity={0.7}>
+                      <Star
+                        color="#F59E0B"
+                        size={28}
+                        fill={n <= rating ? '#F59E0B' : 'transparent'}
+                        style={styles.formStarIcon}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TextInput
+                  value={reviewText}
+                  onChangeText={setReviewText}
+                  placeholder="Share your experience..."
+                  placeholderTextColor="#8C8797"
+                  multiline
+                  numberOfLines={3}
+                  style={styles.reviewInput}
+                />
+                <TouchableOpacity style={styles.submitReviewBtn} onPress={() => setSubmitted(true)} activeOpacity={0.7}>
+                  <Send color="#ffffff" size={16} style={styles.btnIcon} />
+                  <Text style={styles.submitReviewText}>Submit Review</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Section>
+        )}
       </View>
 
       {/* Achievements Info Modal */}

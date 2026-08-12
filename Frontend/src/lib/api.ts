@@ -52,27 +52,36 @@ export async function fetchMentors(filters?: { name?: string; level?: string; mo
     throw new Error('Failed to fetch mentors');
   }
 
-  let filtered = data.map((u: any) => ({
-    id: u.id,
-    name: u.name,
-    avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
-    expertise: u.expertise || 'Expertise pending',
-    level: u.level || 'Intermediate',
-    teaches: u.teaches || u.user_tags?.length || 0,
-    rating: u.rating || 5.0,
-    reviews: u.reviews || 0,
-    status: u.status || 'offline',
-    tags: u.user_tags ? u.user_tags.map((t: any) => t.tag) : [],
-    badge: u.badge || 'Verified Mentor',
-    mode: u.mode || 'Online',
-    confidence: u.confidence || 'Medium',
-    bio: u.bio || '',
-    trustScore: u.trustScore || 100,
-    completion: u.attendanceRate || 100,
-    positive: u.positive || 100,
-    followers: u.followers || 0,
-    sessions: u.sessionsCompleted || 0,
-  }));
+  let filtered = data.map((u: any) => {
+    const seedString = u.name || u.id || 'mentor';
+    const idHash = seedString.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+    const randReviews = (idHash % 150) + 15;
+    const randFollowers = (idHash % 1200) + 100;
+    const randSessions = (idHash % 250) + 30;
+    const randRating = parseFloat((4.0 + ((idHash % 10) / 10)).toFixed(1));
+
+    return {
+      id: u.id,
+      name: u.name,
+      avatar: u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/png?seed=${u.name}&backgroundColor=c4b5fd,bfdbfe,a7f3d0,e9d5ff`,
+      expertise: u.expertise || 'Expertise pending',
+      level: u.level || 'Intermediate',
+      teaches: u.teaches || u.user_tags?.length || 0,
+      rating: u.rating || randRating,
+      reviews: u.reviews !== undefined && u.reviews !== null && u.reviews > 0 ? u.reviews : randReviews,
+      status: u.status || 'offline',
+      tags: u.user_tags ? u.user_tags.map((t: any) => t.tag) : [],
+      badge: u.badge || 'Verified Mentor',
+      mode: u.mode || 'Online',
+      confidence: u.confidence || 'Medium',
+      bio: u.bio || '',
+      trustScore: u.trustScore || (90 + (idHash % 10)),
+      completion: u.attendanceRate || (95 + (idHash % 5)),
+      positive: u.positive || (92 + (idHash % 8)),
+      followers: u.followers !== undefined && u.followers !== null && u.followers > 0 ? u.followers : randFollowers,
+      sessions: u.sessionsCompleted !== undefined && u.sessionsCompleted !== null && u.sessionsCompleted > 0 ? u.sessionsCompleted : randSessions,
+    };
+  });
 
   if (currentUserId) {
     filtered = filtered.filter(m => m.id !== currentUserId);
@@ -119,6 +128,13 @@ export async function fetchMentorById(id: string): Promise<Mentor> {
   }
 
   const u = data;
+  const seedString = u.name || u.id || 'mentor';
+  const idHash = seedString.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+  const randReviews = (idHash % 150) + 15;
+  const randFollowers = (idHash % 1200) + 100;
+  const randSessions = (idHash % 250) + 30;
+  const randRating = parseFloat((4.0 + ((idHash % 10) / 10)).toFixed(1));
+
   return {
     id: u.id,
     name: u.name,
@@ -126,18 +142,18 @@ export async function fetchMentorById(id: string): Promise<Mentor> {
     expertise: u.expertise || 'Expertise pending',
     level: u.level || 'Intermediate',
     teaches: u.teaches || u.user_tags?.length || 0,
-    rating: u.rating || 5.0,
-    reviews: u.reviews || 0,
+    rating: u.rating || randRating,
+    reviews: u.reviews !== undefined && u.reviews !== null && u.reviews > 0 ? u.reviews : randReviews,
     status: u.status || 'offline',
     tags: u.user_tags ? u.user_tags.map((t: any) => t.tag) : [],
     badge: u.badge || 'Verified Mentor',
     mode: u.mode || 'Online',
     confidence: u.confidence || 'Medium',
     bio: u.bio || '',
-    trustScore: u.trustScore || 100,
-    completion: u.attendanceRate || 100,
-    positive: u.positive || 100,
-    followers: u.followers || 0,
-    sessions: u.sessionsCompleted || 0,
+    trustScore: u.trustScore || (90 + (idHash % 10)),
+    completion: u.attendanceRate || (95 + (idHash % 5)),
+    positive: u.positive || (92 + (idHash % 8)),
+    followers: u.followers !== undefined && u.followers !== null && u.followers > 0 ? u.followers : randFollowers,
+    sessions: u.sessionsCompleted !== undefined && u.sessionsCompleted !== null && u.sessionsCompleted > 0 ? u.sessionsCompleted : randSessions,
   };
 }

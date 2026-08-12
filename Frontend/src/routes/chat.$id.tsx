@@ -183,9 +183,14 @@ export default function ChatRoom() {
   };
 
   const isSessionBooked = () => {
+    if (!m || !m.name) return false;
     try {
       const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
-      return bookings.some((b: any) => b.with === m?.name || b.mentorId === m?.id);
+      return bookings.some((b: any) => {
+        const matchName = b.with && b.with.toLowerCase() === m.name.toLowerCase();
+        const matchId = b.mentorId && m.id && b.mentorId === m.id;
+        return !!(matchName || matchId);
+      });
     } catch (e) {
       return false;
     }
