@@ -491,6 +491,43 @@ export default function ChatRoom() {
     };
   }, [activeCallMode]);
 
+  const [screenStream, setScreenStream] = useState<any>(null);
+
+  useEffect(() => {
+    if (activeCallMode === 'screenshare') {
+      if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        navigator.mediaDevices.getDisplayMedia({ video: true })
+          .then((stream) => {
+            setScreenStream(stream);
+            stream.getVideoTracks()[0].onended = () => {
+              setActiveCallMode('none');
+              setScreenStream(null);
+            };
+          })
+          .catch((err) => {
+            console.warn('Display media capture error:', err);
+            setActiveCallMode('none');
+          });
+      } else {
+        alert('Screensharing is not supported by this browser.');
+        setActiveCallMode('none');
+      }
+    } else {
+      if (screenStream) {
+        screenStream.getTracks().forEach((track: any) => track.stop());
+        setScreenStream(null);
+      }
+    }
+  }, [activeCallMode]);
+
+  useEffect(() => {
+    return () => {
+      if (screenStream) {
+        screenStream.getTracks().forEach((track: any) => track.stop());
+      }
+    };
+  }, [screenStream]);
+
   const send = () => {
     if (!text.trim()) return;
     const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1029,31 +1066,29 @@ export default function ChatRoom() {
             </View>
 
             <View style={styles.sharedScreenContainer}>
-              <View style={styles.sharedScreenMock}>
-                <View style={styles.editorHeader}>
-                  <View style={styles.editorDotRow}>
-                    <View style={[styles.editorDot, { backgroundColor: '#ef4444' }]} />
-                    <View style={[styles.editorDot, { backgroundColor: '#f59e0b' }]} />
-                    <View style={[styles.editorDot, { backgroundColor: '#10b981' }]} />
-                  </View>
-                  <Text style={styles.editorFilename}>main.py</Text>
+              {screenStream ? (
+                <video
+                  ref={(ref) => {
+                    if (ref) {
+                      ref.srcObject = screenStream;
+                      ref.play().catch(e => console.warn(e));
+                    }
+                  }}
+                  autoPlay
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    backgroundColor: '#1E1E2F'
+                  }}
+                />
+              ) : (
+                <View style={[styles.sharedScreenMock, { justifyContent: 'center', alignItems: 'center' }]}>
+                  <ActivityIndicator size="large" color="#8b5cf6" />
+                  <Text style={{ color: '#8C8797', marginTop: 12 }}>Starting screen capture...</Text>
                 </View>
-                <ScrollView style={styles.codeTextContainer}>
-                  <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> tensorflow <Text style={styles.codeKeyword}>as</Text> tf</Text>
-                  <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> numpy <Text style={styles.codeKeyword}>as</Text> np</Text>
-                  <Text style={styles.codeText}></Text>
-                  <Text style={styles.codeComment}># Creating a simple neural network classifier</Text>
-                  <Text style={styles.codeText}>model = tf.keras.Sequential([</Text>
-                  <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>128</Text>, activation=<Text style={styles.codeString}>'relu'</Text>),</Text>
-                  <Text style={styles.codeText}>    tf.keras.layers.Dropout(<Text style={styles.codeNumber}>0.2</Text>),</Text>
-                  <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>10</Text>, activation=<Text style={styles.codeString}>'softmax'</Text>)</Text>
-                  <Text style={styles.codeText}>])</Text>
-                  <Text style={styles.codeText}></Text>
-                  <Text style={styles.codeText}>model.compile(optimizer=<Text style={styles.codeString}>'adam'</Text>,</Text>
-                  <Text style={styles.codeText}>              loss=<Text style={styles.codeString}>'sparse_categorical_crossentropy'</Text>,</Text>
-                  <Text style={styles.codeText}>              metrics=[<Text style={styles.codeString}>'accuracy'</Text>])</Text>
-                </ScrollView>
-              </View>
+              )}
 
               <View style={styles.pipVideo}>
                 <Image source={{ uri: m.avatar }} style={styles.pipAvatar} />
