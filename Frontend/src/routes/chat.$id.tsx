@@ -70,6 +70,99 @@ function VoiceMessagePlayer({ duration }: { duration: string }) {
   );
 }
 
+function CodePlaygroundBlock({ 
+  initialCode, 
+  language, 
+  msgIndex, 
+  msgs, 
+  setMsgs, 
+  id 
+}: { 
+  initialCode: string; 
+  language: string; 
+  msgIndex: number; 
+  msgs: any[]; 
+  setMsgs: any; 
+  id: string; 
+}) {
+  const [code, setCode] = useState(initialCode);
+  const [output, setOutput] = useState('');
+  const [running, setRunning] = useState(false);
+
+  const runCode = () => {
+    setRunning(true);
+    setOutput('Compiling and running code...');
+    
+    setTimeout(() => {
+      setRunning(false);
+      const lines = code.split('\n');
+      let printLines: string[] = [];
+      
+      lines.forEach((line) => {
+        const printMatch = line.match(/print\((['"])(.*?)\1\)/);
+        if (printMatch) {
+          printLines.push(printMatch[2]);
+        }
+        const printFMatch = line.match(/print\(f(['"])(.*?)\1\)/);
+        if (printFMatch) {
+          let cleanStr = printFMatch[2]
+            .replace('{skill1}', 'Python')
+            .replace('{skill2}', 'React Design');
+          printLines.push(cleanStr);
+        }
+      });
+      
+      if (printLines.length > 0) {
+        setOutput(printLines.join('\n') + '\n\n>>> Process finished with exit code 0');
+      } else {
+        setOutput('>>> Running main.py\nSwapping Python for React Design...\nMatch Success!\n\n>>> Process finished with exit code 0');
+      }
+    }, 1200);
+  };
+
+  return (
+    <View style={styles.playgroundCard}>
+      <View style={styles.playgroundHeader}>
+        <View style={styles.editorDots}>
+          <View style={[styles.editorDot, { backgroundColor: '#ef4444' }]} />
+          <View style={[styles.editorDot, { backgroundColor: '#f59e0b' }]} />
+          <View style={[styles.editorDot, { backgroundColor: '#22c55e' }]} />
+        </View>
+        <Text style={styles.playgroundLang}>{language.toUpperCase()} PLAYGROUND</Text>
+      </View>
+      
+      <TextInput
+        value={code}
+        onChangeText={(newVal) => {
+          setCode(newVal);
+          const updated = [...msgs];
+          updated[msgIndex] = { ...updated[msgIndex], code: newVal };
+          setMsgs(updated);
+          localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+        }}
+        multiline
+        style={styles.playgroundInput}
+      />
+      
+      <TouchableOpacity 
+        style={[styles.playgroundRunBtn, running && { opacity: 0.7 }]} 
+        onPress={runCode}
+        disabled={running}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.playgroundRunText}>{running ? 'Running...' : 'Run Code ▶'}</Text>
+      </TouchableOpacity>
+      
+      {output ? (
+        <View style={styles.consoleContainer}>
+          <Text style={styles.consoleTitle}>Console Output:</Text>
+          <Text style={styles.consoleOutput}>{output}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export default function ChatRoom() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
@@ -180,6 +273,21 @@ export default function ChatRoom() {
     setMsgs(updated);
     localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
     setShowAttachmentActions(false);
+  };
+
+  const sendCodePlaygroundMessage = () => {
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      from: 'me',
+      type: 'code_playground',
+      code: `def double_swap(skill1, skill2):\n    print(f"Swapping {skill1} for {skill2}...")\n    return "Match Success!"\n\ndouble_swap("Python", "React Design")`,
+      language: 'python',
+      consoleOutput: '',
+      time: timeNow
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
   };
 
   const isSessionBooked = () => {
@@ -554,6 +662,20 @@ export default function ChatRoom() {
             style={styles.attachmentActionCard} 
             onPress={() => {
               setShowAttachmentActions(false);
+              sendCodePlaygroundMessage();
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.attachmentIconBox, { backgroundColor: '#f0fdf4' }]}>
+              <Monitor color="#16a34a" size={20} />
+            </View>
+            <Text style={styles.attachmentLabel}>Playground</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.attachmentActionCard} 
+            onPress={() => {
+              setShowAttachmentActions(false);
               sendMockImage('https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&auto=format&fit=crop&q=80');
             }}
             activeOpacity={0.7}
@@ -829,6 +951,15 @@ export default function ChatRoom() {
                       <Text style={styles.fileMsgSize}>{msg.fileSize}</Text>
                     </View>
                   </View>
+                ) : msg.type === 'code_playground' ? (
+                  <CodePlaygroundBlock 
+                    initialCode={msg.code} 
+                    language={msg.language} 
+                    msgIndex={i}
+                    msgs={msgs}
+                    setMsgs={setMsgs}
+                    id={id}
+                  />
                 ) : (
                   <Text style={[styles.msgText, me ? styles.textMe : styles.textThem]}>{msg.text}</Text>
                 )}
@@ -1596,5 +1727,75 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#ef4444',
+  },
+  playgroundCard: {
+    width: 240,
+    backgroundColor: '#1E1E2F',
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  playgroundHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: 8,
+    marginBottom: 8,
+  },
+  editorDots: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  editorDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  playgroundLang: {
+    fontSize: 9,
+    color: '#8C8797',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  playgroundInput: {
+    fontSize: 11,
+    color: '#A9B2C3',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    padding: 8,
+    borderRadius: 8,
+    minHeight: 80,
+  },
+  playgroundRunBtn: {
+    backgroundColor: '#16a34a',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  playgroundRunText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  consoleContainer: {
+    marginTop: 8,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 8,
+    borderRadius: 8,
+  },
+  consoleTitle: {
+    fontSize: 9,
+    color: '#8c8797',
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  consoleOutput: {
+    fontSize: 10,
+    color: '#34d399',
+    lineHeight: 14,
   },
 });

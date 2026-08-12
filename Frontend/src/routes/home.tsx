@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image,
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy, Sparkles } from 'lucide-react-native';
+import { X } from 'lucide-react';
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
@@ -18,6 +19,11 @@ export default function Home() {
   const [mentorsList, setMentorsList] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  // Double-matching states
+  const [doubleMatches, setDoubleMatches] = useState<Mentor[]>([]);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [myProfile, setMyProfile] = useState<any>(null);
 
   React.useEffect(() => {
     let active = true;
@@ -48,6 +54,151 @@ export default function Home() {
       active = false;
     };
   }, [cat, search, sort]);
+
+  // Load my profile & find double matches
+  React.useEffect(() => {
+    try {
+      let profile = JSON.parse(localStorage.getItem('my_profile') || 'null');
+      if (!profile) {
+        profile = {
+          id: 'my-mock-user',
+          name: 'Alex',
+          expertise: 'Full-Stack Coding',
+          teaches: 2,
+          tags: ['React', 'Node', 'TypeScript'],
+          interests: ['Python', 'Figma', 'AI', 'Communication']
+        };
+        localStorage.setItem('my_profile', JSON.stringify(profile));
+      }
+      setMyProfile(profile);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!myProfile || mentorsList.length === 0) return;
+    
+    const myTeaches = myProfile.tags || ['React', 'TypeScript', 'Node'];
+    const myInterests = myProfile.interests || ['Python', 'Figma', 'AI', 'Communication'];
+
+    const matches = mentorsList.filter((m) => {
+      const peerTeachesInterest = m.tags.some((tag: string) => 
+        myInterests.some((interest: string) => tag.toLowerCase().includes(interest.toLowerCase()))
+      );
+
+      const peerLearningNeeds: Record<string, string[]> = {
+        'aria-shah': ['React', 'TypeScript'],
+        'leo-park': ['TypeScript', 'Node'],
+        'maya-iyer': ['Python', 'Figma'],
+        'noah-fields': ['React', 'Node'],
+        'sara-kim': ['Figma', 'React'],
+        'ravi-mehta': ['TypeScript', 'React']
+      };
+      
+      const needs = peerLearningNeeds[m.id] || ['React', 'TypeScript'];
+      const peerWantsMyTeaches = needs.some((n: string) => 
+        myTeaches.some((t: string) => t.toLowerCase().includes(n.toLowerCase()))
+      );
+
+      return peerTeachesInterest && peerWantsMyTeaches;
+    });
+
+    setDoubleMatches(matches);
+  }, [myProfile, mentorsList]);
+
+  const renderDoubleMatchBanner = () => {
+    if (doubleMatches.length === 0) return null;
+    return (
+      <View style={styles.matchBannerContainer}>
+        <View style={styles.matchBannerHeader}>
+          <Sparkles color="#ffffff" size={16} fill="#ffffff" />
+          <Text style={styles.matchBannerTitle}>Perfect Double-Matches Found!</Text>
+        </View>
+        <Text style={styles.matchBannerText}>
+          We found {doubleMatches.length} peers who want to learn your skills and can teach yours.
+        </Text>
+        <TouchableOpacity 
+          style={styles.matchBannerBtn} 
+          onPress={() => setShowMatchModal(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.matchBannerBtnText}>View Double-Matches</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderDoubleMatchModal = () => {
+    if (!showMatchModal) return null;
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={styles.matchModalCard}>
+          <View style={styles.modalHeaderRow}>
+            <Text style={styles.modalTitleText}>✨ Smart Double-Matches</Text>
+            <TouchableOpacity onPress={() => setShowMatchModal(false)} style={styles.closeBtn}>
+              <X color="#342F3D" size={20} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+            {doubleMatches.map((peer) => {
+              const myTeaches = myProfile?.tags || ['React', 'Node'];
+              const peerTeaches = peer.tags;
+              
+              return (
+                <View key={peer.id} style={styles.matchPeerCard}>
+                  <View style={styles.matchCardTop}>
+                    <Image source={{ uri: peer.avatar }} style={styles.matchAvatar} />
+                    <View style={styles.matchMeta}>
+                      <Text style={styles.matchPeerName}>{peer.name}</Text>
+                      <Text style={styles.matchExpertise}>{peer.expertise}</Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.matchSplitContainer}>
+                    <View style={styles.matchSplitCol}>
+                      <Text style={styles.splitLabel}>You Learn From Them:</Text>
+                      <View style={styles.splitTagsRow}>
+                        {peerTeaches.slice(0, 2).map((t) => (
+                          <View key={t} style={[styles.splitTag, styles.learnTag]}>
+                            <Text style={styles.splitTagText}>{t}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                    
+                    <View style={styles.matchSplitCol}>
+                      <Text style={styles.splitLabel}>They Learn From You:</Text>
+                      <View style={styles.splitTagsRow}>
+                        {myTeaches.slice(0, 2).map((t) => (
+                          <View key={t} style={[styles.splitTag, styles.teachTag]}>
+                            <Text style={styles.splitTagText}>{t}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                  
+                  <TouchableOpacity
+                    style={styles.startSwapBtn}
+                    onPress={() => {
+                      setShowMatchModal(false);
+                      navigation.navigate('ChatDetails', { id: peer.id });
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <MessageCircle color="#ffffff" size={16} style={{ marginRight: 6 }} />
+                    <Text style={styles.startSwapBtnText}>Start Skill Swap</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -92,6 +243,9 @@ export default function Home() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Double Match Recommendation Banner */}
+      {renderDoubleMatchBanner()}
 
       {/* Sorting Selector */}
       <View style={styles.sortWrapper}>
@@ -180,6 +334,7 @@ export default function Home() {
           mentorsList.map((m) => <MentorCard key={m.id} m={m} />)
         )}
       </View>
+      {renderDoubleMatchModal()}
     </ScrollView>
   );
 }
@@ -719,5 +874,162 @@ const styles = StyleSheet.create({
   },
   bookButtonDisabled: {
     backgroundColor: '#E8E5EC',
+  },
+  matchBannerContainer: {
+    backgroundColor: '#8b5cf6',
+    borderRadius: 24,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  matchBannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  matchBannerTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  matchBannerText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.85)',
+    lineHeight: 16,
+    marginBottom: 16,
+  },
+  matchBannerBtn: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  matchBannerBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8b5cf6',
+  },
+  matchModalCard: {
+    width: '92%',
+    maxHeight: '80%',
+    backgroundColor: '#ffffff',
+    borderRadius: 28,
+    padding: 24,
+    shadowColor: 'rgba(94, 84, 112, 0.2)',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 1,
+    shadowRadius: 36,
+    elevation: 8,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  modalTitleText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FAF9FC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalScroll: {
+    flexGrow: 0,
+  },
+  matchPeerCard: {
+    backgroundColor: '#FAF9FC',
+    borderWidth: 1,
+    borderColor: '#F3F0F6',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+  },
+  matchCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  matchAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: '#E8E5EC',
+  },
+  matchMeta: {
+    flex: 1,
+  },
+  matchPeerName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  matchExpertise: {
+    fontSize: 11,
+    color: '#8C8797',
+    marginTop: 2,
+  },
+  matchSplitContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  matchSplitCol: {
+    flex: 1,
+  },
+  splitLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#8C8797',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  splitTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  splitTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  learnTag: {
+    backgroundColor: 'rgba(34, 197, 94, 0.08)',
+  },
+  teachTag: {
+    backgroundColor: 'rgba(139, 92, 246, 0.08)',
+  },
+  splitTagText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#5E5470',
+  },
+  startSwapBtn: {
+    backgroundColor: '#8b5cf6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  startSwapBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

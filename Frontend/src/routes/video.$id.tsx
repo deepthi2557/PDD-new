@@ -162,6 +162,34 @@ export default function VideoRoom() {
     ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
+  const shareWhiteboardSnapshot = () => {
+    if (!canvasRef.current || !id) return;
+    try {
+      const snapshotUrl = canvasRef.current.toDataURL('image/png');
+      const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const localMsgsStr = localStorage.getItem(`chat_msgs_${id}`);
+      const chatMsgs = localMsgsStr ? JSON.parse(localMsgsStr) : [];
+      
+      const snapshotMsg = {
+        from: 'me',
+        type: 'image',
+        mediaUrl: snapshotUrl,
+        time: timeNow,
+        caption: '🎨 Shared a snapshot of the whiteboard'
+      };
+      
+      const updated = [...chatMsgs, snapshotMsg];
+      localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+      setMsgs(updated);
+      
+      alert('Whiteboard snapshot shared successfully to chat!');
+    } catch (err) {
+      console.error('Failed to export canvas:', err);
+      alert('Could not share canvas snapshot.');
+    }
+  };
+
   const submitReview = () => {
     setSubmitted(true);
     setTimeout(() => {
@@ -257,6 +285,15 @@ export default function VideoRoom() {
                 
                 <TouchableOpacity onPress={clearCanvas} style={styles.toolBtn}>
                   <RotateCcw color="#5E5470" size={16} />
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  onPress={shareWhiteboardSnapshot} 
+                  style={[styles.toolBtn, styles.shareBtn]}
+                  activeOpacity={0.8}
+                >
+                  <Send color="#ffffff" size={12} style={{ marginRight: 6 }} />
+                  <Text style={styles.shareBtnText}>Share to Chat</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -866,5 +903,18 @@ const styles = StyleSheet.create({
   },
   timeThem: {
     color: '#8C8797',
+  },
+  shareBtn: {
+    backgroundColor: '#8b5cf6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  shareBtnText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
