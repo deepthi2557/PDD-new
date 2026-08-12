@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Modal, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from 'lucide-react-native';
+import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2, X } from 'lucide-react-native';
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
+import { supabase } from '../lib/supabase';
 
 export const Route = createFileRoute('/profile/$id')({
   component: Profile,
@@ -36,6 +37,116 @@ export default function Profile() {
 
   const [following, setFollowing] = useState(false);
   const [localFollowers, setLocalFollowers] = useState(0);
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editExpertise, setEditExpertise] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editLevel, setEditLevel] = useState('Intermediate');
+  const [editMode, setEditMode] = useState('Online');
+  const [editTagsStr, setEditTagsStr] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const isOwnProfile = currentUserId && m && currentUserId === m.id;
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (m) {
+      setEditName(m.name || '');
+      setEditExpertise(m.expertise || '');
+      setEditBio(m.bio || '');
+      setEditLevel(m.level || 'Intermediate');
+      setEditMode(m.mode || 'Online');
+      setEditTagsStr(m.tags ? m.tags.join(', ') : '');
+    }
+  }, [m]);
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim() || !editExpertise.trim() || !editTagsStr.trim()) {
+      setEditError('Name, Expertise and Skills are required.');
+      return;
+    }
+    setSavingProfile(true);
+    setEditError('');
+
+    try {
+      const skillsArray = editTagsStr.split(',').map(s => s.trim()).filter(Boolean);
+      
+      // 1. Update Supabase users
+      const { error: userError } = await supabase
+        .from('users')
+        .update({
+          name: editName.trim(),
+          expertise: editExpertise.trim(),
+          bio: editBio.trim(),
+          level: editLevel,
+          mode: editMode,
+          teaches: skillsArray.length
+        })
+        .eq('id', m!.id);
+
+      if (userError) throw userError;
+
+      // 2. Update Supabase user_tags
+      await supabase.from('user_tags').delete().eq('user_id', m!.id);
+      const tagsToInsert = skillsArray.map(tag => ({
+        user_id: m!.id,
+        tag: tag
+      }));
+      await supabase.from('user_tags').insert(tagsToInsert);
+
+      // 3. Update Spring Boot Backend PUT endpoint
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (token) {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/mentors/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: editName.trim(),
+            expertise: editExpertise.trim(),
+            bio: editBio.trim(),
+            level: editLevel,
+            mode: editMode,
+            teaches: skillsArray.length,
+            avatarUrl: m!.avatar || ''
+          })
+        });
+      }
+
+      // Update local state to reflect change immediately
+      setM(prev => prev ? {
+        ...prev,
+        name: editName.trim(),
+        expertise: editExpertise.trim(),
+        bio: editBio.trim(),
+        level: editLevel,
+        mode: editMode,
+        tags: skillsArray,
+        teaches: skillsArray.length
+      } : null);
+
+      setEditModalVisible(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (err: any) {
+      console.error(err);
+      setEditError(err.message || 'Failed to save changes.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   React.useEffect(() => {
     if (!id) return;
@@ -134,39 +245,51 @@ export default function Profile() {
 
           {/* Action Row */}
           <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={styles.chatBtn}
-              onPress={() => navigation.navigate('ChatDetails', { id: m.id })}
-              activeOpacity={0.7}
-            >
-              <MessageCircle color="#342F3D" size={16} style={styles.btnIcon} />
-              <Text style={styles.chatBtnText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.bookBtn}
-              onPress={() => navigation.navigate('Book', { id: m.id })}
-              activeOpacity={0.7}
-            >
-              <CalendarPlus color="#ffffff" size={16} style={styles.btnIcon} />
-              <Text style={styles.bookBtnText}>Book</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.followBtn, following && styles.followBtnActive]}
-              onPress={() => {
-                if (following) {
-                  setLocalFollowers((prev) => prev - 1);
-                } else {
-                  setLocalFollowers((prev) => prev + 1);
-                }
-                setFollowing(!following);
-              }}
-              activeOpacity={0.7}
-            >
-              <UserPlus color={following ? '#ffffff' : '#342F3D'} size={16} style={styles.btnIcon} />
-              <Text style={[styles.followBtnText, following && styles.followBtnTextActive]}>
-                {following ? 'Following' : 'Follow'}
-              </Text>
-            </TouchableOpacity>
+            {isOwnProfile ? (
+              <TouchableOpacity
+                style={styles.editProfileBtn}
+                onPress={() => setEditModalVisible(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.editProfileBtnText}>Edit Profile Details</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={styles.chatBtn}
+                  onPress={() => navigation.navigate('ChatDetails', { id: m.id })}
+                  activeOpacity={0.7}
+                >
+                  <MessageCircle color="#342F3D" size={16} style={styles.btnIcon} />
+                  <Text style={styles.chatBtnText}>Chat</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.bookBtn}
+                  onPress={() => navigation.navigate('Book', { id: m.id })}
+                  activeOpacity={0.7}
+                >
+                  <CalendarPlus color="#ffffff" size={16} style={styles.btnIcon} />
+                  <Text style={styles.bookBtnText}>Book</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.followBtn, following && styles.followBtnActive]}
+                  onPress={() => {
+                    if (following) {
+                      setLocalFollowers((prev) => prev - 1);
+                    } else {
+                      setLocalFollowers((prev) => prev + 1);
+                    }
+                    setFollowing(!following);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <UserPlus color={following ? '#ffffff' : '#342F3D'} size={16} style={styles.btnIcon} />
+                  <Text style={[styles.followBtnText, following && styles.followBtnTextActive]}>
+                    {following ? 'Following' : 'Follow'}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
 
@@ -321,6 +444,102 @@ export default function Profile() {
           </View>
         </View>
       )}
+
+      {/* Edit Profile Modal */}
+      <Modal visible={editModalVisible} animationType="slide">
+        <ScrollView contentContainerStyle={styles.editModalContainer} showsVerticalScrollIndicator={false}>
+          <View style={styles.editModalHeader}>
+            <Text style={styles.editModalTitle}>Edit Profile</Text>
+            <TouchableOpacity onPress={() => setEditModalVisible(false)} style={styles.editModalClose}>
+              <X color="#342F3D" size={24} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.editForm}>
+            <Text style={styles.inputLabel}>Full Name</Text>
+            <TextInput
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Full Name"
+              placeholderTextColor="#8C8797"
+              style={styles.formInput}
+            />
+
+            <Text style={styles.inputLabel}>Expertise Header</Text>
+            <TextInput
+              value={editExpertise}
+              onChangeText={setEditExpertise}
+              placeholder="e.g. Full-Stack Developer"
+              placeholderTextColor="#8C8797"
+              style={styles.formInput}
+            />
+
+            <Text style={styles.inputLabel}>Bio</Text>
+            <TextInput
+              value={editBio}
+              onChangeText={setEditBio}
+              placeholder="Tell others about yourself..."
+              placeholderTextColor="#8C8797"
+              multiline
+              numberOfLines={4}
+              style={[styles.formInput, { height: 100, textAlignVertical: 'top' }]}
+            />
+
+            <Text style={styles.inputLabel}>Experience Level</Text>
+            <View style={styles.pickerRow}>
+              {['Beginner Friendly', 'Intermediate', 'Expert'].map((lvl) => (
+                <TouchableOpacity
+                  key={lvl}
+                  onPress={() => setEditLevel(lvl)}
+                  style={[styles.pickerBtn, editLevel === lvl && styles.pickerBtnActive]}
+                >
+                  <Text style={[styles.pickerBtnText, editLevel === lvl && styles.pickerBtnTextActive]}>
+                    {lvl}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>Mentorship Mode</Text>
+            <View style={styles.pickerRow}>
+              {['Online', 'Offline', 'Hybrid'].map((md) => (
+                <TouchableOpacity
+                  key={md}
+                  onPress={() => setEditMode(md)}
+                  style={[styles.pickerBtn, editMode === md && styles.pickerBtnActive]}
+                >
+                  <Text style={[styles.pickerBtnText, editMode === md && styles.pickerBtnTextActive]}>
+                    {md}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>Teaching Skills (comma-separated)</Text>
+            <TextInput
+              value={editTagsStr}
+              onChangeText={setEditTagsStr}
+              placeholder="React, TypeScript, Node.js"
+              placeholderTextColor="#8C8797"
+              style={styles.formInput}
+            />
+
+            {editError ? <Text style={styles.editErrorText}>{editError}</Text> : null}
+
+            <TouchableOpacity 
+              style={[styles.saveProfileBtn, savingProfile && { opacity: 0.7 }]}
+              onPress={handleSaveProfile}
+              disabled={savingProfile}
+            >
+              {savingProfile ? (
+                <ActivityIndicator color="#ffffff" size="small" />
+              ) : (
+                <Text style={styles.saveProfileBtnText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Modal>
     </ScrollView>
   );
 }
@@ -836,5 +1055,111 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
+  },
+  editProfileBtn: {
+    flex: 1,
+    backgroundColor: '#8b5cf6',
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(139, 92, 246, 0.25)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  editProfileBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  editModalContainer: {
+    padding: 24,
+    backgroundColor: '#FAF9FC',
+  },
+  editModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    paddingTop: 16,
+  },
+  editModalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#342F3D',
+  },
+  editModalClose: {
+    padding: 8,
+  },
+  editForm: {
+    gap: 16,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#5E5470',
+    textTransform: 'uppercase',
+    letterSpacing: 1.0,
+    marginBottom: -4,
+  },
+  formInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 14,
+    fontSize: 14,
+    color: '#342F3D',
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pickerBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerBtnActive: {
+    backgroundColor: '#8b5cf6',
+    borderColor: '#8b5cf6',
+  },
+  pickerBtnText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#5E5470',
+  },
+  pickerBtnTextActive: {
+    color: '#ffffff',
+  },
+  editErrorText: {
+    color: '#ef4444',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  saveProfileBtn: {
+    backgroundColor: '#8b5cf6',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    shadowColor: 'rgba(139, 92, 246, 0.35)',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  saveProfileBtnText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

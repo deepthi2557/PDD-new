@@ -4,7 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy, Sparkles } from 'lucide-react-native';
 import { X } from 'lucide-react';
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
-import { fetchMentors } from '../lib/api';
+import { fetchMentors, fetchMentorById } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/home')({
@@ -19,6 +20,26 @@ export default function Home() {
   const [mentorsList, setMentorsList] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        fetchMentorById(user.id)
+          .then((profileData) => {
+            setCurrentUser(profileData);
+          })
+          .catch(() => {
+            setCurrentUser({
+              id: user.id,
+              name: user.user_metadata?.full_name || 'Learner',
+              avatar: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/png?seed=${user.email}`
+            });
+          });
+      }
+    });
+  }, []);
 
   // Double-matching states
   const [doubleMatches, setDoubleMatches] = useState<Mentor[]>([]);
@@ -205,17 +226,28 @@ export default function Home() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerWelcome}>Hi, Alex 👋</Text>
+          <Text style={styles.headerWelcome}>Hi, {currentUser ? currentUser.name : 'Learner'} 👋</Text>
           <Text style={styles.headerTitle}>Explore Skills</Text>
         </View>
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => navigation.navigate('Notifications')}
-          activeOpacity={0.7}
-        >
-          <Bell color="#342F3D" size={20} />
-          <View style={styles.notificationBadge} />
-        </TouchableOpacity>
+        <View style={styles.headerRightActions}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => navigation.navigate('Notifications')}
+            activeOpacity={0.7}
+          >
+            <Bell color="#342F3D" size={20} />
+            <View style={styles.notificationBadge} />
+          </TouchableOpacity>
+          {currentUser && (
+            <TouchableOpacity
+              style={styles.myProfileButton}
+              onPress={() => navigation.navigate('ProfileDetails', { id: currentUser.id })}
+              activeOpacity={0.7}
+            >
+              <Image source={{ uri: currentUser.avatar }} style={styles.myProfileAvatar} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Search Input */}
@@ -1031,5 +1063,22 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 13,
     fontWeight: '700',
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  myProfileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#8b5cf6',
+    overflow: 'hidden',
+  },
+  myProfileAvatar: {
+    width: '100%',
+    height: '100%',
   },
 });
