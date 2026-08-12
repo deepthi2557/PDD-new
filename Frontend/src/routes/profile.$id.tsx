@@ -6,6 +6,7 @@ import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
+import { VITE_API_URL } from '../lib/env';
 
 export const Route = createFileRoute('/profile/$id')({
   component: Profile,
@@ -108,7 +109,7 @@ export default function Profile() {
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
       if (token) {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/mentors/profile`, {
+        await fetch(`${VITE_API_URL}/api/mentors/profile`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

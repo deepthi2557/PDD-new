@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
+import { VITE_API_URL } from '../lib/env';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/book')({
@@ -109,7 +110,7 @@ export default function Book() {
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
       if (token) {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
+        await fetch(`${VITE_API_URL}/api/bookings`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

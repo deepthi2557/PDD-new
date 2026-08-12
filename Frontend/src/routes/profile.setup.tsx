@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ChevronDown, ArrowRight, BookOpen, CheckCircle, Plus, X } from 'lucide-react-native';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
+import { VITE_API_URL } from '../lib/env';
 
 export const Route = createFileRoute('/profile/setup')({
   component: ProfileSetup,
@@ -140,7 +141,7 @@ export default function ProfileSetup() {
         const session = await supabase.auth.getSession();
         const token = session.data.session?.access_token;
         if (token) {
-          await fetch(`${import.meta.env.VITE_API_URL}/api/mentors/profile`, {
+          await fetch(`${VITE_API_URL}/api/mentors/profile`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
