@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar } from 'lucide-react-native';
@@ -740,182 +740,7 @@ export default function ChatRoom() {
     );
   }
 
-  if (activeCallMode === 'voice') {
-    return (
-      <View style={styles.callOverlay}>
-        <View style={styles.callContainer}>
-          <View style={styles.callHeader}>
-            <TouchableOpacity 
-              onPress={() => {
-                setActiveCallMode('none');
-                setShowCallChat(false);
-              }}
-              style={styles.overlayBackButton}
-              activeOpacity={0.7}
-            >
-              <ArrowLeft color="#8C8797" size={14} />
-              <Text style={styles.overlayBackText}>Back to Chat</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.callStateText}>Secure Voice Call</Text>
-            <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
-          </View>
 
-          <View style={styles.callAvatarSection}>
-            <View style={styles.pulseContainer}>
-              <View style={[styles.pulseRing, styles.pulse1]} />
-              <View style={[styles.pulseRing, styles.pulse2]} />
-              <Image source={{ uri: m.avatar }} style={styles.callAvatar} />
-            </View>
-            <Text style={styles.callName}>{m.name}</Text>
-            <Text style={styles.callStatus}>Connected</Text>
-          </View>
-
-          <View style={styles.callControls}>
-            <TouchableOpacity 
-              style={[styles.controlCircle, isMuted ? styles.controlCircleActive : styles.controlCircleInactive]}
-              onPress={() => setIsMuted(!isMuted)}
-              activeOpacity={0.7}
-            >
-              <MicOff color={isMuted ? '#ffffff' : '#5E5470'} size={22} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.controlCircle, showCallChat ? styles.controlCircleActive : styles.controlCircleInactive]}
-              onPress={() => setShowCallChat(!showCallChat)}
-              activeOpacity={0.7}
-            >
-              <MessageSquare color={showCallChat ? '#ffffff' : '#5E5470'} size={22} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.controlCircle, isSpeakerOn ? styles.controlCircleActive : styles.controlCircleInactive]}
-              onPress={() => setIsSpeakerOn(!isSpeakerOn)}
-              activeOpacity={0.7}
-            >
-              <Volume2 color={isSpeakerOn ? '#ffffff' : '#5E5470'} size={22} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.controlCircle, styles.callHangup]}
-              onPress={() => {
-                setActiveCallMode('none');
-                setShowCallChat(false);
-              }}
-              activeOpacity={0.7}
-            >
-              <PhoneOff color="#ffffff" size={22} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {showCallChat && renderCallChatDrawer()}
-      </View>
-    );
-  }
-
-  if (activeCallMode === 'screenshare') {
-    return (
-      <View style={styles.callOverlay}>
-        <View style={styles.callContainer}>
-          <View style={styles.callHeader}>
-            <TouchableOpacity 
-              onPress={() => {
-                setActiveCallMode('none');
-                setShowCallChat(false);
-              }}
-              style={styles.overlayBackButton}
-              activeOpacity={0.7}
-            >
-              <ArrowLeft color="#8C8797" size={14} />
-              <Text style={styles.overlayBackText}>Back to Chat</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.callStateText}>Screen Sharing Session</Text>
-            <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
-            
-            <TouchableOpacity 
-              onPress={() => {
-                setActiveCallMode('none');
-                setShowCallChat(false);
-              }}
-              style={styles.topEndShareBtn}
-              activeOpacity={0.8}
-            >
-              <PhoneOff color="#ffffff" size={12} style={{ marginRight: 6 }} />
-              <Text style={styles.topEndShareText}>End Screen Share</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.sharedScreenContainer}>
-            <View style={styles.sharedScreenMock}>
-              <View style={styles.editorHeader}>
-                <View style={styles.editorDotRow}>
-                  <View style={[styles.editorDot, { backgroundColor: '#ef4444' }]} />
-                  <View style={[styles.editorDot, { backgroundColor: '#f59e0b' }]} />
-                  <View style={[styles.editorDot, { backgroundColor: '#10b981' }]} />
-                </View>
-                <Text style={styles.editorFilename}>main.py</Text>
-              </View>
-              <ScrollView style={styles.codeTextContainer}>
-                <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> tensorflow <Text style={styles.codeKeyword}>as</Text> tf</Text>
-                <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> numpy <Text style={styles.codeKeyword}>as</Text> np</Text>
-                <Text style={styles.codeText}></Text>
-                <Text style={styles.codeComment}># Creating a simple neural network classifier</Text>
-                <Text style={styles.codeText}>model = tf.keras.Sequential([</Text>
-                <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>128</Text>, activation=<Text style={styles.codeString}>'relu'</Text>),</Text>
-                <Text style={styles.codeText}>    tf.keras.layers.Dropout(<Text style={styles.codeNumber}>0.2</Text>),</Text>
-                <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>10</Text>, activation=<Text style={styles.codeString}>'softmax'</Text>)</Text>
-                <Text style={styles.codeText}>])</Text>
-                <Text style={styles.codeText}></Text>
-                <Text style={styles.codeText}>model.compile(optimizer=<Text style={styles.codeString}>'adam'</Text>,</Text>
-                <Text style={styles.codeText}>              loss=<Text style={styles.codeString}>'sparse_categorical_crossentropy'</Text>,</Text>
-                <Text style={styles.codeText}>              metrics=[<Text style={styles.codeString}>'accuracy'</Text>])</Text>
-              </ScrollView>
-            </View>
-
-            <View style={styles.pipVideo}>
-              <Image source={{ uri: m.avatar }} style={styles.pipAvatar} />
-              <View style={styles.pipNameBadge}>
-                <Text style={styles.pipNameText}>{m.name}</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.callControls}>
-            <TouchableOpacity 
-              style={[styles.controlCircle, isMuted ? styles.controlCircleActive : styles.controlCircleInactive]}
-              onPress={() => setIsMuted(!isMuted)}
-              activeOpacity={0.7}
-            >
-              <MicOff color={isMuted ? '#ffffff' : '#5E5470'} size={22} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.controlCircle, showCallChat ? styles.controlCircleActive : styles.controlCircleInactive]}
-              onPress={() => setShowCallChat(!showCallChat)}
-              activeOpacity={0.7}
-            >
-              <MessageSquare color={showCallChat ? '#ffffff' : '#5E5470'} size={22} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.controlCircle, styles.callHangup]}
-              onPress={() => {
-                setActiveCallMode('none');
-                setShowCallChat(false);
-              }}
-              activeOpacity={0.7}
-            >
-              <PhoneOff color="#ffffff" size={22} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {showCallChat && renderCallChatDrawer()}
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -1096,6 +921,181 @@ export default function ChatRoom() {
 
       {/* Outgoing Call ringing dialog overlay */}
       {renderOutgoingCallOverlay()}
+
+      {/* Voice Call Overlay Modal */}
+      <Modal visible={activeCallMode === 'voice'} animationType="slide">
+        <View style={styles.callOverlay}>
+          <View style={styles.callContainer}>
+            <View style={styles.callHeader}>
+              <TouchableOpacity 
+                onPress={() => {
+                  setActiveCallMode('none');
+                  setShowCallChat(false);
+                }}
+                style={styles.overlayBackButton}
+                activeOpacity={0.7}
+              >
+                <ArrowLeft color="#8C8797" size={14} />
+                <Text style={styles.overlayBackText}>Back to Chat</Text>
+              </TouchableOpacity>
+              
+              <Text style={styles.callStateText}>Secure Voice Call</Text>
+              <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
+            </View>
+
+            <View style={styles.callAvatarSection}>
+              <View style={styles.pulseContainer}>
+                <View style={[styles.pulseRing, styles.pulse1]} />
+                <View style={[styles.pulseRing, styles.pulse2]} />
+                <Image source={{ uri: m.avatar }} style={styles.callAvatar} />
+              </View>
+              <Text style={styles.callName}>{m.name}</Text>
+              <Text style={styles.callStatus}>Connected</Text>
+            </View>
+
+            <View style={styles.callControls}>
+              <TouchableOpacity 
+                style={[styles.controlCircle, isMuted ? styles.controlCircleActive : styles.controlCircleInactive]}
+                onPress={() => setIsMuted(!isMuted)}
+                activeOpacity={0.7}
+              >
+                <MicOff color={isMuted ? '#ffffff' : '#5E5470'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.controlCircle, showCallChat ? styles.controlCircleActive : styles.controlCircleInactive]}
+                onPress={() => setShowCallChat(!showCallChat)}
+                activeOpacity={0.7}
+              >
+                <MessageSquare color={showCallChat ? '#ffffff' : '#5E5470'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.controlCircle, isSpeakerOn ? styles.controlCircleActive : styles.controlCircleInactive]}
+                onPress={() => setIsSpeakerOn(!isSpeakerOn)}
+                activeOpacity={0.7}
+              >
+                <Volume2 color={isSpeakerOn ? '#ffffff' : '#5E5470'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.controlCircle, styles.callHangup]}
+                onPress={() => {
+                  setActiveCallMode('none');
+                  setShowCallChat(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <PhoneOff color="#ffffff" size={22} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {showCallChat && renderCallChatDrawer()}
+        </View>
+      </Modal>
+
+      {/* Screenshare Overlay Modal */}
+      <Modal visible={activeCallMode === 'screenshare'} animationType="slide">
+        <View style={styles.callOverlay}>
+          <View style={styles.callContainer}>
+            <View style={styles.callHeader}>
+              <TouchableOpacity 
+                onPress={() => {
+                  setActiveCallMode('none');
+                  setShowCallChat(false);
+                }}
+                style={styles.overlayBackButton}
+                activeOpacity={0.7}
+              >
+                <ArrowLeft color="#8C8797" size={14} />
+                <Text style={styles.overlayBackText}>Back to Chat</Text>
+              </TouchableOpacity>
+              
+              <Text style={styles.callStateText}>Screen Sharing Session</Text>
+              <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
+              
+              <TouchableOpacity 
+                onPress={() => {
+                  setActiveCallMode('none');
+                  setShowCallChat(false);
+                }}
+                style={styles.topEndShareBtn}
+                activeOpacity={0.8}
+              >
+                <PhoneOff color="#ffffff" size={12} style={{ marginRight: 6 }} />
+                <Text style={styles.topEndShareText}>End Screen Share</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.sharedScreenContainer}>
+              <View style={styles.sharedScreenMock}>
+                <View style={styles.editorHeader}>
+                  <View style={styles.editorDotRow}>
+                    <View style={[styles.editorDot, { backgroundColor: '#ef4444' }]} />
+                    <View style={[styles.editorDot, { backgroundColor: '#f59e0b' }]} />
+                    <View style={[styles.editorDot, { backgroundColor: '#10b981' }]} />
+                  </View>
+                  <Text style={styles.editorFilename}>main.py</Text>
+                </View>
+                <ScrollView style={styles.codeTextContainer}>
+                  <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> tensorflow <Text style={styles.codeKeyword}>as</Text> tf</Text>
+                  <Text style={styles.codeText}><Text style={styles.codeKeyword}>import</Text> numpy <Text style={styles.codeKeyword}>as</Text> np</Text>
+                  <Text style={styles.codeText}></Text>
+                  <Text style={styles.codeComment}># Creating a simple neural network classifier</Text>
+                  <Text style={styles.codeText}>model = tf.keras.Sequential([</Text>
+                  <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>128</Text>, activation=<Text style={styles.codeString}>'relu'</Text>),</Text>
+                  <Text style={styles.codeText}>    tf.keras.layers.Dropout(<Text style={styles.codeNumber}>0.2</Text>),</Text>
+                  <Text style={styles.codeText}>    tf.keras.layers.Dense(<Text style={styles.codeNumber}>10</Text>, activation=<Text style={styles.codeString}>'softmax'</Text>)</Text>
+                  <Text style={styles.codeText}>])</Text>
+                  <Text style={styles.codeText}></Text>
+                  <Text style={styles.codeText}>model.compile(optimizer=<Text style={styles.codeString}>'adam'</Text>,</Text>
+                  <Text style={styles.codeText}>              loss=<Text style={styles.codeString}>'sparse_categorical_crossentropy'</Text>,</Text>
+                  <Text style={styles.codeText}>              metrics=[<Text style={styles.codeString}>'accuracy'</Text>])</Text>
+                </ScrollView>
+              </View>
+
+              <View style={styles.pipVideo}>
+                <Image source={{ uri: m.avatar }} style={styles.pipAvatar} />
+                <View style={styles.pipNameBadge}>
+                  <Text style={styles.pipNameText}>{m.name}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.callControls}>
+              <TouchableOpacity 
+                style={[styles.controlCircle, isMuted ? styles.controlCircleActive : styles.controlCircleInactive]}
+                onPress={() => setIsMuted(!isMuted)}
+                activeOpacity={0.7}
+              >
+                <MicOff color={isMuted ? '#ffffff' : '#5E5470'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.controlCircle, showCallChat ? styles.controlCircleActive : styles.controlCircleInactive]}
+                onPress={() => setShowCallChat(!showCallChat)}
+                activeOpacity={0.7}
+              >
+                <MessageSquare color={showCallChat ? '#ffffff' : '#5E5470'} size={22} />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.controlCircle, styles.callHangup]}
+                onPress={() => {
+                  setActiveCallMode('none');
+                  setShowCallChat(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <PhoneOff color="#ffffff" size={22} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {showCallChat && renderCallChatDrawer()}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1275,13 +1275,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   callOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    width: '100%',
+    height: '100%',
     backgroundColor: '#FAF9FC',
-    zIndex: 100,
     flexDirection: 'row',
   },
   callContainer: {
