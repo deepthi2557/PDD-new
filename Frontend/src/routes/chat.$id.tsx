@@ -745,6 +745,18 @@ export default function ChatRoom() {
       <View style={styles.callOverlay}>
         <View style={styles.callContainer}>
           <View style={styles.callHeader}>
+            <TouchableOpacity 
+              onPress={() => {
+                setActiveCallMode('none');
+                setShowCallChat(false);
+              }}
+              style={styles.overlayBackButton}
+              activeOpacity={0.7}
+            >
+              <ArrowLeft color="#8C8797" size={14} />
+              <Text style={styles.overlayBackText}>Back to Chat</Text>
+            </TouchableOpacity>
+            
             <Text style={styles.callStateText}>Secure Voice Call</Text>
             <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
           </View>
@@ -807,8 +819,32 @@ export default function ChatRoom() {
       <View style={styles.callOverlay}>
         <View style={styles.callContainer}>
           <View style={styles.callHeader}>
+            <TouchableOpacity 
+              onPress={() => {
+                setActiveCallMode('none');
+                setShowCallChat(false);
+              }}
+              style={styles.overlayBackButton}
+              activeOpacity={0.7}
+            >
+              <ArrowLeft color="#8C8797" size={14} />
+              <Text style={styles.overlayBackText}>Back to Chat</Text>
+            </TouchableOpacity>
+            
             <Text style={styles.callStateText}>Screen Sharing Session</Text>
             <Text style={styles.callTimer}>{formatDuration(callDuration)}</Text>
+            
+            <TouchableOpacity 
+              onPress={() => {
+                setActiveCallMode('none');
+                setShowCallChat(false);
+              }}
+              style={styles.topEndShareBtn}
+              activeOpacity={0.8}
+            >
+              <PhoneOff color="#ffffff" size={12} style={{ marginRight: 6 }} />
+              <Text style={styles.topEndShareText}>End Screen Share</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.sharedScreenContainer}>
@@ -1239,7 +1275,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   callOverlay: {
-    position: 'absolute',
+    position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
@@ -1262,6 +1298,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 10,
+    position: 'relative',
   },
   callStateText: {
     fontSize: 12,
@@ -1797,5 +1834,33 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#34d399',
     lineHeight: 14,
+  },
+  topEndShareBtn: {
+    backgroundColor: '#ef4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 99,
+    marginTop: 8,
+  },
+  topEndShareText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  overlayBackButton: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+  },
+  overlayBackText: {
+    fontSize: 12,
+    color: '#8C8797',
+    fontWeight: '600',
   },
 });
