@@ -1,0 +1,16 @@
+backend
+Frontend/node_modules
+Frontend/android
+Frontend/ios
+Frontend/dist
+Frontend/dist-ssr
+Frontend/.output
+Frontend/.vinxi
+Frontend/.tanstack
+Frontend/.nitro
+Frontend/.vercel
+Frontend/.git
+Frontend/.wrangler
+Frontend/.expo
+Frontend/.eas
+*.log
