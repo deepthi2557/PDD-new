@@ -309,7 +309,7 @@ export default function ChatRoom() {
               } else if (lowerMsg.includes('spanish') || lowerMsg.includes('languages') || lowerMsg.includes('english')) {
                 replyText = "Great! Conversational practice is the fastest way to learn. We can structure our swap to split time between speaking both languages.";
               } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-                replyText = `Hey! Thanks for booking a swap session with me. I'm ready to hop on a call whenever you are!`;
+                replyText = "Thanks for booking a session!";
               } else if (lowerMsg.includes('video') || lowerMsg.includes('call') || lowerMsg.includes('screenshare')) {
                 replyText = "Sure, let's jump on a quick voice/video call! Placing the call now...";
                 isBooking = true;
@@ -318,7 +318,7 @@ export default function ChatRoom() {
               }
             } else {
               if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-                replyText = `Hello! I'm excited to swap skills with you. To initiate a voice or video call, please book a session first using the 'Book' option in the menu.`;
+                replyText = "Hi!";
               } else if (lowerMsg.includes('book') || lowerMsg.includes('session')) {
                 replyText = "Awesome! Simply click the '+' attachment menu or the calendar icon above to choose a day and time slot to confirm.";
               } else {

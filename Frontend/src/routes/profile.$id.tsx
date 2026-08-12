@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image,
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2 } from 'lucide-react-native';
-import { mentors, reviews, type Mentor } from '../lib/data';
+import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -238,7 +238,7 @@ export default function Profile() {
         {/* Reviews Section */}
         <Section title="Reviews">
           <View style={styles.reviewsList}>
-            {reviews.map((r) => (
+            {getReviewsForMentor(m.id).map((r) => (
               <View key={r.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <Image source={{ uri: r.avatar }} style={styles.reviewAvatar} />

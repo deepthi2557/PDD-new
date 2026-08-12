@@ -83,11 +83,58 @@ export const categories = ["All", "Programming", "Design", "Business", "Communic
 export const sortOptions = ["Top Rated", "Newest", "Most Active", "Popular Skills", "Nearby Mentors"];
 export const searchSuggestions = ["Coding", "UI/UX", "Mathematics", "Video Editing", "AI & ML", "Public Speaking"];
 
+const mentorReviewsData: Record<string, Array<{ id: number; user: string; avatar: string; rating: number; date: string; text: string }>> = {
+  "aria-shah": [
+    { id: 1, user: "Tara L.", avatar: avatars("Tara"), rating: 5, date: "2d", text: "Aria is brilliant! She explained neural networks in 5 minutes using intuitive drawings." },
+    { id: 2, user: "Jamal R.", avatar: avatars("Jamal"), rating: 5, date: "1w", text: "Excellent Python insights, especially libraries like PyTorch and NumPy." },
+    { id: 3, user: "Eve C.", avatar: avatars("Eve"), rating: 4, date: "2w", text: "Super patient and structured. Felt very welcoming for beginners in AI." },
+    { id: 4, user: "Darnell M.", avatar: avatars("Darnell"), rating: 5, date: "3w", text: "Helped me debug my custom classifier pipeline. A complete lifesaver!" },
+  ],
+  "leo-park": [
+    { id: 1, user: "Clara S.", avatar: avatars("Clara"), rating: 5, date: "3d", text: "Leo gave me highly actionable tips on my typography and Figma auto-layouts." },
+    { id: 2, user: "Marcus K.", avatar: avatars("Marcus"), rating: 5, date: "5d", text: "Highly recommend Leo for design critiques! Very sharp eye for detailing." },
+    { id: 3, user: "Ariel P.", avatar: avatars("Ariel"), rating: 4, date: "1w", text: "Felt like a professional sprint. Learnt advanced design system tricks." },
+    { id: 4, user: "Devon B.", avatar: avatars("Devon"), rating: 5, date: "2w", text: "Great session on prototyping micro-interactions and smooth transitions." },
+  ],
+  "maya-iyer": [
+    { id: 1, user: "Steve O.", avatar: avatars("Steve"), rating: 5, date: "1d", text: "Maya makes React hooks and state management feel like a walk in the park." },
+    { id: 2, user: "Nisha V.", avatar: avatars("Nisha"), rating: 5, date: "4d", text: "Excellent explanation of TypeScript interfaces versus types. Very clear!" },
+    { id: 3, user: "Jaden T.", avatar: avatars("Jaden"), rating: 4, date: "1w", text: "Super hands-on coding. We built a React component from scratch together." },
+    { id: 4, user: "Rachel G.", avatar: avatars("Rachel"), rating: 5, date: "2w", text: "Friendly and clear communicator. Encourages good coding patterns and styles." },
+  ],
+  "noah-fields": [
+    { id: 1, user: "Oscar F.", avatar: avatars("Oscar"), rating: 5, date: "1d", text: "Noah's voice modulation training instantly improved my presentation confidence." },
+    { id: 2, user: "Elena D.", avatar: avatars("Elena"), rating: 5, date: "3d", text: "Incredible insights on structuring pitch decks and telling powerful stories." },
+    { id: 3, user: "Fiona H.", avatar: avatars("Fiona"), rating: 5, date: "1w", text: "Helped me prep for my TEDx talk. The pacing exercises were absolutely stellar." },
+    { id: 4, user: "Kenji S.", avatar: avatars("Kenji"), rating: 5, date: "2w", text: "Great session on audience engagement tactics and speaking anxiety management." },
+  ],
+  "sara-kim": [
+    { id: 1, user: "Gavin T.", avatar: avatars("Gavin"), rating: 5, date: "2d", text: "Sara made linear algebra matrices and dimensions feel intuitive and simple." },
+    { id: 2, user: "Chloe P.", avatar: avatars("Chloe"), rating: 5, date: "6d", text: "Very structured calculus session. She writes out all steps patiently." },
+    { id: 3, user: "Ethan J.", avatar: avatars("Ethan"), rating: 4, date: "1w", text: "Great TA! Patiently answered my basic statistics and probability questions." },
+    { id: 4, user: "Mia W.", avatar: avatars("Mia"), rating: 5, date: "2w", text: "I finally understand Bayes' Theorem! Highly recommended math mentor." },
+  ],
+  "ravi-mehta": [
+    { id: 1, user: "Victor N.", avatar: avatars("Victor"), rating: 5, date: "4d", text: "Ravi has a super efficient workflow for Premiere Pro short-cuts." },
+    { id: 2, user: "Zoe K.", avatar: avatars("Zoe"), rating: 5, date: "1w", text: "Great tips on color grading and audio leveling. Learned so much speed editing." },
+    { id: 3, user: "Liam M.", avatar: avatars("Liam"), rating: 5, date: "2w", text: "Very helpful review of keyframes and motion graphics transitions." },
+    { id: 4, user: "Olivia D.", avatar: avatars("Olivia"), rating: 4, date: "3w", text: "Awesome pacing! I learned video editing speed hacks in just one hour." },
+  ],
+};
+
 export const reviews = [
   { id: 1, user: "Tara L.", avatar: avatars("Tara"), rating: 5, date: "2d", text: "Best session I've had. Concepts finally clicked." },
   { id: 2, user: "Jamal R.", avatar: avatars("Jamal"), rating: 5, date: "1w", text: "Patient, thorough, and incredibly kind." },
   { id: 3, user: "Eve C.", avatar: avatars("Eve"), rating: 4, date: "2w", text: "Great pacing. Would book again." },
 ];
+
+export function getReviewsForMentor(mentorId: string): typeof reviews {
+  return mentorReviewsData[mentorId] || [
+    { id: 1, user: "Tara L.", avatar: avatars("Tara"), rating: 5, date: "2d", text: "Best session I've had. Concepts finally clicked." },
+    { id: 2, user: "Jamal R.", avatar: avatars("Jamal"), rating: 5, date: "1w", text: "Patient, thorough, and incredibly kind." },
+    { id: 3, user: "Eve C.", avatar: avatars("Eve"), rating: 4, date: "2w", text: "Great pacing. Would book again." },
+  ];
+}
 
 export const activity = {
   learning: [
