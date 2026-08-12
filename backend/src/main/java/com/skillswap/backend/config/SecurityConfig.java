@@ -48,12 +48,16 @@ public class SecurityConfig {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> claims = mapper.readValue(payloadJson, Map.class);
                 
-                if (claims != null && !claims.containsKey("name") && claims.containsKey("user_metadata")) {
+                if (claims != null && claims.containsKey("user_metadata")) {
                     Object meta = claims.get("user_metadata");
                     if (meta instanceof Map) {
+                        @SuppressWarnings("unchecked")
                         Map<String, Object> metaMap = (Map<String, Object>) meta;
-                        if (metaMap.containsKey("name")) {
+                        if (!claims.containsKey("name") && metaMap.containsKey("name")) {
                             claims.put("name", metaMap.get("name"));
+                        }
+                        if (!claims.containsKey("avatarUrl") && metaMap.containsKey("avatar_url")) {
+                            claims.put("avatarUrl", metaMap.get("avatar_url"));
                         }
                     }
                 }
