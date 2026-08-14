@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert, Modal, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar } from 'lucide-react-native';
@@ -1066,7 +1066,7 @@ export default function ChatRoom() {
             </View>
 
             <View style={styles.sharedScreenContainer}>
-              {screenStream ? (
+              {Platform.OS === 'web' && screenStream ? (
                 <video
                   ref={(ref) => {
                     if (ref) {
@@ -1086,7 +1086,9 @@ export default function ChatRoom() {
               ) : (
                 <View style={[styles.sharedScreenMock, { justifyContent: 'center', alignItems: 'center' }]}>
                   <ActivityIndicator size="large" color="#8b5cf6" />
-                  <Text style={{ color: '#8C8797', marginTop: 12 }}>Starting screen capture...</Text>
+                  <Text style={{ color: '#8C8797', marginTop: 12 }}>
+                    {Platform.OS === 'web' ? 'Starting screen capture...' : 'Screenshare is only available on Web'}
+                  </Text>
                 </View>
               )}
 

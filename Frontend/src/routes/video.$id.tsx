@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, TextInput, Platform } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle2, Send } from 'lucide-react-native';
@@ -300,14 +300,20 @@ export default function VideoRoom() {
 
             {/* Canvas Area */}
             <View style={styles.canvasWrapper}>
-              <canvas
-                ref={canvasRef}
-                onMouseDown={handleStartDraw}
-                onMouseMove={handleDrawing}
-                onMouseUp={handleStopDraw}
-                onMouseLeave={handleStopDraw}
-                style={styles.htmlCanvas}
-              />
+              {Platform.OS === 'web' ? (
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={handleStartDraw}
+                  onMouseMove={handleDrawing}
+                  onMouseUp={handleStopDraw}
+                  onMouseLeave={handleStopDraw}
+                  style={styles.htmlCanvas}
+                />
+              ) : (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F0F7', borderRadius: 8 }}>
+                  <Text style={{ color: '#8C8797' }}>Whiteboard is only available on Web</Text>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -424,11 +430,12 @@ export default function VideoRoom() {
                 </View>
 
                 {/* Feedback Input */}
-                <textarea
+                <TextInput
                   value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
+                  onChangeText={setFeedback}
                   placeholder="Share a short feedback review..."
-                  className="modal-textarea"
+                  placeholderTextColor="#8C8797"
+                  multiline={true}
                   style={{
                     width: '100%',
                     height: 80,
@@ -437,10 +444,8 @@ export default function VideoRoom() {
                     borderWidth: 1,
                     padding: 12,
                     fontSize: 14,
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    resize: 'none',
                     marginBottom: 20,
+                    textAlignVertical: 'top',
                   }}
                 />
 
@@ -656,7 +661,6 @@ const styles = StyleSheet.create({
   canvasWrapper: {
     flex: 1,
     backgroundColor: '#FAF9FC',
-    cursor: 'crosshair',
   },
   htmlCanvas: {
     width: '100%',

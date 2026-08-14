@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 16,
     maxHeight: 180,
-    overflow: 'scroll',
+    overflow: 'hidden',
     marginBottom: 12,
     shadowColor: 'rgba(94, 84, 112, 0.08)',
     shadowOffset: { width: 0, height: 4 },
