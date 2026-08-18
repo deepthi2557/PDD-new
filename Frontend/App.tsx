@@ -23,6 +23,58 @@ import NotificationsScreen from './src/routes/notifications';
 import VideoScreen from './src/routes/video.$id';
 import ProfileSetupScreen from './src/routes/profile.setup';
 
+// Error boundary state interfaces
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAF9FC', padding: 24 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 12 }}>Application Error</Text>
+          <Text style={{ fontSize: 14, color: '#8C8797', marginBottom: 16, textAlign: 'center' }}>
+            A rendering crash occurred during startup.
+          </Text>
+          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E8E5EC', borderRadius: 16, padding: 16 }}>
+            <Text style={{ fontFamily: 'monospace', fontSize: 12, color: '#ef4444', fontWeight: 'bold', marginBottom: 8 }}>
+              {this.state.error?.toString()}
+            </Text>
+            <Text style={{ fontFamily: 'monospace', fontSize: 10, color: '#342F3D' }}>
+              {this.state.error?.stack}
+            </Text>
+          </ScrollView>
+          <TouchableOpacity 
+            style={{ marginTop: 24, backgroundColor: '#8b5cf6', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
+            onPress={() => this.setState({ hasError: false, error: null })}
+          >
+            <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 16 }}>Reset App</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Navigation parameter types
 export type RootStackParamList = {
   Login: undefined;
@@ -109,30 +161,32 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Login"
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: '#FAF9FC' },
-            }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
-            <Stack.Screen name="Main" component={TabNavigator} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} />
-            <Stack.Screen name="Book" component={BookScreen} />
-            <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
-            <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
-            <Stack.Screen name="Community" component={CommunityScreen} />
-            <Stack.Screen name="VideoDetails" component={VideoScreen} />
-            <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: '#FAF9FC' },
+              }}
+            >
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Signup" component={SignupScreen} />
+              <Stack.Screen name="Main" component={TabNavigator} />
+              <Stack.Screen name="Notifications" component={NotificationsScreen} />
+              <Stack.Screen name="Book" component={BookScreen} />
+              <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
+              <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
+              <Stack.Screen name="Community" component={CommunityScreen} />
+              <Stack.Screen name="VideoDetails" component={VideoScreen} />
+              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
