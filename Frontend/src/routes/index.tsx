@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 10,
     elevation: 1,
-    marginBottom: 'auto',
+    marginBottom: 16,
   },
   googleButtonText: {
     fontSize: 14,
