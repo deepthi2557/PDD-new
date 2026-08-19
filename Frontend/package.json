@@ -85,6 +85,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@expo/cli": "~0.18.29",
     "babel-preset-expo": "~11.0.15",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^1.7.0",
