@@ -91,7 +91,7 @@ function LoginScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.loginRoot}>
+    <View style={styles.loginRoot}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.loginContent}
@@ -191,7 +191,7 @@ function LoginScreen({ navigation }: any) {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
