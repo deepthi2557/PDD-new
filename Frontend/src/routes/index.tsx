@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
@@ -9,8 +9,9 @@ export const Route = createFileRoute('/')({
   component: Login,
 });
 
-export default function Login() {
-  const navigation = useNavigation<any>();
+export default function Login(props: any) {
+  const hookNavigation = useNavigation<any>();
+  const navigation = props?.navigation || hookNavigation;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,9 @@ export default function Login() {
         return;
       }
 
-      navigation.navigate('Main');
+      if (navigation && navigation.navigate) {
+        navigation.navigate('Main');
+      }
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred');
       Alert.alert('Error', err.message || 'An unexpected error occurred');
@@ -47,11 +50,13 @@ export default function Login() {
   };
 
   const bypassToApp = () => {
-    navigation.navigate('Main');
+    if (navigation && navigation.navigate) {
+      navigation.navigate('Main');
+    }
   };
 
   return (
-    <View style={styles.rootView}>
+    <SafeAreaView style={styles.rootView}>
       <ScrollView
         style={styles.scrollContainer}
         contentContainerStyle={styles.contentContainer}
@@ -61,20 +66,17 @@ export default function Login() {
         {/* Brand Header Banner */}
         <View style={styles.headerBanner}>
           <View style={styles.logoBadge}>
-            <Sparkles color="#ffffff" size={28} />
+            <Sparkles color="#7c3aed" size={28} />
           </View>
           <Text style={styles.brandTitle}>SkillSwap</Text>
           <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
         </View>
 
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
+        {/* Form Card */}
+        <View style={styles.formCard}>
           <Text style={styles.welcomeTitle}>Welcome Back 👋</Text>
           <Text style={styles.welcomeSubtitle}>Sign in to your account to continue</Text>
-        </View>
 
-        {/* Form */}
-        <View style={styles.formCard}>
           {errorMessage ? (
             <View style={styles.errorBanner}>
               <Text style={styles.errorText}>{errorMessage}</Text>
@@ -136,7 +138,7 @@ export default function Login() {
             onPress={bypassToApp}
             activeOpacity={0.8}
           >
-            <Sparkles color="#7c3aed" size={16} style={{ marginRight: 6 }} />
+            <Sparkles color="#ffffff" size={16} style={{ marginRight: 6 }} />
             <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
           </TouchableOpacity>
         </View>
@@ -147,21 +149,21 @@ export default function Login() {
             Don't have an account?{' '}
             <Text
               style={styles.signupLink}
-              onPress={() => navigation.navigate('Signup')}
+              onPress={() => navigation && navigation.navigate('Signup')}
             >
               Create Account
             </Text>
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   rootView: {
     flex: 1,
-    backgroundColor: '#FAF9FC',
+    backgroundColor: '#7c3aed',
   },
   scrollContainer: {
     flex: 1,
@@ -169,69 +171,60 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 48,
+    paddingTop: 36,
     paddingBottom: 40,
   },
   headerBanner: {
-    backgroundColor: '#7c3aed',
-    borderRadius: 24,
-    paddingVertical: 28,
-    paddingHorizontal: 20,
     alignItems: 'center',
     marginBottom: 24,
-    shadowColor: '#7c3aed',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 6,
   },
   logoBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   brandTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#ffffff',
     letterSpacing: 0.5,
   },
   brandTagline: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 4,
     fontWeight: '500',
   },
-  welcomeSection: {
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  welcomeTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e1b4b',
-  },
-  welcomeSubtitle: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 4,
-  },
   formCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 28,
+    padding: 22,
+    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 2,
+    shadowRadius: 20,
+    elevation: 6,
     marginBottom: 20,
+  },
+  welcomeTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1e1b4b',
+    marginBottom: 4,
+  },
+  welcomeSubtitle: {
+    fontSize: 13,
+    color: '#64748b',
+    marginBottom: 18,
   },
   errorBanner: {
     backgroundColor: '#fef2f2',
@@ -251,7 +244,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#334155',
-    marginBottom: 8,
+    marginBottom: 6,
     marginTop: 4,
   },
   inputBox: {
@@ -259,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f8fafc',
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
+    borderColor: '#cbd5e1',
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -311,17 +304,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f1f5f9',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+    backgroundColor: '#0f172a',
     borderRadius: 16,
-    paddingVertical: 14,
-    marginTop: 14,
+    paddingVertical: 15,
+    marginTop: 12,
   },
   bypassBtnText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
   footerContainer: {
     alignItems: 'center',
@@ -329,10 +320,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#64748b',
+    color: 'rgba(255, 255, 255, 0.9)',
   },
   signupLink: {
-    color: '#7c3aed',
+    color: '#ffffff',
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
 });

@@ -192,7 +192,7 @@ export default function App() {
                 initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: '#FAF9FC' },
+                  contentStyle: { backgroundColor: '#7c3aed' },
                 }}
               >
                 <Stack.Screen name="Login" component={LoginScreen} />
