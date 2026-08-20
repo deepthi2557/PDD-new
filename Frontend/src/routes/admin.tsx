@@ -1,8 +1,8 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Users, Calendar, Star, TrendingUp, Flag, MessageSquare, Activity as ActIcon, BarChart3 } from 'lucide-react-native';
-import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/admin')({
   component: Admin,

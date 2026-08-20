@@ -1,10 +1,10 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Modal, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2, X } from 'lucide-react-native';
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
-import { createFileRoute } from '../lib/router-bridge';
 import { supabase } from '../lib/supabase';
 import { VITE_API_URL } from '../lib/env';
 
@@ -53,7 +53,7 @@ export default function Profile() {
   const isOwnProfile = currentUserId && m && currentUserId === m.id;
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: any) => {
       if (user) {
         setCurrentUserId(user.id);
       }
@@ -128,13 +128,13 @@ export default function Profile() {
       }
 
       // Update local state to reflect change immediately
-      setM(prev => prev ? {
+      setM((prev: any) => prev ? {
         ...prev,
         name: editName.trim(),
         expertise: editExpertise.trim(),
         bio: editBio.trim(),
-        level: editLevel,
-        mode: editMode,
+        level: editLevel as any,
+        mode: editMode as any,
         tags: skillsArray,
         teaches: skillsArray.length
       } : null);

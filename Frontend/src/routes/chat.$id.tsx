@@ -1,10 +1,10 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert, Modal, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar, Monitor, Volume2, X, Play, Pause, FileText, Image as ImageIcon, Camera, Trash2 } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
-import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/chat/$id')({
   component: ChatRoom,
@@ -122,17 +122,17 @@ function CodePlaygroundBlock({
   return (
     <View style={styles.playgroundCard}>
       <View style={styles.playgroundHeader}>
-        <View style={styles.editorDots}>
-          <View style={[styles.editorDot, { backgroundColor: '#ef4444' }]} />
-          <View style={[styles.editorDot, { backgroundColor: '#f59e0b' }]} />
-          <View style={[styles.editorDot, { backgroundColor: '#22c55e' }]} />
+        <View style={styles.playgroundEditorDots}>
+          <View style={[styles.playgroundEditorDot, { backgroundColor: '#ef4444' }]} />
+          <View style={[styles.playgroundEditorDot, { backgroundColor: '#f59e0b' }]} />
+          <View style={[styles.playgroundEditorDot, { backgroundColor: '#22c55e' }]} />
         </View>
         <Text style={styles.playgroundLang}>{language.toUpperCase()} PLAYGROUND</Text>
       </View>
       
       <TextInput
         value={code}
-        onChangeText={(newVal) => {
+        onChangeText={(newVal: string) => {
           setCode(newVal);
           const updated = [...msgs];
           updated[msgIndex] = { ...updated[msgIndex], code: newVal };
@@ -1814,11 +1814,11 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     marginBottom: 8,
   },
-  editorDots: {
+  playgroundEditorDots: {
     flexDirection: 'row',
     gap: 4,
   },
-  editorDot: {
+  playgroundEditorDot: {
     width: 6,
     height: 6,
     borderRadius: 3,

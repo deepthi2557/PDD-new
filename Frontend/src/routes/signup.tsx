@@ -1,8 +1,8 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award, Camera } from 'lucide-react-native';
-import { createFileRoute } from '../lib/router-bridge';
 import { supabase } from '../lib/supabase';
 
 export const Route = createFileRoute('/signup')({

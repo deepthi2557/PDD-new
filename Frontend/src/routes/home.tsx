@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -5,7 +6,6 @@ import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldChe
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/home')({
   component: Home,
@@ -23,7 +23,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: any) => {
       if (user) {
         fetchMentorById(user.id)
           .then((profileData) => {
@@ -191,7 +191,7 @@ export default function Home() {
                     <View style={styles.matchSplitCol}>
                       <Text style={styles.splitLabel}>They Learn From You:</Text>
                       <View style={styles.splitTagsRow}>
-                        {myTeaches.slice(0, 2).map((t) => (
+                        {myTeaches.slice(0, 2).map((t: string) => (
                           <View key={t} style={[styles.splitTag, styles.teachTag]}>
                             <Text style={styles.splitTagText}>{t}</Text>
                           </View>

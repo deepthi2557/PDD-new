@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -6,7 +7,6 @@ import { mentors, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { VITE_API_URL } from '../lib/env';
-import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/book')({
   component: Book,

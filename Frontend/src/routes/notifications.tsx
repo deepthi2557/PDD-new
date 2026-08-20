@@ -1,9 +1,9 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft } from 'lucide-react-native';
 import { notifications } from '../lib/data';
-import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/notifications')({
   component: Notifs,

@@ -21,6 +21,9 @@ declare module 'react-native' {
   export const Image: any;
   export const ActivityIndicator: any;
   export const Alert: any;
+  export const SafeAreaView: any;
+  export const Modal: any;
+  export const Platform: any;
   export type ViewStyle = any;
   export type TextStyle = any;
   export type ImageStyle = any;
@@ -46,6 +49,7 @@ declare module 'lucide-react-native' {
   export const ShieldCheck: any;
   export const Flame: any;
   export const Clock: any;
+  export const CheckCircle: any;
   export const CheckCircle2: any;
   export const AlertTriangle: any;
   export const Users: any;
@@ -75,6 +79,14 @@ declare module 'lucide-react-native' {
   export const Brain: any;
   export const Award: any;
   export const Camera: any;
+  export const Monitor: any;
+  export const Volume2: any;
+  export const X: any;
+  export const Play: any;
+  export const Pause: any;
+  export const FileText: any;
+  export const Image: any;
+  export const Trash2: any;
 }
 
 declare module '@expo/vector-icons' {

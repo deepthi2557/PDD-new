@@ -84,23 +84,23 @@ export async function fetchMentors(filters?: { name?: string; level?: string; mo
   });
 
   if (currentUserId) {
-    filtered = filtered.filter(m => m.id !== currentUserId);
+    filtered = filtered.filter((m: Mentor) => m.id !== currentUserId);
   }
 
   if (filters) {
     if (filters.name) {
       const searchStr = filters.name.toLowerCase();
-      filtered = filtered.filter(m => m.name.toLowerCase().includes(searchStr));
+      filtered = filtered.filter((m: Mentor) => m.name.toLowerCase().includes(searchStr));
     }
     if (filters.level && filters.level !== 'All') {
-      filtered = filtered.filter(m => m.level === filters.level);
+      filtered = filtered.filter((m: Mentor) => m.level === filters.level);
     }
     if (filters.mode && filters.mode !== 'All') {
-      filtered = filtered.filter(m => m.mode === filters.mode);
+      filtered = filtered.filter((m: Mentor) => m.mode === filters.mode);
     }
     if (filters.tag && filters.tag !== 'All') {
       const subTags = getSubTagsForCategory(filters.tag).map(t => t.toLowerCase());
-      filtered = filtered.filter(m => 
+      filtered = filtered.filter((m: Mentor) => 
         m.tags.some((tag: string) => subTags.includes(tag.toLowerCase()))
       );
     }
