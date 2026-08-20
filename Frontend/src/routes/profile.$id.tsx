@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Star, MessageCircle, CalendarPlus, UserPlus, Award, Send, CheckCircle2, X } from 'lucide-react-native';
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 import { supabase } from '../lib/supabase';
 import { VITE_API_URL } from '../lib/env';
 

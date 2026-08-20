@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, useParams } from "@tanstack/react-router";
+import { useNavigate, useLocation, useParams } from "./router-bridge";
 
 export function useIsFocused() {
   return true;

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
 import { chats } from '../lib/data';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/chat/')({
   component: ChatList,

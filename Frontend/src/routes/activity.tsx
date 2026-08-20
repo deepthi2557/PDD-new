@@ -4,7 +4,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
 import { activity, mentors, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/activity')({
   component: Activity,

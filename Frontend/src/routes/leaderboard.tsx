@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { Trophy, TrendingUp, Crown } from 'lucide-react-native';
 import { leaderboard } from '../lib/data';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/leaderboard')({
   component: Board,

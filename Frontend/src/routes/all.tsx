@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "../lib/router-bridge";
 
 export const Route = createFileRoute("/all")({
   component: AllPages,

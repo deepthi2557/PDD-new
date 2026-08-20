@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft, Phone, Video, Smile, Paperclip, Mic, Send, PhoneOff, MicOff, MessageSquare, Calendar, Monitor, Volume2, X, Play, Pause, FileText, Image as ImageIcon, Camera, Trash2 } from 'lucide-react-native';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/chat/$id')({
   component: ChatRoom,

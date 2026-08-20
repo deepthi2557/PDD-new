@@ -5,7 +5,7 @@ import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldChe
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 export const Route = createFileRoute('/home')({
   component: Home,

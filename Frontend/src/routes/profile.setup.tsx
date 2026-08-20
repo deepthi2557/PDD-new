@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image,
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronDown, ArrowRight, BookOpen, CheckCircle, Plus, X } from 'lucide-react-native';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 import { supabase } from '../lib/supabase';
 import { VITE_API_URL } from '../lib/env';
 

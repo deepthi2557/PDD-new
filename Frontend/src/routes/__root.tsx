@@ -6,7 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-} from "@tanstack/react-router";
+} from "../lib/router-bridge";
 import { Platform, View, Text } from "react-native";
 
 import appCss from "../styles.css?url";

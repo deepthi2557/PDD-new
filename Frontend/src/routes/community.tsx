@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image 
 import React, { useState } from 'react';
 import { Heart, MessageSquare, Sparkles, Plus } from 'lucide-react-native';
 import { community } from '../lib/data';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '../lib/router-bridge';
 
 interface Submission {
   id: number;
