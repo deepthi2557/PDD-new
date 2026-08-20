@@ -1,8 +1,3 @@
-// Polyfill window object for browser-compatible libraries inside React Native
-if (typeof global.window === 'undefined') {
-  global.window = global as any;
-}
-
 // Polyfill localStorage for React Native environment
 if (typeof global.localStorage === 'undefined') {
   const store = new Map<string, string>();
