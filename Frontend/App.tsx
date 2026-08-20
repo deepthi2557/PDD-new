@@ -9,19 +9,41 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Import Screens (Paths match our pages migration roadmap)
-import LoginScreen from './src/routes/index';
-import SignupScreen from './src/routes/signup';
-import HomeScreen from './src/routes/home';
-import ActivityScreen from './src/routes/activity';
-import ChatListScreen from './src/routes/chat.index';
-import ChatDetailsScreen from './src/routes/chat.$id';
-import LeaderboardScreen from './src/routes/leaderboard';
-import ProfileDetailsScreen from './src/routes/profile.$id';
-import BookScreen from './src/routes/book';
-import CommunityScreen from './src/routes/community';
-import NotificationsScreen from './src/routes/notifications';
-import VideoScreen from './src/routes/video.$id';
-import ProfileSetupScreen from './src/routes/profile.setup';
+import RawLoginScreen from './src/routes/index';
+import RawSignupScreen from './src/routes/signup';
+import RawHomeScreen from './src/routes/home';
+import RawActivityScreen from './src/routes/activity';
+import RawChatListScreen from './src/routes/chat.index';
+import RawChatDetailsScreen from './src/routes/chat.$id';
+import RawLeaderboardScreen from './src/routes/leaderboard';
+import RawProfileDetailsScreen from './src/routes/profile.$id';
+import RawBookScreen from './src/routes/book';
+import RawCommunityScreen from './src/routes/community';
+import RawNotificationsScreen from './src/routes/notifications';
+import RawVideoScreen from './src/routes/video.$id';
+import RawProfileSetupScreen from './src/routes/profile.setup';
+
+// Safe component resolver helper for module interop
+const resolveComp = (comp: any): React.ComponentType<any> => {
+  if (!comp) return () => <View style={{ flex: 1, backgroundColor: '#FAF9FC' }} />;
+  if (typeof comp === 'function') return comp;
+  if (comp && comp.default && typeof comp.default === 'function') return comp.default;
+  return () => <View style={{ flex: 1, backgroundColor: '#FAF9FC' }} />;
+};
+
+const LoginScreen = resolveComp(RawLoginScreen);
+const SignupScreen = resolveComp(RawSignupScreen);
+const HomeScreen = resolveComp(RawHomeScreen);
+const ActivityScreen = resolveComp(RawActivityScreen);
+const ChatListScreen = resolveComp(RawChatListScreen);
+const ChatDetailsScreen = resolveComp(RawChatDetailsScreen);
+const LeaderboardScreen = resolveComp(RawLeaderboardScreen);
+const ProfileDetailsScreen = resolveComp(RawProfileDetailsScreen);
+const BookScreen = resolveComp(RawBookScreen);
+const CommunityScreen = resolveComp(RawCommunityScreen);
+const NotificationsScreen = resolveComp(RawNotificationsScreen);
+const VideoScreen = resolveComp(RawVideoScreen);
+const ProfileSetupScreen = resolveComp(RawProfileSetupScreen);
 
 // Error boundary state interfaces
 interface ErrorBoundaryProps {
@@ -155,7 +177,7 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#7c3aed' }}>
+    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
