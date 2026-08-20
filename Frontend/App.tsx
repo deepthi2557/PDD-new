@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from './src/lib/supabase';
 
 // Import External Screens
@@ -45,7 +45,7 @@ const NotificationsScreen = resolveComp(RawNotificationsScreen);
 const VideoScreen = resolveComp(RawVideoScreen);
 const ProfileSetupScreen = resolveComp(RawProfileSetupScreen);
 
-// Inline Login Screen to guarantee 100% crash-free rendering on Native Mobile
+// Inline Login Screen using Native-Safe @expo/vector-icons
 function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -101,7 +101,7 @@ function LoginScreen({ navigation }: any) {
         {/* Brand Header Banner */}
         <View style={styles.headerBanner}>
           <View style={styles.logoBadge}>
-            <Sparkles color="#7c3aed" size={28} />
+            <Feather name="sparkles" size={28} color="#7c3aed" />
           </View>
           <Text style={styles.brandTitle}>SkillSwap</Text>
           <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
@@ -120,7 +120,7 @@ function LoginScreen({ navigation }: any) {
 
           <Text style={styles.fieldLabel}>Email or Username</Text>
           <View style={styles.inputBox}>
-            <Mail color="#7c3aed" size={20} style={{ marginRight: 12 }} />
+            <Feather name="mail" size={20} color="#7c3aed" style={{ marginRight: 12 }} />
             <TextInput
               placeholder="Enter your email"
               placeholderTextColor="#94a3b8"
@@ -135,7 +135,7 @@ function LoginScreen({ navigation }: any) {
 
           <Text style={styles.fieldLabel}>Password</Text>
           <View style={styles.inputBox}>
-            <Lock color="#7c3aed" size={20} style={{ marginRight: 12 }} />
+            <Feather name="lock" size={20} color="#7c3aed" style={{ marginRight: 12 }} />
             <TextInput
               placeholder="Enter your password"
               placeholderTextColor="#94a3b8"
@@ -162,7 +162,7 @@ function LoginScreen({ navigation }: any) {
             ) : (
               <View style={styles.btnRow}>
                 <Text style={styles.primaryBtnText}>Log In</Text>
-                <ArrowRight color="#ffffff" size={18} style={{ marginLeft: 8 }} />
+                <Feather name="arrow-right" size={18} color="#ffffff" style={{ marginLeft: 8 }} />
               </View>
             )}
           </TouchableOpacity>
@@ -173,7 +173,7 @@ function LoginScreen({ navigation }: any) {
             onPress={bypassToApp}
             activeOpacity={0.8}
           >
-            <Sparkles color="#ffffff" size={16} style={{ marginRight: 6 }} />
+            <Feather name="check-circle" size={16} color="#ffffff" style={{ marginRight: 6 }} />
             <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
           </TouchableOpacity>
         </View>
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   loginContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 36,
+    paddingTop: 48,
     paddingBottom: 40,
   },
   headerBanner: {
