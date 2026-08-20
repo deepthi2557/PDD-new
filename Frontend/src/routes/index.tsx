@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { Mail, Lock, ArrowRight, Sparkles, LogIn } from 'lucide-react-native';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
 
@@ -38,7 +37,6 @@ export default function Login() {
         return;
       }
 
-      // Preserves routing behavior: navigate to main App navigation structure
       navigation.navigate('Main');
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred');
@@ -48,272 +46,293 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setErrorMessage('');
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
-        }
-      });
-      if (error) {
-        setErrorMessage(error.message);
-        Alert.alert('Google Sign-In Error', error.message);
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'An unexpected error occurred');
-      Alert.alert('Error', err.message || 'An unexpected error occurred');
-    } finally {
-      setLoading(false);
-    }
+  const bypassToApp = () => {
+    navigation.navigate('Main');
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#FAF9FC' }} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      {/* Brand Logo Header */}
-      <View style={styles.logoContainer}>
-        <View style={styles.logoBox}>
-          <Sparkles color="#ffffff" size={24} />
-        </View>
-        <Text style={styles.logoText}>SkillSwap</Text>
-      </View>
-
-      {/* Welcome Message */}
-      <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeTitle}>Welcome back</Text>
-        <Text style={styles.welcomeSubtitle}>Sign in to keep learning and teaching</Text>
-      </View>
-
-      {/* Login Form */}
-      <View style={styles.form}>
-        {errorMessage ? (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        ) : null}
-
-        <View style={styles.inputContainer}>
-          <Mail color="#8C8797" size={20} style={styles.inputIcon} />
-          <TextInput
-            placeholder="Email or phone"
-            placeholderTextColor="#8C8797"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-            editable={!loading}
-          />
+    <View style={styles.rootView}>
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Brand Header Banner */}
+        <View style={styles.headerBanner}>
+          <View style={styles.logoBadge}>
+            <Sparkles color="#ffffff" size={28} />
+          </View>
+          <Text style={styles.brandTitle}>SkillSwap</Text>
+          <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Lock color="#8C8797" size={20} style={styles.inputIcon} />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="#8C8797"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={styles.input}
-            editable={!loading}
-          />
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>Welcome Back 👋</Text>
+          <Text style={styles.welcomeSubtitle}>Sign in to your account to continue</Text>
         </View>
 
-        <TouchableOpacity style={styles.forgotPasswordButton} activeOpacity={0.7} disabled={loading}>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-        </TouchableOpacity>
+        {/* Form */}
+        <View style={styles.formCard}>
+          {errorMessage ? (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
 
-        <TouchableOpacity 
-          style={[styles.loginButton, loading && styles.disabledButton]} 
-          onPress={handleLogin} 
-          activeOpacity={0.8}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#ffffff" size="small" />
-          ) : (
-            <>
-              <Text style={styles.loginButtonText}>Log in</Text>
-              <ArrowRight color="#ffffff" size={16} />
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.fieldLabel}>Email or Username</Text>
+          <View style={styles.inputBox}>
+            <Mail color="#7c3aed" size={20} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Enter your email"
+              placeholderTextColor="#94a3b8"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={styles.textInput}
+              editable={!loading}
+            />
+          </View>
 
-      {/* Signup Redirection */}
-      <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>
-          New here?{' '}
-          <Text
-            style={styles.signupLink}
-            onPress={() => navigation.navigate('Signup')}
+          <Text style={styles.fieldLabel}>Password</Text>
+          <View style={styles.inputBox}>
+            <Lock color="#7c3aed" size={20} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Enter your password"
+              placeholderTextColor="#94a3b8"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              style={styles.textInput}
+              editable={!loading}
+            />
+          </View>
+
+          <TouchableOpacity style={styles.forgotBtn} activeOpacity={0.7} disabled={loading}>
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.primaryBtn, loading && styles.disabledBtn]}
+            onPress={handleLogin}
+            activeOpacity={0.85}
+            disabled={loading}
           >
-            Create account
+            {loading ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <View style={styles.btnRow}>
+                <Text style={styles.primaryBtnText}>Log In</Text>
+                <ArrowRight color="#ffffff" size={18} style={{ marginLeft: 8 }} />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* Quick Demo Bypass Button */}
+          <TouchableOpacity
+            style={styles.bypassBtn}
+            onPress={bypassToApp}
+            activeOpacity={0.8}
+          >
+            <LogIn color="#7c3aed" size={16} style={{ marginRight: 6 }} />
+            <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Signup Redirect Footer */}
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>
+            Don't have an account?{' '}
+            <Text
+              style={styles.signupLink}
+              onPress={() => navigation.navigate('Signup')}
+            >
+              Create Account
+            </Text>
           </Text>
-        </Text>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
+  rootView: {
+    flex: 1,
     backgroundColor: '#FAF9FC',
-    paddingHorizontal: 24,
-    paddingTop: 64,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 48,
     paddingBottom: 40,
   },
-  logoContainer: {
-    flexDirection: 'row',
+  headerBanner: {
+    backgroundColor: '#7c3aed',
+    borderRadius: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginBottom: 48,
-  },
-  logoBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#8b5cf6',
+    marginBottom: 24,
+    shadowColor: '#7c3aed',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
-    elevation: 4,
-    marginRight: 10,
+    elevation: 6,
   },
-  logoText: {
-    fontSize: 24,
+  logoBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  brandTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#8b5cf6',
+    color: '#ffffff',
+    letterSpacing: 0.5,
   },
-  welcomeContainer: {
-    marginBottom: 32,
+  brandTagline: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.85)',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  welcomeSection: {
+    marginBottom: 20,
+    paddingHorizontal: 4,
   },
   welcomeTitle: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 8,
+    color: '#1e1b4b',
   },
   welcomeSubtitle: {
-    fontSize: 16,
-    color: '#8C8797',
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 4,
   },
-  form: {
-    width: '100%',
+  formCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: 'rgba(94, 84, 112, 0.08)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 2,
+    marginBottom: 20,
   },
-  inputContainer: {
+  errorBanner: {
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#dc2626',
+    fontSize: 13,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
     borderRadius: 16,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     marginBottom: 16,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
   },
   inputIcon: {
     marginRight: 12,
   },
-  input: {
+  textInput: {
     flex: 1,
-    fontSize: 14,
-    color: '#342F3D',
-    padding: 0, // Reset default padding
+    fontSize: 15,
+    color: '#0f172a',
+    padding: 0,
   },
-  forgotPasswordButton: {
+  forgotBtn: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  forgotPasswordText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#8b5cf6',
+  forgotText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#7c3aed',
   },
-  loginButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8b5cf6',
+  primaryBtn: {
+    backgroundColor: '#7c3aed',
     borderRadius: 16,
     paddingVertical: 16,
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
     elevation: 4,
   },
-  loginButtonText: {
+  primaryBtnText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
+    fontWeight: 'bold',
   },
-  dividerContainer: {
+  btnRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E8E5EC',
+  disabledBtn: {
+    opacity: 0.6,
   },
-  dividerText: {
-    fontSize: 12,
-    color: '#8C8797',
-    paddingHorizontal: 12,
-  },
-  googleButton: {
+  bypassBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: '#f1f5f9',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: '#cbd5e1',
     borderRadius: 16,
     paddingVertical: 14,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-    marginBottom: 16,
+    marginTop: 14,
   },
-  googleButtonText: {
+  bypassBtnText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#342F3D',
-    marginLeft: 12,
+    fontWeight: '600',
+    color: '#475569',
   },
-  signupContainer: {
+  footerContainer: {
     alignItems: 'center',
-    paddingTop: 32,
+    paddingVertical: 12,
   },
-  signupText: {
+  footerText: {
     fontSize: 14,
-    color: '#8C8797',
+    color: '#64748b',
   },
   signupLink: {
-    color: '#8b5cf6',
-    fontWeight: '600',
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  disabledButton: {
-    opacity: 0.5,
+    color: '#7c3aed',
+    fontWeight: 'bold',
   },
 });
