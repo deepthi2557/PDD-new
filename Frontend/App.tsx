@@ -26,10 +26,10 @@ import RawProfileSetupScreen from './src/routes/profile.setup';
 
 // Safe component resolver helper for module interop
 const resolveComp = (comp: any): React.ComponentType<any> => {
-  if (!comp) return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
+  if (!comp) return () => <View style={{ flex: 1, backgroundColor: '#FAF9FC' }} />;
   if (typeof comp === 'function') return comp;
   if (comp && comp.default && typeof comp.default === 'function') return comp.default;
-  return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
+  return () => <View style={{ flex: 1, backgroundColor: '#FAF9FC' }} />;
 };
 
 const SignupScreen = resolveComp(RawSignupScreen);
@@ -91,7 +91,7 @@ function LoginScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.loginRoot}>
+    <SafeAreaView style={styles.loginRoot}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={styles.loginContent}
@@ -101,7 +101,7 @@ function LoginScreen({ navigation }: any) {
         {/* Brand Header Banner */}
         <View style={styles.headerBanner}>
           <View style={styles.logoBadge}>
-            <Feather name="sparkles" size={28} color="#7c3aed" />
+            <Feather name="sparkles" size={28} color="#ffffff" />
           </View>
           <Text style={styles.brandTitle}>SkillSwap</Text>
           <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
@@ -191,7 +191,7 @@ function LoginScreen({ navigation }: any) {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -326,16 +326,16 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#7c3aed' }}>
+    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
+            <NavigationContainer initialState={undefined}>
               <Stack.Navigator
                 initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: '#7c3aed' },
+                  contentStyle: { backgroundColor: '#FAF9FC' },
                 }}
               >
                 <Stack.Screen name="Login" component={LoginScreen} />
@@ -360,7 +360,7 @@ export default function App() {
 const styles = StyleSheet.create({
   loginRoot: {
     flex: 1,
-    backgroundColor: '#7c3aed',
+    backgroundColor: '#FAF9FC',
   },
   loginContent: {
     flexGrow: 1,
@@ -376,25 +376,25 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 22,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#7c3aed',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
   },
   brandTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#7c3aed',
     letterSpacing: 0.5,
   },
   brandTagline: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#64748b',
     marginTop: 4,
     fontWeight: '500',
   },
@@ -402,12 +402,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 28,
     padding: 22,
-    shadowColor: 'rgba(0, 0, 0, 0.15)',
+    shadowColor: 'rgba(94, 84, 112, 0.1)',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
     shadowRadius: 20,
-    elevation: 6,
+    elevation: 4,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   welcomeTitle: {
     fontSize: 22,
@@ -511,12 +513,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#64748b',
   },
   signupLink: {
-    color: '#ffffff',
+    color: '#7c3aed',
     fontWeight: 'bold',
-    textDecorationLine: 'underline',
   },
   tabBar: {
     position: 'absolute',
