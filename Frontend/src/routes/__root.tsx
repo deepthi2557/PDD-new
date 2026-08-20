@@ -7,10 +7,19 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Platform, View, Text } from "react-native";
 
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FAF9FC', padding: 16 }}>
+        <Text style={{ fontSize: 48, fontWeight: 'bold', color: '#342F3D' }}>404</Text>
+        <Text style={{ fontSize: 18, fontWeight: '600', color: '#8C8797', marginTop: 8 }}>Page not found</Text>
+      </View>
+    );
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -33,7 +42,14 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  if (Platform.OS !== 'web') {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FAF9FC', padding: 16 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#ef4444' }}>This page didn't load</Text>
+        <Text style={{ fontSize: 14, color: '#8C8797', marginTop: 8 }}>{error?.message || 'Something went wrong.'}</Text>
+      </View>
+    );
+  }
   const router = useRouter();
 
   return (
@@ -95,6 +111,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  if (Platform.OS !== 'web') {
+    return <View style={{ flex: 1 }}>{children}</View>;
+  }
   return (
     <html lang="en">
       <head>
