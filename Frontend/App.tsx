@@ -56,10 +56,10 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           </Text>
           <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E8E5EC', borderRadius: 16, padding: 16 }}>
             <Text style={{ fontFamily: 'monospace', fontSize: 12, color: '#ef4444', fontWeight: 'bold', marginBottom: 8 }}>
-              {this.state.error?.toString()}
+              {String(this.state.error?.message || this.state.error || 'Unknown Error')}
             </Text>
             <Text style={{ fontFamily: 'monospace', fontSize: 10, color: '#342F3D' }}>
-              {this.state.error?.stack}
+              {String(this.state.error?.stack || '')}
             </Text>
           </ScrollView>
           <TouchableOpacity 
@@ -161,32 +161,40 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <SafeAreaProvider style={{ flex: 1 }}>
-        <QueryClientProvider client={queryClient}>
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName="Login"
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: '#FAF9FC' },
-              }}
+    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
+      <ErrorBoundary>
+        <SafeAreaProvider style={{ flex: 1 }}>
+          <QueryClientProvider client={queryClient}>
+            <NavigationContainer
+              fallback={
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#7c3aed' }}>
+                  <Text style={{ color: '#ffffff', fontSize: 20, fontWeight: 'bold' }}>SkillSwap Loading...</Text>
+                </View>
+              }
             >
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Signup" component={SignupScreen} />
-              <Stack.Screen name="Main" component={TabNavigator} />
-              <Stack.Screen name="Notifications" component={NotificationsScreen} />
-              <Stack.Screen name="Book" component={BookScreen} />
-              <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
-              <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
-              <Stack.Screen name="Community" component={CommunityScreen} />
-              <Stack.Screen name="VideoDetails" component={VideoScreen} />
-              <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </ErrorBoundary>
+              <Stack.Navigator
+                initialRouteName="Login"
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: '#FAF9FC' },
+                }}
+              >
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Signup" component={SignupScreen} />
+                <Stack.Screen name="Main" component={TabNavigator} />
+                <Stack.Screen name="Notifications" component={NotificationsScreen} />
+                <Stack.Screen name="Book" component={BookScreen} />
+                <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
+                <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
+                <Stack.Screen name="Community" component={CommunityScreen} />
+                <Stack.Screen name="VideoDetails" component={VideoScreen} />
+                <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    </View>
   );
 }
 
