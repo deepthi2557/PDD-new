@@ -24,26 +24,36 @@ import RawVideoScreen from './src/routes/video.$id';
 import RawProfileSetupScreen from './src/routes/profile.setup';
 
 // Safe component resolver helper for module interop
-const resolveComp = (comp: any): React.ComponentType<any> => {
-  if (!comp) return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
+const resolveComp = (name: string, comp: any): React.ComponentType<any> => {
   if (typeof comp === 'function') return comp;
-  if (comp && comp.default && typeof comp.default === 'function') return comp.default;
+  if (comp && typeof comp.default === 'function') return comp.default;
+  if (comp && comp.default && typeof comp.default.default === 'function') return comp.default.default;
   if (comp && comp.Route && typeof comp.Route.component === 'function') return comp.Route.component;
-  return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
+  if (comp && comp.default && comp.default.Route && typeof comp.default.Route.component === 'function') return comp.default.Route.component;
+
+  console.warn(`[resolveComp] Failed to resolve screen component for "${name}":`, comp);
+  return () => (
+    <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Resolution Error</Text>
+      <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
+        Could not resolve component for screen: <Text style={{ fontWeight: 'bold', color: '#38bdf8' }}>{name}</Text>
+      </Text>
+    </View>
+  );
 };
 
-const SignupScreen = resolveComp(RawSignupScreen);
-const HomeScreen = resolveComp(RawHomeScreen);
-const ActivityScreen = resolveComp(RawActivityScreen);
-const ChatListScreen = resolveComp(RawChatListScreen);
-const ChatDetailsScreen = resolveComp(RawChatDetailsScreen);
-const LeaderboardScreen = resolveComp(RawLeaderboardScreen);
-const ProfileDetailsScreen = resolveComp(RawProfileDetailsScreen);
-const BookScreen = resolveComp(RawBookScreen);
-const CommunityScreen = resolveComp(RawCommunityScreen);
-const NotificationsScreen = resolveComp(RawNotificationsScreen);
-const VideoScreen = resolveComp(RawVideoScreen);
-const ProfileSetupScreen = resolveComp(RawProfileSetupScreen);
+const SignupScreen = resolveComp('Signup', RawSignupScreen);
+const HomeScreen = resolveComp('Home', RawHomeScreen);
+const ActivityScreen = resolveComp('Activity', RawActivityScreen);
+const ChatListScreen = resolveComp('ChatList', RawChatListScreen);
+const ChatDetailsScreen = resolveComp('ChatDetails', RawChatDetailsScreen);
+const LeaderboardScreen = resolveComp('Leaderboard', RawLeaderboardScreen);
+const ProfileDetailsScreen = resolveComp('ProfileDetails', RawProfileDetailsScreen);
+const BookScreen = resolveComp('Book', RawBookScreen);
+const CommunityScreen = resolveComp('Community', RawCommunityScreen);
+const NotificationsScreen = resolveComp('Notifications', RawNotificationsScreen);
+const VideoScreen = resolveComp('Video', RawVideoScreen);
+const ProfileSetupScreen = resolveComp('ProfileSetup', RawProfileSetupScreen);
 
 // Pure Native Zero-Dependency Login Screen
 function LoginScreen({ navigation }: any) {
@@ -318,21 +328,21 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   render() {
     if (this.state.hasError) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#7c3aed', padding: 24 }}>
-          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#ffffff', marginBottom: 12 }}>Application Startup Error</Text>
-          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', marginBottom: 16, textAlign: 'center' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a', padding: 24 }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#ef4444', marginBottom: 12 }}>Application Startup Error</Text>
+          <Text style={{ fontSize: 14, color: '#f8fafc', marginBottom: 16, textAlign: 'center' }}>
             {String(this.state.error?.message || this.state.error || 'Unknown Error')}
           </Text>
-          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderRadius: 16, padding: 16 }}>
-            <Text style={{ fontFamily: 'monospace', fontSize: 11, color: '#ef4444' }}>
+          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#1e293b', borderRadius: 16, padding: 16 }}>
+            <Text style={{ fontFamily: 'monospace', fontSize: 11, color: '#f87171' }}>
               {String(this.state.error?.stack || '')}
             </Text>
           </ScrollView>
           <TouchableOpacity 
-            style={{ marginTop: 24, backgroundColor: '#ffffff', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
+            style={{ marginTop: 24, backgroundColor: '#7c3aed', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
             onPress={() => this.setState({ hasError: false, error: null })}
           >
-            <Text style={{ color: '#7c3aed', fontWeight: 'bold', fontSize: 16 }}>Reset App</Text>
+            <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 16 }}>Reset App</Text>
           </TouchableOpacity>
         </View>
       );
