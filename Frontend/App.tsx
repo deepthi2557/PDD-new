@@ -49,21 +49,21 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   render() {
     if (this.state.hasError) {
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAF9FC', padding: 24 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 12 }}>Application Startup Error</Text>
-          <Text style={{ fontSize: 14, color: '#342F3D', marginBottom: 16, textAlign: 'center' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#7c3aed', padding: 24 }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#ffffff', marginBottom: 12 }}>Application Startup Error</Text>
+          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', marginBottom: 16, textAlign: 'center' }}>
             {String(this.state.error?.message || this.state.error || 'Unknown Error')}
           </Text>
-          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E8E5EC', borderRadius: 16, padding: 16 }}>
-            <Text style={{ fontFamily: 'monospace', fontSize: 10, color: '#342F3D' }}>
+          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderRadius: 16, padding: 16 }}>
+            <Text style={{ fontFamily: 'monospace', fontSize: 11, color: '#ef4444' }}>
               {String(this.state.error?.stack || '')}
             </Text>
           </ScrollView>
           <TouchableOpacity 
-            style={{ marginTop: 24, backgroundColor: '#8b5cf6', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
+            style={{ marginTop: 24, backgroundColor: '#ffffff', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
             onPress={() => this.setState({ hasError: false, error: null })}
           >
-            <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 16 }}>Reset App</Text>
+            <Text style={{ color: '#7c3aed', fontWeight: 'bold', fontSize: 16 }}>Reset App</Text>
           </TouchableOpacity>
         </View>
       );
@@ -155,11 +155,17 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
+    <View style={{ flex: 1, backgroundColor: '#7c3aed' }}>
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
+            <NavigationContainer
+              fallback={
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#7c3aed' }}>
+                  <Text style={{ color: '#ffffff', fontSize: 24, fontWeight: 'bold' }}>SkillSwap Loading...</Text>
+                </View>
+              }
+            >
               <Stack.Navigator
                 initialRouteName="Login"
                 screenOptions={{
