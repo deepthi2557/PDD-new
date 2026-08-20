@@ -2,6 +2,7 @@
   "expo": {
     "name": "SkillSwap",
     "slug": "skillswap",
+    "owner": "rdeepthi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,7 +28,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "32216d00-cd50-4f85-9396-2444a158348e"
+        "projectId": "26ccde3f-024d-4eb9-98b3-7d71b451c440"
       }
     }
   }
