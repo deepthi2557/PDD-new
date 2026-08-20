@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Mail, Lock, ArrowRight, Sparkles, LogIn } from 'lucide-react-native';
+import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
 
@@ -136,7 +136,7 @@ export default function Login() {
             onPress={bypassToApp}
             activeOpacity={0.8}
           >
-            <LogIn color="#7c3aed" size={16} style={{ marginRight: 6 }} />
+            <Sparkles color="#7c3aed" size={16} style={{ marginRight: 6 }} />
             <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
           </TouchableOpacity>
         </View>
