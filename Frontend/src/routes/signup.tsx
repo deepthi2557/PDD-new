@@ -163,16 +163,7 @@ export default function Signup() {
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
 
-        {/* Hidden file input for web upload */}
-        {typeof window !== 'undefined' && (
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept="image/*"
-            style={{ display: 'none' }}
-          />
-        )}
+
 
         {/* Profile Image Picker */}
         <View style={styles.avatarPickerContainer}>

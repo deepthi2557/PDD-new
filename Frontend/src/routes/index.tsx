@@ -71,7 +71,7 @@ export default function Login() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ flex: 1, backgroundColor: '#FAF9FC' }} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       {/* Brand Logo Header */}
       <View style={styles.logoContainer}>
         <View style={styles.logoBox}>

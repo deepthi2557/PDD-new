@@ -162,7 +162,7 @@ function TabNavigator() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
+      <SafeAreaProvider style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
           <NavigationContainer>
             <Stack.Navigator
