@@ -50,14 +50,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     if (this.state.hasError) {
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAF9FC', padding: 24 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 12 }}>Application Error</Text>
-          <Text style={{ fontSize: 14, color: '#8C8797', marginBottom: 16, textAlign: 'center' }}>
-            A rendering crash occurred during startup.
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 12 }}>Application Startup Error</Text>
+          <Text style={{ fontSize: 14, color: '#342F3D', marginBottom: 16, textAlign: 'center' }}>
+            {String(this.state.error?.message || this.state.error || 'Unknown Error')}
           </Text>
           <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#E8E5EC', borderRadius: 16, padding: 16 }}>
-            <Text style={{ fontFamily: 'monospace', fontSize: 12, color: '#ef4444', fontWeight: 'bold', marginBottom: 8 }}>
-              {String(this.state.error?.message || this.state.error || 'Unknown Error')}
-            </Text>
             <Text style={{ fontFamily: 'monospace', fontSize: 10, color: '#342F3D' }}>
               {String(this.state.error?.stack || '')}
             </Text>
@@ -101,9 +98,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const queryClient = new QueryClient();
 
-// Custom Bottom Tab Bar representing the MobileShell.tsx design
-import { Home, Calendar, MessageCircle, Trophy, User } from 'lucide-react-native';
-
 function TabNavigator() {
   return (
     <Tab.Navigator
@@ -119,7 +113,7 @@ function TabNavigator() {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Home color={color} size={size} />,
+          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏠</Text>,
         }}
       />
       <Tab.Screen
@@ -127,7 +121,7 @@ function TabNavigator() {
         component={ActivityScreen}
         options={{
           tabBarLabel: 'Activity',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Calendar color={color} size={size} />,
+          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>📅</Text>,
         }}
       />
       <Tab.Screen
@@ -135,7 +129,7 @@ function TabNavigator() {
         component={ChatListScreen}
         options={{
           tabBarLabel: 'Chat',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => <MessageCircle color={color} size={size} />,
+          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>💬</Text>,
         }}
       />
       <Tab.Screen
@@ -143,7 +137,7 @@ function TabNavigator() {
         component={LeaderboardScreen}
         options={{
           tabBarLabel: 'Rank',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => <Trophy color={color} size={size} />,
+          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏆</Text>,
         }}
       />
       <Tab.Screen
@@ -152,7 +146,7 @@ function TabNavigator() {
         initialParams={{ id: 'me' }}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => <User color={color} size={size} />,
+          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>👤</Text>,
         }}
       />
     </Tab.Navigator>
@@ -165,13 +159,7 @@ export default function App() {
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
-            <NavigationContainer
-              fallback={
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#7c3aed' }}>
-                  <Text style={{ color: '#ffffff', fontSize: 20, fontWeight: 'bold' }}>SkillSwap Loading...</Text>
-                </View>
-              }
-            >
+            <NavigationContainer>
               <Stack.Navigator
                 initialRouteName="Login"
                 screenOptions={{
