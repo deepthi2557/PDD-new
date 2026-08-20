@@ -6,6 +6,7 @@ const config = getDefaultConfig(__dirname);
 config.resolver.unstable_enablePackageExports = true;
 
 const subpathAliases = {
+  '@tanstack/react-router': path.resolve(__dirname, 'src/lib/router-bridge.native.ts'),
   '@tanstack/router-core/isServer': path.resolve(__dirname, 'node_modules/@tanstack/router-core/dist/cjs/isServer/client.cjs'),
   '@tanstack/router-core/ssr/client': path.resolve(__dirname, 'node_modules/@tanstack/router-core/dist/cjs/ssr/client.cjs'),
   '@tanstack/router-core/ssr/server': path.resolve(__dirname, 'node_modules/@tanstack/router-core/dist/cjs/ssr/server.cjs'),

@@ -28,6 +28,7 @@ const resolveComp = (comp: any): React.ComponentType<any> => {
   if (!comp) return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
   if (typeof comp === 'function') return comp;
   if (comp && comp.default && typeof comp.default === 'function') return comp.default;
+  if (comp && comp.Route && typeof comp.Route.component === 'function') return comp.Route.component;
   return () => <View style={{ flex: 1, backgroundColor: '#7c3aed' }} />;
 };
 
