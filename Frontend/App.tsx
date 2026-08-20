@@ -163,7 +163,7 @@ export default function App() {
   return (
     <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
       <ErrorBoundary>
-        <SafeAreaProvider style={{ flex: 1 }}>
+        <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <NavigationContainer
               fallback={
