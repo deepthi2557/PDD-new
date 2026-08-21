@@ -9,20 +9,45 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 
-import SignupScreen from './src/routes/signup';
-import HomeScreen from './src/routes/home';
-import ActivityScreen from './src/routes/activity';
-import ChatListScreen from './src/routes/chat.index';
-import ChatDetailsScreen from './src/routes/chat.$id';
-import LeaderboardScreen from './src/routes/leaderboard';
-import ProfileDetailsScreen from './src/routes/profile.$id';
-import BookScreen from './src/routes/book';
-import CommunityScreen from './src/routes/community';
-import NotificationsScreen from './src/routes/notifications';
-import VideoScreen from './src/routes/video.$id';
-import ProfileSetupScreen from './src/routes/profile.setup';
+// Safe screen module resolver helper to prevent secondary screen errors from breaking Login startup
+function safeComponent(name: string, importFn: () => any) {
+  let Comp: any = null;
+  try {
+    const mod = importFn();
+    Comp = mod?.default || mod?.Route?.component || mod;
+  } catch (e) {
+    console.error(`[App] Error loading screen ${name}:`, e);
+  }
 
-// Suspense fallback shown while a lazy screen loads
+  return function SafeScreenWrapper(props: any) {
+    if (!Comp) {
+      return (
+        <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Error</Text>
+          <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
+            Could not load screen: {name}
+          </Text>
+        </View>
+      );
+    }
+    return <Comp {...props} />;
+  };
+}
+
+const SignupScreen = safeComponent('Signup', () => require('./src/routes/signup'));
+const HomeScreen = safeComponent('Home', () => require('./src/routes/home'));
+const ActivityScreen = safeComponent('Activity', () => require('./src/routes/activity'));
+const ChatListScreen = safeComponent('ChatList', () => require('./src/routes/chat.index'));
+const ChatDetailsScreen = safeComponent('ChatDetails', () => require('./src/routes/chat.$id'));
+const LeaderboardScreen = safeComponent('Leaderboard', () => require('./src/routes/leaderboard'));
+const ProfileDetailsScreen = safeComponent('ProfileDetails', () => require('./src/routes/profile.$id'));
+const BookScreen = safeComponent('Book', () => require('./src/routes/book'));
+const CommunityScreen = safeComponent('Community', () => require('./src/routes/community'));
+const NotificationsScreen = safeComponent('Notifications', () => require('./src/routes/notifications'));
+const VideoScreen = safeComponent('Video', () => require('./src/routes/video.$id'));
+const ProfileSetupScreen = safeComponent('ProfileSetup', () => require('./src/routes/profile.setup'));
+
+// Fallback loader component
 const ScreenFallback = () => (
   <View style={{ flex: 1, backgroundColor: '#7c3aed', justifyContent: 'center', alignItems: 'center' }}>
     <ActivityIndicator color="#ffffff" size="large" />
