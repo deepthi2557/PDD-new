@@ -1,7 +1,7 @@
 import './src/lib/polyfill';
 
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, Suspense } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -9,51 +9,64 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 
-// Import External Screens
-import RawSignupScreen from './src/routes/signup';
-import RawHomeScreen from './src/routes/home';
-import RawActivityScreen from './src/routes/activity';
-import RawChatListScreen from './src/routes/chat.index';
-import RawChatDetailsScreen from './src/routes/chat.$id';
-import RawLeaderboardScreen from './src/routes/leaderboard';
-import RawProfileDetailsScreen from './src/routes/profile.$id';
-import RawBookScreen from './src/routes/book';
-import RawCommunityScreen from './src/routes/community';
-import RawNotificationsScreen from './src/routes/notifications';
-import RawVideoScreen from './src/routes/video.$id';
-import RawProfileSetupScreen from './src/routes/profile.setup';
+// ─── Lazy-load all screens ──────────────────────────────────────────────────
+// IMPORTANT: Static imports cause route modules to evaluate at app startup,
+// before NavigationContainer is mounted. This makes @react-navigation/native's
+// useNavigation() throw "Couldn't find a navigation object", crashing the app
+// and showing only the purple background. React.lazy() defers evaluation until
+// the screen is first rendered inside the NavigationContainer.
+const lazyScreen = (name: string, loader: () => Promise<any>) =>
+  React.lazy(() =>
+    loader().then((mod) => {
+      // Normalize any export shape to { default: Component }
+      const comp =
+        typeof mod === 'function'
+          ? mod
+          : typeof mod?.default === 'function'
+          ? mod.default
+          : mod?.default?.default && typeof mod.default.default === 'function'
+          ? mod.default.default
+          : mod?.Route?.component
+          ? mod.Route.component
+          : mod?.default?.Route?.component
+          ? mod.default.Route.component
+          : null;
 
-// Safe component resolver helper for module interop
-const resolveComp = (name: string, comp: any): React.ComponentType<any> => {
-  if (typeof comp === 'function') return comp;
-  if (comp && typeof comp.default === 'function') return comp.default;
-  if (comp && comp.default && typeof comp.default.default === 'function') return comp.default.default;
-  if (comp && comp.Route && typeof comp.Route.component === 'function') return comp.Route.component;
-  if (comp && comp.default && comp.default.Route && typeof comp.default.Route.component === 'function') return comp.default.Route.component;
+      if (comp) return { default: comp };
 
-  console.warn(`[resolveComp] Failed to resolve screen component for "${name}":`, comp);
-  return () => (
-    <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Resolution Error</Text>
-      <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
-        Could not resolve component for screen: <Text style={{ fontWeight: 'bold', color: '#38bdf8' }}>{name}</Text>
-      </Text>
-    </View>
+      console.warn(`[lazyScreen] Could not resolve component for "${name}". Module:`, mod);
+      return {
+        default: () => (
+          <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Error</Text>
+            <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
+              Could not load: {name}
+            </Text>
+          </View>
+        ),
+      };
+    })
   );
-};
 
-const SignupScreen = resolveComp('Signup', RawSignupScreen);
-const HomeScreen = resolveComp('Home', RawHomeScreen);
-const ActivityScreen = resolveComp('Activity', RawActivityScreen);
-const ChatListScreen = resolveComp('ChatList', RawChatListScreen);
-const ChatDetailsScreen = resolveComp('ChatDetails', RawChatDetailsScreen);
-const LeaderboardScreen = resolveComp('Leaderboard', RawLeaderboardScreen);
-const ProfileDetailsScreen = resolveComp('ProfileDetails', RawProfileDetailsScreen);
-const BookScreen = resolveComp('Book', RawBookScreen);
-const CommunityScreen = resolveComp('Community', RawCommunityScreen);
-const NotificationsScreen = resolveComp('Notifications', RawNotificationsScreen);
-const VideoScreen = resolveComp('Video', RawVideoScreen);
-const ProfileSetupScreen = resolveComp('ProfileSetup', RawProfileSetupScreen);
+const SignupScreen    = lazyScreen('Signup',       () => import('./src/routes/signup'));
+const HomeScreen      = lazyScreen('Home',         () => import('./src/routes/home'));
+const ActivityScreen  = lazyScreen('Activity',     () => import('./src/routes/activity'));
+const ChatListScreen  = lazyScreen('ChatList',     () => import('./src/routes/chat.index'));
+const ChatDetailsScreen = lazyScreen('ChatDetails',() => import('./src/routes/chat.$id'));
+const LeaderboardScreen = lazyScreen('Leaderboard',() => import('./src/routes/leaderboard'));
+const ProfileDetailsScreen = lazyScreen('ProfileDetails', () => import('./src/routes/profile.$id'));
+const BookScreen      = lazyScreen('Book',         () => import('./src/routes/book'));
+const CommunityScreen = lazyScreen('Community',    () => import('./src/routes/community'));
+const NotificationsScreen = lazyScreen('Notifications', () => import('./src/routes/notifications'));
+const VideoScreen     = lazyScreen('Video',        () => import('./src/routes/video.$id'));
+const ProfileSetupScreen = lazyScreen('ProfileSetup', () => import('./src/routes/profile.setup'));
+
+// Suspense fallback shown while a lazy screen loads
+const ScreenFallback = () => (
+  <View style={{ flex: 1, backgroundColor: '#7c3aed', justifyContent: 'center', alignItems: 'center' }}>
+    <ActivityIndicator color="#ffffff" size="large" />
+  </View>
+);
 
 // Pure Native Zero-Dependency Login Screen
 function LoginScreen({ navigation }: any) {
@@ -378,56 +391,58 @@ const queryClient = new QueryClient();
 
 function TabNavigator() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#8b5cf6',
-        tabBarInactiveTintColor: '#8C8797',
-      }}
-    >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏠</Text>,
+    <Suspense fallback={<ScreenFallback />}>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarActiveTintColor: '#8b5cf6',
+          tabBarInactiveTintColor: '#8C8797',
         }}
-      />
-      <Tab.Screen
-        name="ActivityTab"
-        component={ActivityScreen}
-        options={{
-          tabBarLabel: 'Activity',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>📅</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ChatTab"
-        component={ChatListScreen}
-        options={{
-          tabBarLabel: 'Chat',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>💬</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="LeaderboardTab"
-        component={LeaderboardScreen}
-        options={{
-          tabBarLabel: 'Rank',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏆</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileDetailsScreen}
-        initialParams={{ id: 'me' }}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>👤</Text>,
-        }}
-      />
-    </Tab.Navigator>
+      >
+        <Tab.Screen
+          name="HomeTab"
+          component={HomeScreen}
+          options={{
+            tabBarLabel: 'Home',
+            tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏠</Text>,
+          }}
+        />
+        <Tab.Screen
+          name="ActivityTab"
+          component={ActivityScreen}
+          options={{
+            tabBarLabel: 'Activity',
+            tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>📅</Text>,
+          }}
+        />
+        <Tab.Screen
+          name="ChatTab"
+          component={ChatListScreen}
+          options={{
+            tabBarLabel: 'Chat',
+            tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>💬</Text>,
+          }}
+        />
+        <Tab.Screen
+          name="LeaderboardTab"
+          component={LeaderboardScreen}
+          options={{
+            tabBarLabel: 'Rank',
+            tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏆</Text>,
+          }}
+        />
+        <Tab.Screen
+          name="ProfileTab"
+          component={ProfileDetailsScreen}
+          initialParams={{ id: 'me' }}
+          options={{
+            tabBarLabel: 'Profile',
+            tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>👤</Text>,
+          }}
+        />
+      </Tab.Navigator>
+    </Suspense>
   );
 }
 
@@ -438,24 +453,26 @@ export default function App() {
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <NavigationContainer initialState={undefined}>
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: '#7c3aed' },
-                }}
-              >
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Signup" component={SignupScreen} />
-                <Stack.Screen name="Main" component={TabNavigator} />
-                <Stack.Screen name="Notifications" component={NotificationsScreen} />
-                <Stack.Screen name="Book" component={BookScreen} />
-                <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
-                <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
-                <Stack.Screen name="Community" component={CommunityScreen} />
-                <Stack.Screen name="VideoDetails" component={VideoScreen} />
-                <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-              </Stack.Navigator>
+              <Suspense fallback={<ScreenFallback />}>
+                <Stack.Navigator
+                  initialRouteName="Login"
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: '#7c3aed' },
+                  }}
+                >
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                  <Stack.Screen name="Signup" component={SignupScreen} />
+                  <Stack.Screen name="Main" component={TabNavigator} />
+                  <Stack.Screen name="Notifications" component={NotificationsScreen} />
+                  <Stack.Screen name="Book" component={BookScreen} />
+                  <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
+                  <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
+                  <Stack.Screen name="Community" component={CommunityScreen} />
+                  <Stack.Screen name="VideoDetails" component={VideoScreen} />
+                  <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
+                </Stack.Navigator>
+              </Suspense>
             </NavigationContainer>
           </QueryClientProvider>
         </SafeAreaProvider>
