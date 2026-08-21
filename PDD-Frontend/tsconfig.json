@@ -1,0 +1,32 @@
+{
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "App.tsx"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    /* Bundler mode */
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "noEmit": true,
+
+    /* Linting */
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "react-native": ["./src/types/native.d.ts"],
+      "lucide-react-native": ["./src/types/native.d.ts"],
+      "@react-navigation/native": ["./src/lib/navigation-bridge.ts"],
+      "@react-navigation/bottom-tabs": ["./src/lib/navigation-bridge.ts"],
+      "@react-navigation/native-stack": ["./src/lib/navigation-bridge.ts"],
+      "@expo/vector-icons": ["./src/types/native.d.ts"]
+    }
+  }
+}
