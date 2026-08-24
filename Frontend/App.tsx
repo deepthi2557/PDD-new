@@ -9,43 +9,49 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 
-// Safe screen module resolver helper to prevent secondary screen errors from breaking Login startup
-function safeComponent(name: string, importFn: () => any) {
-  let Comp: any = null;
-  try {
-    const mod = importFn();
-    Comp = mod?.default || mod?.Route?.component || mod;
-  } catch (e) {
-    console.error(`[App] Error loading screen ${name}:`, e);
-  }
+// Safe deferred screen loader using React.lazy to isolate startup from secondary screen crashes
+function safeComponent(name: string, importFn: () => Promise<any>) {
+  const LazyComp = React.lazy(async () => {
+    try {
+      const mod = await importFn();
+      const Comp = mod?.default || mod?.Route?.component || mod;
+      return { default: Comp || (() => null) };
+    } catch (e) {
+      console.error(`[App] Error lazy loading screen ${name}:`, e);
+      return {
+        default: () => (
+          <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Error</Text>
+            <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
+              Could not load screen: {name}
+            </Text>
+          </View>
+        ),
+      };
+    }
+  });
 
   return function SafeScreenWrapper(props: any) {
-    if (!Comp) {
-      return (
-        <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Error</Text>
-          <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
-            Could not load screen: {name}
-          </Text>
-        </View>
-      );
-    }
-    return <Comp {...props} />;
+    return (
+      <Suspense fallback={<ScreenFallback />}>
+        <LazyComp {...props} />
+      </Suspense>
+    );
   };
 }
 
-const SignupScreen = safeComponent('Signup', () => require('./src/routes/signup'));
-const HomeScreen = safeComponent('Home', () => require('./src/routes/home'));
-const ActivityScreen = safeComponent('Activity', () => require('./src/routes/activity'));
-const ChatListScreen = safeComponent('ChatList', () => require('./src/routes/chat.index'));
-const ChatDetailsScreen = safeComponent('ChatDetails', () => require('./src/routes/chat.$id'));
-const LeaderboardScreen = safeComponent('Leaderboard', () => require('./src/routes/leaderboard'));
-const ProfileDetailsScreen = safeComponent('ProfileDetails', () => require('./src/routes/profile.$id'));
-const BookScreen = safeComponent('Book', () => require('./src/routes/book'));
-const CommunityScreen = safeComponent('Community', () => require('./src/routes/community'));
-const NotificationsScreen = safeComponent('Notifications', () => require('./src/routes/notifications'));
-const VideoScreen = safeComponent('Video', () => require('./src/routes/video.$id'));
-const ProfileSetupScreen = safeComponent('ProfileSetup', () => require('./src/routes/profile.setup'));
+const SignupScreen = safeComponent('Signup', () => import('./src/routes/signup'));
+const HomeScreen = safeComponent('Home', () => import('./src/routes/home'));
+const ActivityScreen = safeComponent('Activity', () => import('./src/routes/activity'));
+const ChatListScreen = safeComponent('ChatList', () => import('./src/routes/chat.index'));
+const ChatDetailsScreen = safeComponent('ChatDetails', () => import('./src/routes/chat.$id'));
+const LeaderboardScreen = safeComponent('Leaderboard', () => import('./src/routes/leaderboard'));
+const ProfileDetailsScreen = safeComponent('ProfileDetails', () => import('./src/routes/profile.$id'));
+const BookScreen = safeComponent('Book', () => import('./src/routes/book'));
+const CommunityScreen = safeComponent('Community', () => import('./src/routes/community'));
+const NotificationsScreen = safeComponent('Notifications', () => import('./src/routes/notifications'));
+const VideoScreen = safeComponent('Video', () => import('./src/routes/video.$id'));
+const ProfileSetupScreen = safeComponent('ProfileSetup', () => import('./src/routes/profile.setup'));
 
 // Fallback loader component
 const ScreenFallback = () => (
