@@ -55,8 +55,8 @@ const ProfileSetupScreen = safeComponent('ProfileSetup', () => import('./src/rou
 
 // Fallback loader component
 const ScreenFallback = () => (
-  <View style={{ flex: 1, backgroundColor: '#7c3aed', justifyContent: 'center', alignItems: 'center' }}>
-    <ActivityIndicator color="#ffffff" size="large" />
+  <View style={{ flex: 1, backgroundColor: '#FAF9FC', justifyContent: 'center', alignItems: 'center' }}>
+    <ActivityIndicator color="#7c3aed" size="large" />
   </View>
 );
 
@@ -106,7 +106,7 @@ function LoginScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#7c3aed' }}>
+    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -125,23 +125,23 @@ function LoginScreen({ navigation }: any) {
               width: 72,
               height: 72,
               borderRadius: 24,
-              backgroundColor: '#ffffff',
+              backgroundColor: '#f3e8ff',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 14,
-              elevation: 6,
-              shadowColor: '#000',
+              elevation: 4,
+              shadowColor: '#7c3aed',
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
             }}
           >
             <Text style={{ fontSize: 36 }}>✨</Text>
           </View>
-          <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>
+          <Text style={{ fontSize: 34, fontWeight: 'bold', color: '#1e1b4b', letterSpacing: 0.5 }}>
             SkillSwap
           </Text>
-          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.9)', marginTop: 4, fontWeight: '500' }}>
+          <Text style={{ fontSize: 14, color: '#64748b', marginTop: 4, fontWeight: '500' }}>
             Learn • Teach • Grow Together
           </Text>
         </View>
@@ -292,10 +292,10 @@ function LoginScreen({ navigation }: any) {
 
         {/* Signup Redirect Footer */}
         <View style={{ alignItems: 'center', paddingVertical: 12 }}>
-          <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.95)' }}>
+          <Text style={{ fontSize: 14, color: '#64748b' }}>
             Don't have an account?{' '}
             <Text
-              style={{ color: '#ffffff', fontWeight: 'bold', textDecorationLine: 'underline' }}
+              style={{ color: '#7c3aed', fontWeight: 'bold', textDecorationLine: 'underline' }}
               onPress={() => navigation && navigation.navigate('Signup')}
             >
               Create Account
@@ -438,7 +438,7 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#7c3aed' }}>
+    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
       <ErrorBoundary>
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
@@ -447,7 +447,7 @@ export default function App() {
                 initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: '#7c3aed' },
+                  contentStyle: { backgroundColor: '#FAF9FC' },
                 }}
               >
                 <Stack.Screen name="Login" component={LoginScreen} />
