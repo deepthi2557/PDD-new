@@ -8,17 +8,16 @@ export function useIsFocused() {
 export function useNavigation<T = any>() {
   const navigate = useNavigate();
 
-  // Check if AppNavigationContext exists from App.tsx
   try {
     const { AppNavigationContext } = require('../../App');
     if (AppNavigationContext) {
-      const ctx = useContext(AppNavigationContext);
+      const ctx = useContext(AppNavigationContext) as any;
       if (ctx && ctx.navigation && ctx.navigation.navigate) {
         return ctx.navigation;
       }
     }
   } catch (e) {
-    // Fallback to web router bridge
+    // Fallback
   }
 
   return {
@@ -82,7 +81,7 @@ export function useRoute<T = any>(): { params: T; name: string } {
   try {
     const { AppNavigationContext } = require('../../App');
     if (AppNavigationContext) {
-      const ctx = useContext(AppNavigationContext);
+      const ctx = useContext(AppNavigationContext) as any;
       if (ctx && ctx.route) {
         return ctx.route;
       }

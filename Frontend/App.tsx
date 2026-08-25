@@ -1,6 +1,6 @@
 import './src/lib/polyfill';
 import React, { useState, createContext, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -30,6 +30,21 @@ export const AppNavigationContext = createContext<{
 });
 
 export const useAppNavigation = () => useContext(AppNavigationContext);
+
+// Cast component helpers to avoid IntrinsicAttributes TS errors
+const Login: any = LoginScreen;
+const Signup: any = SignupScreen;
+const Home: any = HomeScreen;
+const Activity: any = ActivityScreen;
+const ChatList: any = ChatListScreen;
+const ChatDetails: any = ChatDetailsScreen;
+const Leaderboard: any = LeaderboardScreen;
+const ProfileDetails: any = ProfileDetailsScreen;
+const Book: any = BookScreen;
+const Community: any = CommunityScreen;
+const Notifications: any = NotificationsScreen;
+const VideoDetails: any = VideoScreen;
+const ProfileSetup: any = ProfileSetupScreen;
 
 // Error boundary state interfaces
 interface ErrorBoundaryProps {
@@ -107,18 +122,18 @@ export default function App() {
   const renderContent = () => {
     switch (currentRoute.name) {
       case 'Login':
-        return <LoginScreen navigation={navigation} route={route} />;
+        return <Login navigation={navigation} route={route} />;
       case 'Signup':
-        return <SignupScreen navigation={navigation} route={route} />;
+        return <Signup navigation={navigation} route={route} />;
       case 'Main':
         return (
           <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
             <View style={{ flex: 1 }}>
-              {activeTab === 'HomeTab' && <HomeScreen navigation={navigation} route={route} />}
-              {activeTab === 'ActivityTab' && <ActivityScreen navigation={navigation} route={route} />}
-              {activeTab === 'ChatTab' && <ChatListScreen navigation={navigation} route={route} />}
-              {activeTab === 'LeaderboardTab' && <LeaderboardScreen navigation={navigation} route={route} />}
-              {activeTab === 'ProfileTab' && <ProfileDetailsScreen navigation={navigation} route={{ ...route, params: { id: 'me' } }} />}
+              {activeTab === 'HomeTab' && <Home navigation={navigation} route={route} />}
+              {activeTab === 'ActivityTab' && <Activity navigation={navigation} route={route} />}
+              {activeTab === 'ChatTab' && <ChatList navigation={navigation} route={route} />}
+              {activeTab === 'LeaderboardTab' && <Leaderboard navigation={navigation} route={route} />}
+              {activeTab === 'ProfileTab' && <ProfileDetails navigation={navigation} route={{ ...route, params: { id: 'me' } }} />}
             </View>
 
             {/* Custom Glassmorphic Tab Bar */}
@@ -147,21 +162,21 @@ export default function App() {
           </View>
         );
       case 'Notifications':
-        return <NotificationsScreen navigation={navigation} route={route} />;
+        return <Notifications navigation={navigation} route={route} />;
       case 'Book':
-        return <BookScreen navigation={navigation} route={route} />;
+        return <Book navigation={navigation} route={route} />;
       case 'ChatDetails':
-        return <ChatDetailsScreen navigation={navigation} route={route} />;
+        return <ChatDetails navigation={navigation} route={route} />;
       case 'ProfileDetails':
-        return <ProfileDetailsScreen navigation={navigation} route={route} />;
+        return <ProfileDetails navigation={navigation} route={route} />;
       case 'Community':
-        return <CommunityScreen navigation={navigation} route={route} />;
+        return <Community navigation={navigation} route={route} />;
       case 'VideoDetails':
-        return <VideoScreen navigation={navigation} route={route} />;
+        return <VideoDetails navigation={navigation} route={route} />;
       case 'ProfileSetup':
-        return <ProfileSetupScreen navigation={navigation} route={route} />;
+        return <ProfileSetup navigation={navigation} route={route} />;
       default:
-        return <LoginScreen navigation={navigation} route={route} />;
+        return <Login navigation={navigation} route={route} />;
     }
   };
 
@@ -199,7 +214,7 @@ const styles = StyleSheet.create({
   tabItem: {
     flex: 1,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
     paddingVertical: 6,
   },
 });
