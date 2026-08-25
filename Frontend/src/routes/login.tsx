@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 
-export const Route = createFileRoute('/login' as any)({
+export const Route = (createFileRoute as any)('/login')({
   component: Login,
 });
 
