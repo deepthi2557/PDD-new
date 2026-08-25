@@ -11,6 +11,17 @@ import { supabase } from './src/lib/supabase';
 
 import LoginScreen from './src/routes/login';
 import SignupScreen from './src/routes/signup';
+import HomeScreen from './src/routes/home';
+import ActivityScreen from './src/routes/activity';
+import ChatListScreen from './src/routes/chat.index';
+import ChatDetailsScreen from './src/routes/chat.$id';
+import LeaderboardScreen from './src/routes/leaderboard';
+import ProfileDetailsScreen from './src/routes/profile.$id';
+import BookScreen from './src/routes/book';
+import CommunityScreen from './src/routes/community';
+import NotificationsScreen from './src/routes/notifications';
+import VideoScreen from './src/routes/video.$id';
+import ProfileSetupScreen from './src/routes/profile.setup';
 
 // Error boundary state interfaces
 interface ErrorBoundaryProps {
