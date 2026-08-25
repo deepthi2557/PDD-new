@@ -9,49 +9,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
 
-// Safe deferred screen loader using React.lazy to isolate startup from secondary screen crashes
-function safeComponent(name: string, importFn: () => Promise<any>) {
-  const LazyComp = React.lazy(async () => {
-    try {
-      const mod = await importFn();
-      const Comp = mod?.default || mod?.Route?.component || mod;
-      return { default: Comp || (() => null) };
-    } catch (e) {
-      console.error(`[App] Error lazy loading screen ${name}:`, e);
-      return {
-        default: () => (
-          <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 }}>Screen Error</Text>
-            <Text style={{ fontSize: 14, color: '#f8fafc', textAlign: 'center' }}>
-              Could not load screen: {name}
-            </Text>
-          </View>
-        ),
-      };
-    }
-  });
-
-  return function SafeScreenWrapper(props: any) {
-    return (
-      <Suspense fallback={<ScreenFallback />}>
-        <LazyComp {...props} />
-      </Suspense>
-    );
-  };
-}
-
-const SignupScreen = safeComponent('Signup', () => import('./src/routes/signup'));
-const HomeScreen = safeComponent('Home', () => import('./src/routes/home'));
-const ActivityScreen = safeComponent('Activity', () => import('./src/routes/activity'));
-const ChatListScreen = safeComponent('ChatList', () => import('./src/routes/chat.index'));
-const ChatDetailsScreen = safeComponent('ChatDetails', () => import('./src/routes/chat.$id'));
-const LeaderboardScreen = safeComponent('Leaderboard', () => import('./src/routes/leaderboard'));
-const ProfileDetailsScreen = safeComponent('ProfileDetails', () => import('./src/routes/profile.$id'));
-const BookScreen = safeComponent('Book', () => import('./src/routes/book'));
-const CommunityScreen = safeComponent('Community', () => import('./src/routes/community'));
-const NotificationsScreen = safeComponent('Notifications', () => import('./src/routes/notifications'));
-const VideoScreen = safeComponent('Video', () => import('./src/routes/video.$id'));
-const ProfileSetupScreen = safeComponent('ProfileSetup', () => import('./src/routes/profile.setup'));
+import SignupScreen from './src/routes/signup';
+import HomeScreen from './src/routes/home';
+import ActivityScreen from './src/routes/activity';
+import ChatListScreen from './src/routes/chat.index';
+import ChatDetailsScreen from './src/routes/chat.$id';
+import LeaderboardScreen from './src/routes/leaderboard';
+import ProfileDetailsScreen from './src/routes/profile.$id';
+import BookScreen from './src/routes/book';
+import CommunityScreen from './src/routes/community';
+import NotificationsScreen from './src/routes/notifications';
+import VideoScreen from './src/routes/video.$id';
+import ProfileSetupScreen from './src/routes/profile.setup';
 
 // Fallback loader component
 const ScreenFallback = () => (
@@ -444,15 +413,15 @@ export default function App() {
           <QueryClientProvider client={queryClient}>
             <NavigationContainer initialState={undefined}>
               <Stack.Navigator
-                initialRouteName="Login"
+                initialRouteName="Main"
                 screenOptions={{
                   headerShown: false,
                   contentStyle: { backgroundColor: '#FAF9FC' },
                 }}
               >
+                <Stack.Screen name="Main" component={TabNavigator} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
-                <Stack.Screen name="Main" component={TabNavigator} />
                 <Stack.Screen name="Notifications" component={NotificationsScreen} />
                 <Stack.Screen name="Book" component={BookScreen} />
                 <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
