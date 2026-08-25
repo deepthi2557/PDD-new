@@ -37,9 +37,14 @@ export default function Signup() {
   const fileInputRef = React.useRef<any>(null);
   const [uploading, setUploading] = useState(false);
 
+  const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+
   const triggerFileSelect = () => {
-    if (fileInputRef.current) {
+    if (typeof document !== 'undefined' && fileInputRef.current) {
       fileInputRef.current.click();
+    } else {
+      // On mobile environment, toggle default avatar
+      setFormState(prev => ({ ...prev, avatarUrl: prev.avatarUrl ? '' : DEFAULT_AVATAR }));
     }
   };
 
@@ -79,8 +84,8 @@ export default function Signup() {
   const handleSignup = async () => {
     const { name, phone, email, password, confirmPassword, avatarUrl } = formState;
 
-    if (!name || !phone || !email || !password || !confirmPassword || !avatarUrl) {
-      setErrorMessage('Please fill in all fields (including profile picture)');
+    if (!name || !phone || !email || !password || !confirmPassword) {
+      setErrorMessage('Please fill in all required fields');
       return;
     }
 
@@ -97,6 +102,10 @@ export default function Signup() {
     setLoading(true);
     setErrorMessage('');
 
+    const finalAvatar = (avatarUrl && avatarUrl.trim().length > 0) 
+      ? avatarUrl 
+      : DEFAULT_AVATAR;
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -107,7 +116,7 @@ export default function Signup() {
             phone: phone,
             role: role,
             tags: selectedSkills,
-            avatar_url: avatarUrl || '',
+            avatar_url: finalAvatar,
           },
           emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
@@ -147,7 +156,13 @@ export default function Signup() {
       {/* Back Button */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => {
+          if (navigation && navigation.navigate) {
+            navigation.navigate('Login');
+          } else if (navigation && navigation.goBack) {
+            navigation.goBack();
+          }
+        }}
         activeOpacity={0.7}
       >
         <ArrowLeft color="#8C8797" size={16} style={styles.backIcon} />
@@ -185,7 +200,7 @@ export default function Signup() {
             )}
           </TouchableOpacity>
           <Text style={styles.avatarLabel}>
-            {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Upload Profile Picture *'}
+            {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Upload Profile Picture (Optional)'}
           </Text>
           <View style={styles.urlInputContainer}>
             <TextInput

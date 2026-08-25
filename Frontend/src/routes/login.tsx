@@ -16,9 +16,21 @@ export default function Login(props: any) {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
   const handleLogin = async () => {
-    if (!email || !password) {
-      setErrorMessage('Please fill in all fields');
+    setEmailError(false);
+    setPasswordError(false);
+
+    if (!email.trim()) {
+      setEmailError(true);
+      setErrorMessage('Please enter your email address');
+      return;
+    }
+    if (!password) {
+      setPasswordError(true);
+      setErrorMessage('Please enter your password');
       return;
     }
 
@@ -78,18 +90,18 @@ export default function Login(props: any) {
 
           {errorMessage ? (
             <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
             </View>
           ) : null}
 
           <Text style={styles.fieldLabel}>Email or Username</Text>
-          <View style={styles.inputBox}>
+          <View style={[styles.inputBox, emailError && styles.inputBoxError]}>
             <Text style={{ fontSize: 18, marginRight: 10 }}>📧</Text>
             <TextInput
               placeholder="Enter your email"
               placeholderTextColor="#94a3b8"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text: string) => { setEmail(text); setEmailError(false); setErrorMessage(''); }}
               autoCapitalize="none"
               keyboardType="email-address"
               style={styles.textInput}
@@ -98,13 +110,13 @@ export default function Login(props: any) {
           </View>
 
           <Text style={styles.fieldLabel}>Password</Text>
-          <View style={styles.inputBox}>
+          <View style={[styles.inputBox, passwordError && styles.inputBoxError]}>
             <Text style={{ fontSize: 18, marginRight: 10 }}>🔒</Text>
             <TextInput
               placeholder="Enter your password"
               placeholderTextColor="#94a3b8"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text: string) => { setPassword(text); setPasswordError(false); setErrorMessage(''); }}
               secureTextEntry
               style={styles.textInput}
               editable={!loading}
@@ -258,6 +270,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginBottom: 16,
+  },
+  inputBoxError: {
+    borderColor: '#ef4444',
+    backgroundColor: '#fff5f5',
   },
   inputIcon: {
     marginRight: 12,

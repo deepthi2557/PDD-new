@@ -247,13 +247,27 @@ export default function Profile() {
           {/* Action Row */}
           <View style={styles.actionsRow}>
             {isOwnProfile ? (
-              <TouchableOpacity
-                style={styles.editProfileBtn}
-                onPress={() => setEditModalVisible(true)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.editProfileBtnText}>Edit Profile Details</Text>
-              </TouchableOpacity>
+              <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={[styles.editProfileBtn, { flex: 1 }]}
+                  onPress={() => setEditModalVisible(true)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.editProfileBtnText}>Edit Profile</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.logoutBtn]}
+                  onPress={async () => {
+                    await supabase.auth.signOut();
+                    if (typeof localStorage !== 'undefined') localStorage.clear();
+                    Alert.alert('Logged Out', 'You have been signed out successfully.');
+                    navigation.navigate('Login');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.logoutBtnText}>🚪 Log Out</Text>
+                </TouchableOpacity>
+              </View>
             ) : (
               <>
                 <TouchableOpacity
@@ -293,6 +307,26 @@ export default function Profile() {
             )}
           </View>
         </View>
+
+        {/* Dynamic Skill Proficiency & Performance Chart */}
+        <Section title="Activity & Proficiency Chart">
+          <View style={styles.chartCard}>
+            <Text style={styles.chartSubtitle}>Skill Mastery Breakdown</Text>
+            {(m.tags || ['Coding', 'Design', 'Communication']).slice(0, 4).map((skill, idx) => {
+              const percentages = [92, 85, 78, 88];
+              const pct = percentages[idx % percentages.length];
+              return (
+                <View key={skill} style={styles.chartRow}>
+                  <Text style={styles.chartSkillName}>{skill}</Text>
+                  <View style={styles.chartBarOuter}>
+                    <View style={[styles.chartBarInner, { width: `${pct}%` }]} />
+                  </View>
+                  <Text style={styles.chartPctText}>{pct}%</Text>
+                </View>
+              );
+            })}
+          </View>
+        </Section>
 
         {/* Can teach section */}
         <Section title="Can teach">
@@ -782,6 +816,78 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 20,
   },
+  editProfileBtn: {
+    backgroundColor: '#8b5cf6',
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editProfileBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  logoutBtn: {
+    backgroundColor: '#fef2f2',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutBtnText: {
+    color: '#dc2626',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  chartCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+  },
+  chartSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8C8797',
+    marginBottom: 12,
+  },
+  chartRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  chartSkillName: {
+    width: 90,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#342F3D',
+  },
+  chartBarOuter: {
+    flex: 1,
+    height: 10,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginHorizontal: 8,
+  },
+  chartBarInner: {
+    height: '100%',
+    backgroundColor: '#8b5cf6',
+    borderRadius: 5,
+  },
+  chartPctText: {
+    width: 36,
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#8b5cf6',
+    textAlign: 'right',
+  },
   chatBtn: {
     flex: 1,
     flexDirection: 'row',
@@ -1056,24 +1162,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
-  },
-  editProfileBtn: {
-    flex: 1,
-    backgroundColor: '#8b5cf6',
-    borderRadius: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(139, 92, 246, 0.25)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  editProfileBtnText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
   },
   editModalContainer: {
     padding: 24,

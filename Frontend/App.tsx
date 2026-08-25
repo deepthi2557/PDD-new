@@ -1,5 +1,5 @@
 import './src/lib/polyfill';
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -93,6 +93,56 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 export default function App() {
   const [routeStack, setRouteStack] = useState<Array<{ name: string; params?: any }>>([{ name: 'Login' }]);
   const [activeTab, setActiveTab] = useState<'HomeTab' | 'ActivityTab' | 'ChatTab' | 'LeaderboardTab' | 'ProfileTab'>('HomeTab');
+  const [activeNotification, setActiveNotification] = useState<{ title: string; body: string } | null>(null);
+
+  const playChimeSound = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        }
+      }
+    } catch (e) {
+      // Audio context catch
+    }
+  };
+
+  useEffect(() => {
+    // Poll for new messages every 4 seconds
+    let lastMsgCount = 0;
+    const interval = setInterval(() => {
+      try {
+        const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
+        const totalUnread = chatsList.reduce((acc: number, c: any) => acc + (c.unread || 0), 0);
+        if (totalUnread > lastMsgCount && lastMsgCount >= 0) {
+          const lastChat = chatsList.find((c: any) => c.unread > 0);
+          if (lastChat) {
+            playChimeSound();
+            setActiveNotification({
+              title: `💬 New message from ${lastChat.name}`,
+              body: lastChat.last || 'Sent you a message'
+            });
+            setTimeout(() => setActiveNotification(null), 4000);
+          }
+        }
+        lastMsgCount = totalUnread;
+      } catch (e) {}
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const currentRoute = routeStack[routeStack.length - 1] || { name: 'Login' };
 
@@ -183,6 +233,20 @@ export default function App() {
   return (
     <AppNavigationContext.Provider value={{ navigation, route }}>
       <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
+        {/* Status Bar In-App Notification Banner */}
+        {activeNotification && (
+          <TouchableOpacity 
+            style={styles.notificationBanner}
+            onPress={() => {
+              setActiveNotification(null);
+              navigation.navigate('Main', { screen: 'ChatTab' });
+            }}
+          >
+            <Text style={styles.notificationBannerTitle}>{activeNotification.title}</Text>
+            <Text style={styles.notificationBannerBody} numberOfLines={1}>{activeNotification.body}</Text>
+          </TouchableOpacity>
+        )}
+
         <ErrorBoundary>
           <SafeAreaProvider>
             <QueryClientProvider client={queryClient}>
@@ -216,5 +280,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
+  },
+  notificationBanner: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    right: 20,
+    backgroundColor: '#1e1b4b',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    zIndex: 9999,
+    shadowColor: '#7c3aed',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  notificationBannerTitle: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  notificationBannerBody: {
+    color: '#cbd5e1',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
