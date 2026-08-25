@@ -1,3 +1,4 @@
+import React, { useContext } from 'react';
 import { useNavigate, useLocation, useParams } from "./router-bridge";
 
 export function useIsFocused() {
@@ -6,6 +7,19 @@ export function useIsFocused() {
 
 export function useNavigation<T = any>() {
   const navigate = useNavigate();
+
+  // Check if AppNavigationContext exists from App.tsx
+  try {
+    const { AppNavigationContext } = require('../../App');
+    if (AppNavigationContext) {
+      const ctx = useContext(AppNavigationContext);
+      if (ctx && ctx.navigation && ctx.navigation.navigate) {
+        return ctx.navigation;
+      }
+    }
+  } catch (e) {
+    // Fallback to web router bridge
+  }
 
   return {
     navigate: (screenName: string, params?: Record<string, any>) => {
@@ -65,6 +79,18 @@ export function useNavigation<T = any>() {
 }
 
 export function useRoute<T = any>(): { params: T; name: string } {
+  try {
+    const { AppNavigationContext } = require('../../App');
+    if (AppNavigationContext) {
+      const ctx = useContext(AppNavigationContext);
+      if (ctx && ctx.route) {
+        return ctx.route;
+      }
+    }
+  } catch (e) {
+    // Fallback
+  }
+
   const location = useLocation();
   const routeParams = useParams({ strict: false });
 

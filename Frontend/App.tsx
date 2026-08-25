@@ -1,13 +1,8 @@
 import './src/lib/polyfill';
-
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import React, { useState, Suspense } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useState, createContext, useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { supabase } from './src/lib/supabase';
 
 import LoginScreen from './src/routes/login';
 import SignupScreen from './src/routes/signup';
@@ -22,6 +17,19 @@ import CommunityScreen from './src/routes/community';
 import NotificationsScreen from './src/routes/notifications';
 import VideoScreen from './src/routes/video.$id';
 import ProfileSetupScreen from './src/routes/profile.setup';
+
+const queryClient = new QueryClient();
+
+// Navigation Context
+export const AppNavigationContext = createContext<{
+  navigation: any;
+  route: any;
+}>({
+  navigation: { navigate: () => {}, goBack: () => {} },
+  route: { name: 'Login', params: {} },
+});
+
+export const useAppNavigation = () => useContext(AppNavigationContext);
 
 // Error boundary state interfaces
 interface ErrorBoundaryProps {
@@ -54,11 +62,6 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           <Text style={{ fontSize: 14, color: '#f8fafc', marginBottom: 16, textAlign: 'center' }}>
             {String(this.state.error?.message || this.state.error || 'Unknown Error')}
           </Text>
-          <ScrollView style={{ width: '100%', maxHeight: 300, backgroundColor: '#1e293b', borderRadius: 16, padding: 16 }}>
-            <Text style={{ fontFamily: 'monospace', fontSize: 11, color: '#f87171' }}>
-              {String(this.state.error?.stack || '')}
-            </Text>
-          </ScrollView>
           <TouchableOpacity 
             style={{ marginTop: 24, backgroundColor: '#7c3aed', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 16 }}
             onPress={() => this.setState({ hasError: false, error: null })}
@@ -72,136 +75,131 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-export type RootStackParamList = {
-  Login: undefined;
-  Signup: undefined;
-  Main: undefined;
-  Notifications: undefined;
-  Book: { id?: string } | undefined;
-  ChatDetails: { id: string };
-  ProfileDetails: { id: string };
-  Community: undefined;
-  VideoDetails: { id: string };
-  ProfileSetup: undefined;
-};
-
-export type MainTabParamList = {
-  HomeTab: undefined;
-  ActivityTab: undefined;
-  ChatTab: undefined;
-  LeaderboardTab: undefined;
-  ProfileTab: { id: string } | undefined;
-};
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator<MainTabParamList>();
-const queryClient = new QueryClient();
-
-function TabNavigator() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#8b5cf6',
-        tabBarInactiveTintColor: '#8C8797',
-      }}
-    >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏠</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ActivityTab"
-        component={ActivityScreen}
-        options={{
-          tabBarLabel: 'Activity',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>📅</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ChatTab"
-        component={ChatListScreen}
-        options={{
-          tabBarLabel: 'Chat',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>💬</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="LeaderboardTab"
-        component={LeaderboardScreen}
-        options={{
-          tabBarLabel: 'Rank',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>🏆</Text>,
-        }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileDetailsScreen}
-        initialParams={{ id: 'me' }}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }: { color: string }) => <Text style={{ color, fontSize: 18 }}>👤</Text>,
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
 export default function App() {
+  const [routeStack, setRouteStack] = useState<Array<{ name: string; params?: any }>>([{ name: 'Login' }]);
+  const [activeTab, setActiveTab] = useState<'HomeTab' | 'ActivityTab' | 'ChatTab' | 'LeaderboardTab' | 'ProfileTab'>('HomeTab');
+
+  const currentRoute = routeStack[routeStack.length - 1] || { name: 'Login' };
+
+  const navigation = {
+    navigate: (routeName: string, params?: any) => {
+      if (routeName === 'Main') {
+        if (params?.screen) setActiveTab(params.screen);
+        setRouteStack([{ name: 'Main', params }]);
+      } else if (routeName === 'Login' || routeName === 'Signup') {
+        setRouteStack([{ name: routeName, params }]);
+      } else {
+        setRouteStack(prev => [...prev, { name: routeName, params }]);
+      }
+    },
+    goBack: () => {
+      setRouteStack(prev => (prev.length > 1 ? prev.slice(0, -1) : prev));
+    },
+    setOptions: () => {},
+    addListener: () => () => {},
+  };
+
+  const route = {
+    name: currentRoute.name,
+    params: currentRoute.params || {},
+  };
+
+  const renderContent = () => {
+    switch (currentRoute.name) {
+      case 'Login':
+        return <LoginScreen navigation={navigation} route={route} />;
+      case 'Signup':
+        return <SignupScreen navigation={navigation} route={route} />;
+      case 'Main':
+        return (
+          <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
+            <View style={{ flex: 1 }}>
+              {activeTab === 'HomeTab' && <HomeScreen navigation={navigation} route={route} />}
+              {activeTab === 'ActivityTab' && <ActivityScreen navigation={navigation} route={route} />}
+              {activeTab === 'ChatTab' && <ChatListScreen navigation={navigation} route={route} />}
+              {activeTab === 'LeaderboardTab' && <LeaderboardScreen navigation={navigation} route={route} />}
+              {activeTab === 'ProfileTab' && <ProfileDetailsScreen navigation={navigation} route={{ ...route, params: { id: 'me' } }} />}
+            </View>
+
+            {/* Custom Glassmorphic Tab Bar */}
+            <View style={styles.tabBar}>
+              <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('HomeTab')}>
+                <Text style={{ fontSize: 18, color: activeTab === 'HomeTab' ? '#8b5cf6' : '#8C8797' }}>🏠</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: activeTab === 'HomeTab' ? '#8b5cf6' : '#8C8797', fontWeight: activeTab === 'HomeTab' ? 'bold' : 'normal' }}>Home</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ActivityTab')}>
+                <Text style={{ fontSize: 18, color: activeTab === 'ActivityTab' ? '#8b5cf6' : '#8C8797' }}>📅</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: activeTab === 'ActivityTab' ? '#8b5cf6' : '#8C8797', fontWeight: activeTab === 'ActivityTab' ? 'bold' : 'normal' }}>Activity</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ChatTab')}>
+                <Text style={{ fontSize: 18, color: activeTab === 'ChatTab' ? '#8b5cf6' : '#8C8797' }}>💬</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: activeTab === 'ChatTab' ? '#8b5cf6' : '#8C8797', fontWeight: activeTab === 'ChatTab' ? 'bold' : 'normal' }}>Chat</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('LeaderboardTab')}>
+                <Text style={{ fontSize: 18, color: activeTab === 'LeaderboardTab' ? '#8b5cf6' : '#8C8797' }}>🏆</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: activeTab === 'LeaderboardTab' ? '#8b5cf6' : '#8C8797', fontWeight: activeTab === 'LeaderboardTab' ? 'bold' : 'normal' }}>Rank</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ProfileTab')}>
+                <Text style={{ fontSize: 18, color: activeTab === 'ProfileTab' ? '#8b5cf6' : '#8C8797' }}>👤</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: activeTab === 'ProfileTab' ? '#8b5cf6' : '#8C8797', fontWeight: activeTab === 'ProfileTab' ? 'bold' : 'normal' }}>Profile</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+      case 'Notifications':
+        return <NotificationsScreen navigation={navigation} route={route} />;
+      case 'Book':
+        return <BookScreen navigation={navigation} route={route} />;
+      case 'ChatDetails':
+        return <ChatDetailsScreen navigation={navigation} route={route} />;
+      case 'ProfileDetails':
+        return <ProfileDetailsScreen navigation={navigation} route={route} />;
+      case 'Community':
+        return <CommunityScreen navigation={navigation} route={route} />;
+      case 'VideoDetails':
+        return <VideoScreen navigation={navigation} route={route} />;
+      case 'ProfileSetup':
+        return <ProfileSetupScreen navigation={navigation} route={route} />;
+      default:
+        return <LoginScreen navigation={navigation} route={route} />;
+    }
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
-      <ErrorBoundary>
-        <SafeAreaProvider>
-          <QueryClientProvider client={queryClient}>
-            <NavigationContainer initialState={undefined}>
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: '#FAF9FC' },
-                }}
-              >
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Main" component={TabNavigator} />
-                <Stack.Screen name="Signup" component={SignupScreen} />
-                <Stack.Screen name="Notifications" component={NotificationsScreen} />
-                <Stack.Screen name="Book" component={BookScreen} />
-                <Stack.Screen name="ChatDetails" component={ChatDetailsScreen} />
-                <Stack.Screen name="ProfileDetails" component={ProfileDetailsScreen} />
-                <Stack.Screen name="Community" component={CommunityScreen} />
-                <Stack.Screen name="VideoDetails" component={VideoScreen} />
-                <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </QueryClientProvider>
-        </SafeAreaProvider>
-      </ErrorBoundary>
-    </View>
+    <AppNavigationContext.Provider value={{ navigation, route }}>
+      <View style={{ flex: 1, backgroundColor: '#FAF9FC' }}>
+        <ErrorBoundary>
+          <SafeAreaProvider>
+            <QueryClientProvider client={queryClient}>
+              {renderContent()}
+            </QueryClientProvider>
+          </SafeAreaProvider>
+        </ErrorBoundary>
+      </View>
+    </AppNavigationContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
-    bottom: 20,
-    left: '4%',
-    right: '4%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
     height: 64,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    elevation: 4,
-    shadowColor: 'rgba(94, 84, 112, 0.1)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    paddingBottom: 8,
-    paddingTop: 8,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    elevation: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    paddingBottom: 4,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justify: 'center',
+    paddingVertical: 6,
   },
 });
