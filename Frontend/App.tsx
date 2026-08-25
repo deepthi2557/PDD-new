@@ -413,14 +413,14 @@ export default function App() {
           <QueryClientProvider client={queryClient}>
             <NavigationContainer initialState={undefined}>
               <Stack.Navigator
-                initialRouteName="Main"
+                initialRouteName="Login"
                 screenOptions={{
                   headerShown: false,
                   contentStyle: { backgroundColor: '#FAF9FC' },
                 }}
               >
-                <Stack.Screen name="Main" component={TabNavigator} />
                 <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Main" component={TabNavigator} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
                 <Stack.Screen name="Notifications" component={NotificationsScreen} />
                 <Stack.Screen name="Book" component={BookScreen} />
