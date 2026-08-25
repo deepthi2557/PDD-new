@@ -2,7 +2,6 @@ import { createFileRoute } from '../lib/router-bridge';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 
 export const Route = (createFileRoute as any)('/login')({
@@ -66,7 +65,7 @@ export default function Login(props: any) {
         {/* Brand Header Banner */}
         <View style={styles.headerBanner}>
           <View style={styles.logoBadge}>
-            <Sparkles color="#7c3aed" size={28} />
+            <Text style={{ fontSize: 32 }}>✨</Text>
           </View>
           <Text style={styles.brandTitle}>SkillSwap</Text>
           <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
@@ -85,7 +84,7 @@ export default function Login(props: any) {
 
           <Text style={styles.fieldLabel}>Email or Username</Text>
           <View style={styles.inputBox}>
-            <Mail color="#7c3aed" size={20} style={styles.inputIcon} />
+            <Text style={{ fontSize: 18, marginRight: 10 }}>📧</Text>
             <TextInput
               placeholder="Enter your email"
               placeholderTextColor="#94a3b8"
@@ -100,7 +99,7 @@ export default function Login(props: any) {
 
           <Text style={styles.fieldLabel}>Password</Text>
           <View style={styles.inputBox}>
-            <Lock color="#7c3aed" size={20} style={styles.inputIcon} />
+            <Text style={{ fontSize: 18, marginRight: 10 }}>🔒</Text>
             <TextInput
               placeholder="Enter your password"
               placeholderTextColor="#94a3b8"
@@ -127,7 +126,7 @@ export default function Login(props: any) {
             ) : (
               <View style={styles.btnRow}>
                 <Text style={styles.primaryBtnText}>Log In</Text>
-                <ArrowRight color="#ffffff" size={18} style={{ marginLeft: 8 }} />
+                <Text style={{ color: '#ffffff', fontSize: 16, marginLeft: 8 }}>➜</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -138,7 +137,7 @@ export default function Login(props: any) {
             onPress={bypassToApp}
             activeOpacity={0.8}
           >
-            <Sparkles color="#ffffff" size={16} style={{ marginRight: 6 }} />
+            <Text style={{ fontSize: 16, marginRight: 8, color: '#ffffff' }}>⚡</Text>
             <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
           </TouchableOpacity>
         </View>
