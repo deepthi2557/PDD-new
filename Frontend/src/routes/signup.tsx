@@ -81,6 +81,15 @@ export default function Signup() {
     }
   };
 
+  const AVATAR_PRESETS = [
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  ];
+
   const handleSignup = async () => {
     const { name, phone, email, password, confirmPassword, avatarUrl } = formState;
 
@@ -107,6 +116,10 @@ export default function Signup() {
       : DEFAULT_AVATAR;
 
     try {
+      const redirectUrl = (typeof window !== 'undefined' && window.location && window.location.origin) 
+        ? window.location.origin 
+        : undefined;
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password,
@@ -118,7 +131,7 @@ export default function Signup() {
             tags: selectedSkills,
             avatar_url: finalAvatar,
           },
-          emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -178,8 +191,6 @@ export default function Signup() {
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
 
-
-
         {/* Profile Image Picker */}
         <View style={styles.avatarPickerContainer}>
           <TouchableOpacity 
@@ -195,13 +206,35 @@ export default function Signup() {
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Camera color="#8C8797" size={32} />
-                <Text style={styles.avatarPlaceholderText}>Upload</Text>
+                <Text style={styles.avatarPlaceholderText}>Tap to pick</Text>
               </View>
             )}
           </TouchableOpacity>
           <Text style={styles.avatarLabel}>
-            {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Upload Profile Picture (Optional)'}
+            {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Choose Profile Picture (Optional)'}
           </Text>
+
+          {/* Quick Select Presets Grid */}
+          <Text style={{ fontSize: 11, color: '#8C8797', marginTop: 8, marginBottom: 6 }}>Tap to select an avatar preset:</Text>
+          <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 10 }}>
+            {AVATAR_PRESETS.map((url, idx) => (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => setFormState(prev => ({ ...prev, avatarUrl: url }))}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  borderWidth: formState.avatarUrl === url ? 2 : 1,
+                  borderColor: formState.avatarUrl === url ? '#8b5cf6' : '#E8E5EC',
+                  overflow: 'hidden'
+                }}
+              >
+                <Image source={{ uri: url }} style={{ width: '100%', height: '100%' }} />
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <View style={styles.urlInputContainer}>
             <TextInput
               placeholder="Or paste image URL directly..."
