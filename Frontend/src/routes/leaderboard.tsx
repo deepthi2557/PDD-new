@@ -1,8 +1,9 @@
 import { createFileRoute } from '../lib/router-bridge';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { Trophy, TrendingUp, Crown } from 'lucide-react-native';
-import { leaderboard } from '../lib/data';
+import { fetchMentors } from '../lib/api';
+import { Mentor } from '../lib/data';
 
 export const Route = createFileRoute('/leaderboard')({
   component: Board,
@@ -12,6 +13,41 @@ const tabs = ['Mentors', 'Learners', 'Skills'] as const;
 
 export default function Board() {
   const [tab, setTab] = useState<typeof tabs[number]>('Mentors');
+  const [realUsers, setRealUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    fetchMentors()
+      .then((data) => {
+        if (!active) return;
+        // Rank real users dynamically based on points/rating/sessions
+        const ranked = data.map((user, idx) => {
+          const calculatedScore = Math.round((user.rating || 4.8) * 900 + (user.sessions || 10) * 45 + (user.reviews || 5) * 12);
+          return {
+            rank: idx + 1,
+            name: user.name,
+            avatar: user.avatar,
+            score: calculatedScore,
+            badge: user.badge === 'Top Contributor' ? '🏆' : user.badge === 'Verified Mentor' ? '🎖️' : '⭐',
+            expertise: user.expertise,
+          };
+        }).sort((a, b) => b.score - a.score).map((u, i) => ({ ...u, rank: i + 1 }));
+
+        setRealUsers(ranked);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Leaderboard load error:', err);
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
+  }, []);
+
+  const top3 = realUsers.slice(0, 3);
+  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -23,28 +59,33 @@ export default function Board() {
 
       {/* Podium Card Banner */}
       <View style={styles.podiumBanner}>
-        <Text style={styles.podiumSubTitle}>This week</Text>
-        <View style={styles.podiumContainer}>
-          {[1, 0, 2].map((idx, i) => {
-            const heights = [80, 112, 64];
-            const mentor = leaderboard.mentors[idx];
-            if (!mentor) return null;
+        <Text style={styles.podiumSubTitle}>Live Rankings</Text>
 
-            return (
-              <View key={mentor.rank} style={styles.podiumColumn}>
-                {idx === 0 && <Crown color="#D97706" size={20} style={styles.crownIcon} />}
-                <Image source={{ uri: mentor.avatar }} style={styles.podiumAvatar} />
-                <Text style={styles.podiumName} numberOfLines={1}>
-                  {mentor.name.split(' ')[0]}
-                </Text>
-                <Text style={styles.podiumScore}>{mentor.score}</Text>
-                <View style={[styles.podiumBox, { height: heights[i] }]}>
-                  <Text style={styles.podiumRankText}>#{mentor.rank}</Text>
+        {loading ? (
+          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginVertical: 20 }} />
+        ) : (
+          <View style={styles.podiumContainer}>
+            {podiumOrder.map((user, i) => {
+              if (!user) return null;
+              const isFirst = user.rank === 1;
+              const heights = [80, 112, 64];
+
+              return (
+                <View key={user.name + i} style={styles.podiumColumn}>
+                  {isFirst && <Crown color="#D97706" size={20} style={styles.crownIcon} />}
+                  <Image source={{ uri: user.avatar }} style={styles.podiumAvatar} />
+                  <Text style={styles.podiumName} numberOfLines={1}>
+                    {user.name.split(' ')[0]}
+                  </Text>
+                  <Text style={styles.podiumScore}>{user.score} pts</Text>
+                  <View style={[styles.podiumBox, { height: heights[i % heights.length] }]}>
+                    <Text style={styles.podiumRankText}>#{user.rank}</Text>
+                  </View>
                 </View>
-              </View>
-            );
-          })}
-        </View>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       {/* Tabs Menu */}
@@ -75,15 +116,17 @@ export default function Board() {
       </View>
 
       {/* Tab Contents */}
-      {tab !== 'Skills' ? (
+      {loading ? (
+        <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
+      ) : tab !== 'Skills' ? (
         <View style={styles.listContainer}>
-          {leaderboard.mentors.map((m) => (
-            <View key={m.rank} style={styles.listCard}>
+          {realUsers.map((m) => (
+            <View key={m.name + m.rank} style={styles.listCard}>
               <Text style={styles.rankIndex}>#{m.rank}</Text>
               <Image source={{ uri: m.avatar }} style={styles.listAvatar} />
               <View style={styles.listInfo}>
                 <Text style={styles.listName}>{m.name}</Text>
-                <Text style={styles.listScore}>{m.score} pts</Text>
+                <Text style={styles.listScore}>{m.score} pts · {m.expertise}</Text>
               </View>
               {m.badge && <Text style={styles.listBadgeEmoji}>{m.badge}</Text>}
             </View>
@@ -91,7 +134,12 @@ export default function Board() {
         </View>
       ) : (
         <View style={styles.listContainer}>
-          {leaderboard.skills.map((s, i) => (
+          {[
+            { name: 'Python & AI', growth: '+42% this week' },
+            { name: 'React & TypeScript', growth: '+38% this week' },
+            { name: 'UI/UX & Figma', growth: '+31% this week' },
+            { name: 'Node.js & Backend', growth: '+25% this week' },
+          ].map((s, i) => (
             <View key={s.name} style={styles.listCard}>
               <Text style={styles.rankIndex}>#{i + 1}</Text>
               <Text style={styles.skillName}>{s.name}</Text>
@@ -149,7 +197,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     marginBottom: 20,
-    backgroundImage: 'linear-gradient(135deg, #f5f3ff, #eff6ff, #f0fdf4)', // gradient-hero placeholder mapping
   },
   podiumSubTitle: {
     fontSize: 12,
@@ -159,7 +206,7 @@ const styles = StyleSheet.create({
   },
   podiumContainer: {
     flexDirection: 'row',
-    alignItems: 'end',
+    alignItems: 'flex-end',
     justifyContent: 'space-around',
     marginTop: 16,
     gap: 8,
@@ -178,10 +225,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#ffffff',
     backgroundColor: '#F3F0F6',
-    shadowColor: 'rgba(94, 84, 112, 0.15)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
   },
   podiumName: {
     fontSize: 11,
@@ -229,11 +272,6 @@ const styles = StyleSheet.create({
   },
   tabButtonActive: {
     backgroundColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
   },
   tabButtonText: {
     fontSize: 14,
@@ -331,10 +369,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     alignItems: 'center',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
   },
   badgeEmoji: {
     fontSize: 28,

@@ -1,10 +1,10 @@
 import { createFileRoute } from '../lib/router-bridge';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
-import { activity, mentors, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
+import { Mentor } from '../lib/data';
 
 export const Route = createFileRoute('/activity')({
   component: Activity,
@@ -18,18 +18,27 @@ export default function Activity() {
   const [tab, setTab] = useState<typeof tabs[number]>('Learning');
   const [suggestedList, setSuggestedList] = useState<Mentor[]>([]);
   const [localBookings, setLocalBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
     fetchMentors()
       .then((data) => {
-        setSuggestedList(data.slice(0, 2));
+        if (active) {
+          setSuggestedList(data.slice(0, 3));
+          setLoading(false);
+        }
       })
       .catch((err) => {
         console.error(err);
+        if (active) setLoading(false);
       });
+
+    return () => { active = false; };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isFocused) {
       try {
         const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
@@ -39,6 +48,16 @@ export default function Activity() {
       }
     }
   }, [isFocused]);
+
+  const totalBooked = localBookings.length;
+  const completedSessions = localBookings.filter(b => b.status === 'completed').length;
+  const missedSessions = localBookings.filter(b => b.status === 'missed' || b.status === 'cancelled').length;
+
+  const attendancePct = totalBooked > 0 
+    ? Math.round((completedSessions / totalBooked) * 100) 
+    : 100;
+
+  const trustScore = Math.min(100, Math.max(70, 95 + completedSessions * 2 - missedSessions * 5));
 
   const getItems = () => {
     const mergedLearning = localBookings;
@@ -59,13 +78,13 @@ export default function Activity() {
       <View style={styles.gridStats}>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Trust score</Text>
-          <Text style={[styles.statValue, styles.statValuePurple]}>96</Text>
-          <Text style={styles.statSubTextOnline}>⭐ Top tier</Text>
+          <Text style={[styles.statValue, styles.statValuePurple]}>{trustScore}</Text>
+          <Text style={styles.statSubTextOnline}>⭐ {trustScore > 90 ? 'Top tier' : 'Verified'}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Attendance</Text>
-          <Text style={styles.statValue}>98%</Text>
-          <Text style={styles.statSubTextMuted}>0 missed sessions</Text>
+          <Text style={styles.statValue}>{attendancePct}%</Text>
+          <Text style={styles.statSubTextMuted}>{missedSessions} missed sessions</Text>
         </View>
       </View>
 
@@ -105,62 +124,72 @@ export default function Activity() {
 
       {/* List Items */}
       <View style={styles.itemList}>
-        {getItems().map((it) => (
-          <View key={it.id} style={styles.itemCard}>
-            <View
-              style={[
-                styles.itemIconBox,
-                it.status === 'upcoming' ? styles.iconBoxPurple : styles.iconBoxMint,
-              ]}
-            >
-              {it.status === 'upcoming' ? (
-                <Clock color="#ffffff" size={20} />
-              ) : (
-                <CheckCircle2 color="#22C55E" size={20} />
+        {getItems().length === 0 ? (
+          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 20 }}>
+            No sessions found in {tab.toLowerCase()}.
+          </Text>
+        ) : (
+          getItems().map((it) => (
+            <View key={it.id || it.skill + it.time} style={styles.itemCard}>
+              <View
+                style={[
+                  styles.itemIconBox,
+                  it.status === 'upcoming' ? styles.iconBoxPurple : styles.iconBoxMint,
+                ]}
+              >
+                {it.status === 'upcoming' ? (
+                  <Clock color="#ffffff" size={20} />
+                ) : (
+                  <CheckCircle2 color="#22C55E" size={20} />
+                )}
+              </View>
+
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemTitle} numberOfLines={1}>{it.skill}</Text>
+                <Text style={styles.itemSubtitle} numberOfLines={1}>with {it.with}</Text>
+                <Text style={styles.itemTime}>{it.time}</Text>
+              </View>
+
+              {it.rating > 0 && (
+                <View style={styles.ratingBadge}>
+                  <Star color="#F59E0B" size={10} fill="#F59E0B" />
+                  <Text style={styles.ratingText}>{it.rating}</Text>
+                </View>
               )}
             </View>
-
-            <View style={styles.itemInfo}>
-              <Text style={styles.itemTitle} numberOfLines={1}>{it.skill}</Text>
-              <Text style={styles.itemSubtitle} numberOfLines={1}>with {it.with}</Text>
-              <Text style={styles.itemTime}>{it.time}</Text>
-            </View>
-
-            {it.rating > 0 && (
-              <View style={styles.ratingBadge}>
-                <Star color="#F59E0B" size={10} fill="#F59E0B" />
-                <Text style={styles.ratingText}>{it.rating}</Text>
-              </View>
-            )}
-          </View>
-        ))}
+          ))
+        )}
       </View>
 
       {/* Suggested For You Header */}
       <View style={styles.sectionHeader}>
         <Sparkles color="#8b5cf6" size={16} style={styles.sectionIcon} />
-        <Text style={styles.sectionTitle}>Suggested for you</Text>
+        <Text style={styles.sectionTitle}>Suggested peers for you</Text>
       </View>
 
       {/* Suggested List */}
       <View style={styles.suggestedList}>
-        {(suggestedList.length > 0 ? suggestedList : mentors.slice(0, 2)).map((m) => (
-          <View key={m.id} style={styles.suggestedCard}>
-            <Image source={{ uri: m.avatar }} style={styles.suggestedAvatar} />
-            <View style={styles.suggestedInfo}>
-              <Text style={styles.suggestedName} numberOfLines={1}>{m.name}</Text>
-              <Text style={styles.suggestedExpertise} numberOfLines={1}>
-                Matches interest in {m.tags[0]}
-              </Text>
+        {loading ? (
+          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginVertical: 16 }} />
+        ) : (
+          suggestedList.map((m) => (
+            <View key={m.id} style={styles.suggestedCard}>
+              <Image source={{ uri: m.avatar }} style={styles.suggestedAvatar} />
+              <View style={styles.suggestedInfo}>
+                <Text style={styles.suggestedName} numberOfLines={1}>{m.name}</Text>
+                <Text style={styles.suggestedExpertise} numberOfLines={1}>
+                  {m.expertise || 'SkillSwap Peer'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ProfileDetails', { id: m.id })}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.suggestedViewLink}>View Profile</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ProfileDetails', { id: m.id })}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.suggestedViewLink}>View</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+          ))
+        )}
       </View>
 
       {/* Caution Reminder Banner */}
@@ -254,11 +283,6 @@ const styles = StyleSheet.create({
   },
   tabButtonActive: {
     backgroundColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
   },
   tabButtonText: {
     fontSize: 12,
@@ -282,11 +306,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
   },
   itemIconBox: {
     width: 48,

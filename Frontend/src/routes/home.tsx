@@ -357,12 +357,24 @@ export default function Home() {
       <View style={styles.cardList}>
         {loading ? (
           <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
-        ) : mentorsList.length === 0 ? (
+        ) : mentorsList.filter((m) => {
+            if (currentUser && (m.id === currentUser.id || (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase()))) {
+              return false;
+            }
+            return true;
+          }).length === 0 ? (
           <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 32 }}>
             No mentors found matching your search.
           </Text>
         ) : (
-          mentorsList.map((m) => <MentorCard key={m.id} m={m} />)
+          mentorsList
+            .filter((m) => {
+              if (currentUser && (m.id === currentUser.id || (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase()))) {
+                return false;
+              }
+              return true;
+            })
+            .map((m) => <MentorCard key={m.id} m={m} />)
         )}
       </View>
       {renderDoubleMatchModal()}
@@ -383,12 +395,29 @@ const badgeIcon = {
 };
 
 export function calculateMatchScore(mentorTags: string[]): number {
-  const myInterests = ['Python', 'React', 'Figma', 'Communication', 'Calculus', 'TypeScript', 'TensorFlow'];
-  const matches = mentorTags.filter(tag => myInterests.includes(tag)).length;
+  let mySkills: string[] = ['Python', 'React', 'Figma', 'Communication', 'Calculus', 'TypeScript', 'TensorFlow'];
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const prof = JSON.parse(localStorage.getItem('my_profile') || 'null');
+      if (prof && prof.tags && prof.tags.length > 0) {
+        mySkills = [...prof.tags, ...(prof.interests || [])];
+      }
+    }
+  } catch (e) {}
+
+  if (!mentorTags || mentorTags.length === 0) return 75;
+
+  const matches = mentorTags.filter(tag => 
+    mySkills.some(s => s.toLowerCase().includes(tag.toLowerCase()) || tag.toLowerCase().includes(s.toLowerCase()))
+  ).length;
+
   if (matches > 0) {
-    return Math.min(65 + matches * 10, 98);
+    return Math.min(75 + matches * 10, 99);
   }
-  return 55 + (mentorTags.length % 3) * 8;
+  
+  const seedString = mentorTags.join('');
+  const hash = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return 70 + (hash % 24);
 }
 
 export function MentorCard({ m }: { m: Mentor }) {

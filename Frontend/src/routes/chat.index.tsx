@@ -1,9 +1,9 @@
 import { createFileRoute } from '../lib/router-bridge';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
-import { chats } from '../lib/data';
+import { fetchMentors } from '../lib/api';
 
 export const Route = createFileRoute('/chat/')({
   component: ChatList,
@@ -11,17 +11,43 @@ export const Route = createFileRoute('/chat/')({
 
 export default function ChatList() {
   const navigation = useNavigation<any>();
-  const [chatsList, setChatsList] = React.useState<any[]>([]);
+  const [chatsList, setChatsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-  React.useEffect(() => {
-    const localChats = localStorage.getItem('chats_list');
-    if (localChats) {
-      setChatsList(JSON.parse(localChats));
-    } else {
-      setChatsList(chats);
-      localStorage.setItem('chats_list', JSON.stringify(chats));
-    }
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+
+    fetchMentors()
+      .then((users) => {
+        if (!active) return;
+        // Map real registered users to chat cards
+        const realChatUsers = users.map((u, idx) => ({
+          id: u.id,
+          name: u.name,
+          avatar: u.avatar,
+          last: u.expertise ? `Available for ${u.expertise} skill swap session` : 'Let\'s connect and swap skills!',
+          time: `${(idx % 5) + 1}h`,
+          unread: idx % 3 === 0 ? 1 : 0,
+          online: u.status === 'online' || idx % 2 === 0,
+        }));
+
+        setChatsList(realChatUsers);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Chat load error:', err);
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
   }, []);
+
+  const filteredChats = chatsList.filter((c) => 
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.last.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -34,42 +60,52 @@ export default function ChatList() {
         <TextInput
           placeholder="Search conversations"
           placeholderTextColor="#8C8797"
+          value={search}
+          onChangeText={setSearch}
           style={styles.searchInput}
         />
       </View>
 
       {/* Conversations List */}
       <View style={styles.chatList}>
-        {chatsList.map((c) => (
-          <TouchableOpacity
-            key={c.id}
-            onPress={() => navigation.navigate('ChatDetails', { id: c.id })}
-            style={styles.chatCard}
-            activeOpacity={0.7}
-          >
-            <View style={styles.avatarContainer}>
-              <Image source={{ uri: c.avatar }} style={styles.avatar} />
-              {c.online && <View style={styles.statusDot} />}
-            </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
+        ) : filteredChats.length === 0 ? (
+          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 32 }}>
+            No conversations found matching your search.
+          </Text>
+        ) : (
+          filteredChats.map((c) => (
+            <TouchableOpacity
+              key={c.id}
+              onPress={() => navigation.navigate('ChatDetails', { id: c.id })}
+              style={styles.chatCard}
+              activeOpacity={0.7}
+            >
+              <View style={styles.avatarContainer}>
+                <Image source={{ uri: c.avatar }} style={styles.avatar} />
+                {c.online && <View style={styles.statusDot} />}
+              </View>
 
-            <View style={styles.chatContent}>
-              <View style={styles.row}>
-                <Text style={styles.name}>{c.name}</Text>
-                <Text style={styles.time}>{c.time}</Text>
+              <View style={styles.chatContent}>
+                <View style={styles.row}>
+                  <Text style={styles.name}>{c.name}</Text>
+                  <Text style={styles.time}>{c.time}</Text>
+                </View>
+                <View style={[styles.row, styles.messageRow]}>
+                  <Text style={styles.lastMessage} numberOfLines={1}>
+                    {c.last}
+                  </Text>
+                  {c.unread > 0 && (
+                    <View style={styles.unreadBadge}>
+                      <Text style={styles.unreadText}>{c.unread}</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-              <View style={[styles.row, styles.messageRow]}>
-                <Text style={styles.lastMessage} numberOfLines={1}>
-                  {c.last}
-                </Text>
-                {c.unread > 0 && (
-                  <View style={styles.unreadBadge}>
-                    <Text style={styles.unreadText}>{c.unread}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))
+        )}
       </View>
     </ScrollView>
   );

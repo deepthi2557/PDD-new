@@ -150,30 +150,79 @@ export default function Profile() {
   };
 
   React.useEffect(() => {
-    if (!id) return;
     let active = true;
     setLoading(true);
-    fetchMentorById(id)
-      .then((data) => {
-        if (active) {
-          setM(data);
-          setLocalFollowers(data.followers);
-          setLoading(false);
+
+    const loadProfile = async () => {
+      try {
+        const targetId = (!id || id === 'me') ? (currentUserId || 'me') : id;
+
+        // 1. Try fetching from backend API if targetId is specific
+        if (targetId && targetId !== 'me' && targetId !== currentUserId) {
+          try {
+            const data = await fetchMentorById(targetId);
+            if (active && data) {
+              setM(data);
+              setLocalFollowers(data.followers || 12);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            // continue fallback
+          }
         }
-      })
-      .catch((err) => {
-        console.error(err);
+
+        // 2. Load from local profile or Supabase user auth
+        let localProf: any = null;
+        try {
+          localProf = JSON.parse(localStorage.getItem('my_profile') || 'null');
+        } catch (e) {}
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const profileName = localProf?.name || user?.user_metadata?.full_name || (user?.email ? user.email.split('@')[0] : 'User Profile');
+        const profileAvatar = localProf?.avatar || user?.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+        const profileTags = localProf?.tags || ['React', 'Node.js', 'TypeScript', 'UI/UX'];
+
+        const activeMentor: Mentor = {
+          id: user?.id || targetId || 'me',
+          name: profileName,
+          avatar: profileAvatar,
+          expertise: localProf?.expertise || 'SkillSwap Member',
+          bio: localProf?.bio || 'Passionate about learning and sharing skills with peers on SkillSwap!',
+          rating: 4.9,
+          reviews: 18,
+          followers: 42,
+          sessions: 15,
+          teaches: profileTags.length,
+          tags: profileTags,
+          badge: 'Verified Mentor',
+          mode: 'Online',
+          confidence: 'High',
+          status: 'online',
+          level: 'Intermediate',
+          trustScore: 96,
+          completion: 98,
+          positive: 96,
+        };
+
         if (active) {
-          const fallback = mentors.find((x) => x.id === id) || mentors[0];
-          setM(fallback);
-          setLocalFollowers(fallback.followers);
-          setLoading(false);
+          setM(activeMentor);
+          setLocalFollowers(42);
         }
-      });
+      } catch (err) {
+        console.error('Profile load error:', err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadProfile();
+
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, currentUserId]);
 
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
