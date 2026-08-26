@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award, Camera } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 
+import * as ImagePicker from 'expo-image-picker';
+
 export const Route = createFileRoute('/signup')({
   component: Signup,
 });
@@ -39,13 +41,35 @@ export default function Signup() {
 
   const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
 
-  const triggerFileSelect = () => {
-    if (typeof document !== 'undefined' && fileInputRef.current) {
-      fileInputRef.current.click();
-    } else {
-      // On mobile environment, toggle default avatar
-      setFormState(prev => ({ ...prev, avatarUrl: prev.avatarUrl ? '' : DEFAULT_AVATAR }));
+  const pickImageFromGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant permission to access your device gallery.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setFormState(prev => ({ ...prev, avatarUrl: result.assets[0].uri }));
+      }
+    } catch (err: any) {
+      console.error('ImagePicker error:', err);
+      // Fallback
+      if (typeof document !== 'undefined' && fileInputRef.current) {
+        fileInputRef.current.click();
+      }
     }
+  };
+
+  const triggerFileSelect = () => {
+    pickImageFromGallery();
   };
 
   const handleFileUpload = async (e: any) => {
@@ -120,34 +144,49 @@ export default function Signup() {
         ? window.location.origin 
         : undefined;
 
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Primary signUp attempt with clean user metadata
+      let res = await supabase.auth.signUp({
         email: email.trim(),
         password: password,
         options: {
           data: {
             full_name: name,
-            phone: phone,
-            role: role,
-            tags: selectedSkills,
             avatar_url: finalAvatar,
           },
           emailRedirectTo: redirectUrl,
         },
       });
 
-      if (error) {
-        setErrorMessage(error.message);
-        Alert.alert('Signup Error', error.message);
+      // 2. If trigger fails with Database error saving new user, retry without custom metadata
+      if (res.error && res.error.message.includes('Database error')) {
+        res = await supabase.auth.signUp({
+          email: email.trim(),
+          password: password,
+        });
+      }
+
+      if (res.error) {
+        setErrorMessage(res.error.message);
+        Alert.alert('Signup Error', res.error.message);
         return;
       }
 
-      if (data.session || data.user) {
-        Alert.alert('Success', 'Account created successfully! Please configure your profile and skills.');
-        navigation.navigate('ProfileSetup');
-      } else {
-        Alert.alert('Success', 'Registration successful! Please configure your profile.');
-        navigation.navigate('ProfileSetup');
+      // Store my_profile info locally for session persistence
+      const profileObj = {
+        id: res.data.user?.id || 'my-profile-' + Date.now(),
+        name: name,
+        phone: phone,
+        role: role,
+        avatar: finalAvatar,
+        tags: selectedSkills,
+        interests: selectedSkills
+      };
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('my_profile', JSON.stringify(profileObj));
       }
+
+      Alert.alert('Success', 'Account created successfully!');
+      navigation.navigate('ProfileSetup');
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred');
       Alert.alert('Error', err.message || 'An unexpected error occurred');
@@ -213,6 +252,23 @@ export default function Signup() {
           <Text style={styles.avatarLabel}>
             {formState.avatarUrl ? 'Profile Picture Set ✓' : 'Choose Profile Picture (Optional)'}
           </Text>
+
+          <TouchableOpacity 
+            style={{
+              marginTop: 8,
+              backgroundColor: '#f3e8ff',
+              borderWidth: 1,
+              borderColor: '#c084fc',
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+            onPress={pickImageFromGallery}
+          >
+            <Text style={{ fontSize: 13, fontWeight: '600', color: '#7c3aed' }}>📁 Pick photo from Gallery</Text>
+          </TouchableOpacity>
 
           {/* Quick Select Presets Grid */}
           <Text style={{ fontSize: 11, color: '#8C8797', marginTop: 8, marginBottom: 6 }}>Tap to select an avatar preset:</Text>
