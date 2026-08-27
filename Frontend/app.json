@@ -2,6 +2,7 @@
   "expo": {
     "name": "SkillSwap",
     "slug": "skillswap",
+    "owner": "deepthi2557s-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
