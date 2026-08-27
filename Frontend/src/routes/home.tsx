@@ -1,8 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
-import React, { useState } from 'react';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Search, Bell, ChevronDown, Star, MessageCircle, CalendarPlus, ShieldCheck, Flame, Trophy, Sparkles, X } from 'lucide-react-native';
+import { 
+  Search, 
+  Bell, 
+  ChevronDown, 
+  Star, 
+  MessageCircle, 
+  CalendarPlus, 
+  ShieldCheck, 
+  Flame, 
+  Trophy, 
+  Sparkles, 
+  X, 
+  SlidersHorizontal,
+  ArrowRight,
+  BookOpen
+} from 'lucide-react';
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -12,6 +26,7 @@ export const Route = createFileRoute('/home')({
 });
 
 export default function Home() {
+  const router = useRouter();
   const navigation = useNavigation<any>();
   const [cat, setCat] = useState('All');
   const [sort, setSort] = useState('Top Rated');
@@ -22,7 +37,7 @@ export default function Home() {
 
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }: any) => {
       if (user) {
         fetchMentorById(user.id)
@@ -33,7 +48,7 @@ export default function Home() {
             setCurrentUser({
               id: user.id,
               name: user.user_metadata?.full_name || 'Learner',
-              avatar: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/png?seed=${user.email}`
+              avatar: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`
             });
           });
       }
@@ -45,7 +60,7 @@ export default function Home() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [myProfile, setMyProfile] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let active = true;
     setLoading(true);
     fetchMentors({
@@ -76,7 +91,7 @@ export default function Home() {
   }, [cat, search, sort]);
 
   // Load my profile & find double matches
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       let profile = JSON.parse(localStorage.getItem('my_profile') || 'null');
       if (!profile) {
@@ -96,16 +111,15 @@ export default function Home() {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!myProfile || mentorsList.length === 0) return;
-    
-    const myTeaches = myProfile.tags || ['React', 'TypeScript', 'Node'];
-    const myInterests = myProfile.interests || ['Python', 'Figma', 'AI', 'Communication'];
+    const myInterests = myProfile.interests || ['Python', 'Figma', 'AI'];
+    const myTeaches = myProfile.tags || ['React', 'Node'];
 
     const matches = mentorsList.filter((m) => {
-      const peerTeachesInterest = m.tags.some((tag: string) => 
+      const peerTeachesInterest = m.tags ? m.tags.some((tag: string) =>
         myInterests.some((interest: string) => tag.toLowerCase().includes(interest.toLowerCase()))
-      );
+      ) : false;
 
       const peerLearningNeeds: Record<string, string[]> = {
         'aria-shah': ['React', 'TypeScript'],
@@ -117,7 +131,7 @@ export default function Home() {
       };
       
       const needs = peerLearningNeeds[m.id] || ['React', 'TypeScript'];
-      const peerWantsMyTeaches = needs.some((n: string) => 
+      const peerWantsMyTeaches = needs.some((n: string) =>
         myTeaches.some((t: string) => t.toLowerCase().includes(n.toLowerCase()))
       );
 
@@ -127,986 +141,310 @@ export default function Home() {
     setDoubleMatches(matches);
   }, [myProfile, mentorsList]);
 
-  const renderDoubleMatchBanner = () => {
-    if (doubleMatches.length === 0) return null;
-    return (
-      <View style={styles.matchBannerContainer}>
-        <View style={styles.matchBannerHeader}>
-          <Sparkles color="#ffffff" size={16} fill="#ffffff" />
-          <Text style={styles.matchBannerTitle}>Perfect Double-Matches Found!</Text>
-        </View>
-        <Text style={styles.matchBannerText}>
-          We found {doubleMatches.length} peers who want to learn your skills and can teach yours.
-        </Text>
-        <TouchableOpacity 
-          style={styles.matchBannerBtn} 
-          onPress={() => setShowMatchModal(true)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.matchBannerBtnText}>View Double-Matches</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const renderDoubleMatchModal = () => {
-    if (!showMatchModal) return null;
-    return (
-      <View style={styles.modalOverlay}>
-        <View style={styles.matchModalCard}>
-          <View style={styles.modalHeaderRow}>
-            <Text style={styles.modalTitleText}>✨ Smart Double-Matches</Text>
-            <TouchableOpacity onPress={() => setShowMatchModal(false)} style={styles.closeBtn}>
-              <X color="#342F3D" size={20} />
-            </TouchableOpacity>
-          </View>
-          
-          <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-            {doubleMatches.map((peer) => {
-              const myTeaches = myProfile?.tags || ['React', 'Node'];
-              const peerTeaches = peer.tags;
-              
-              return (
-                <View key={peer.id} style={styles.matchPeerCard}>
-                  <View style={styles.matchCardTop}>
-                    <Image source={{ uri: peer.avatar }} style={styles.matchAvatar} />
-                    <View style={styles.matchMeta}>
-                      <Text style={styles.matchPeerName}>{peer.name}</Text>
-                      <Text style={styles.matchExpertise}>{peer.expertise}</Text>
-                    </View>
-                  </View>
-                  
-                  <View style={styles.matchSplitContainer}>
-                    <View style={styles.matchSplitCol}>
-                      <Text style={styles.splitLabel}>You Learn From Them:</Text>
-                      <View style={styles.splitTagsRow}>
-                        {peerTeaches.slice(0, 2).map((t) => (
-                          <View key={t} style={[styles.splitTag, styles.learnTag]}>
-                            <Text style={styles.splitTagText}>{t}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                    
-                    <View style={styles.matchSplitCol}>
-                      <Text style={styles.splitLabel}>They Learn From You:</Text>
-                      <View style={styles.splitTagsRow}>
-                        {myTeaches.slice(0, 2).map((t: string) => (
-                          <View key={t} style={[styles.splitTag, styles.teachTag]}>
-                            <Text style={styles.splitTagText}>{t}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  </View>
-                  
-                  <TouchableOpacity
-                    style={styles.startSwapBtn}
-                    onPress={() => {
-                      setShowMatchModal(false);
-                      navigation.navigate('ChatDetails', { id: peer.id });
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <MessageCircle color="#ffffff" size={16} style={{ marginRight: 6 }} />
-                    <Text style={styles.startSwapBtnText}>Start Skill Swap</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </View>
-    );
-  };
-
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerWelcome}>Hi, {currentUser ? currentUser.name : 'Learner'} 👋</Text>
-          <Text style={styles.headerTitle}>Explore Skills</Text>
-        </View>
-        <View style={styles.headerRightActions}>
-          <TouchableOpacity
-            style={styles.notificationButton}
-            onPress={() => navigation.navigate('Notifications')}
-            activeOpacity={0.7}
-          >
-            <Bell color="#342F3D" size={20} />
-            <View style={styles.notificationBadge} />
-          </TouchableOpacity>
-          {currentUser && (
-            <TouchableOpacity
-              style={styles.myProfileButton}
-              onPress={() => navigation.navigate('ProfileDetails', { id: currentUser.id })}
-              activeOpacity={0.7}
-            >
-              <Image source={{ uri: currentUser.avatar }} style={styles.myProfileAvatar} />
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+    <div className="max-w-7xl mx-auto space-y-8">
+      
+      {/* Hero Welcome Banner */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-6 sm:p-10 text-white shadow-xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-semibold mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Peer-to-Peer Skill Exchange</span>
+          </div>
 
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Search color="#8C8797" size={20} style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search skills, mentors..."
-          placeholderTextColor="#8C8797"
-          value={search}
-          onChangeText={setSearch}
-          style={styles.searchInput}
-        />
-      </View>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            Hi, {currentUser ? currentUser.name : 'Learner'} 👋
+          </h1>
+          <p className="text-slate-300 text-sm sm:text-base mt-2 leading-relaxed">
+            Teach what you know, learn what you need. Connect with top mentors and swap skills directly.
+          </p>
 
-      {/* Search Suggestions List */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalScroll}
-        style={styles.horizontalScrollWrapper}
-      >
-        {searchSuggestions.map((s) => (
-          <TouchableOpacity key={s} style={styles.suggestionBadge} activeOpacity={0.7}>
-            <Text style={styles.suggestionText}>{s}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+          {/* Quick Search Input inside Banner */}
+          <div className="mt-6 flex items-center bg-white rounded-2xl p-1.5 shadow-lg max-w-xl border border-white/20">
+            <Search className="w-5 h-5 text-slate-400 ml-3.5 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search by skill, topic, or mentor name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-3 py-2 text-sm text-slate-900 placeholder-slate-400 outline-none font-medium bg-transparent"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="p-1 text-slate-400 hover:text-slate-600 mr-1">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <button className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs shrink-0 transition-colors shadow-xs">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Double Match Recommendation Banner */}
-      {renderDoubleMatchBanner()}
-
-      {/* Sorting Selector */}
-      <View style={styles.sortWrapper}>
-        <TouchableOpacity
-          onClick={() => setSortOpen(!sortOpen)}
-          onPress={() => setSortOpen(!sortOpen)}
-          style={styles.sortButton}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.sortLabel}>
-            Sort: <Text style={styles.sortValue}>{sort}</Text>
-          </Text>
-          <ChevronDown color="#8b5cf6" size={16} />
-        </TouchableOpacity>
-
-        {sortOpen && (
-          <View style={styles.dropdownContainer}>
-            {sortOptions.map((o) => (
-              <TouchableOpacity
-                key={o}
-                onPress={() => {
-                  setSort(o);
-                  setSortOpen(false);
-                }}
-                style={[
-                  styles.dropdownItem,
-                  sort === o ? styles.dropdownItemActive : null,
-                ]}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.dropdownItemText,
-                    sort === o ? styles.dropdownItemTextActive : null,
-                  ]}
-                >
-                  {o}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
-
-      {/* Categories Scroller */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalScroll}
-        style={styles.horizontalScrollWrapper}
-      >
-        {categories.map((c) => {
-          const active = c === cat;
-          return (
-            <TouchableOpacity
-              key={c}
-              onPress={() => setCat(c)}
-              style={[
-                styles.categoryBadge,
-                active ? styles.categoryBadgeActive : styles.categoryBadgeInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.categoryText,
-                  active ? styles.categoryTextActive : styles.categoryTextInactive,
-                ]}
-              >
-                {c}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      {/* Mentors Card List */}
-      <View style={styles.cardList}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
-        ) : mentorsList.filter((m) => {
-            if (currentUser && (m.id === currentUser.id || (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase()))) {
-              return false;
-            }
-            return true;
-          }).length === 0 ? (
-          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 32 }}>
-            No mentors found matching your search.
-          </Text>
-        ) : (
-          mentorsList
-            .filter((m) => {
-              if (currentUser && (m.id === currentUser.id || (m.name && currentUser.name && m.name.toLowerCase() === currentUser.name.toLowerCase()))) {
-                return false;
-              }
-              return true;
-            })
-            .map((m) => <MentorCard key={m.id} m={m} />)
-        )}
-      </View>
-      {renderDoubleMatchModal()}
-    </ScrollView>
-  );
-}
-
-const statusColor = {
-  online: '#22C55E',
-  busy: '#F59E0B',
-  offline: '#9CA3AF',
-};
-
-const badgeIcon = {
-  'Verified Mentor': ShieldCheck,
-  'Top Contributor': Trophy,
-  'Trending Mentor': Flame,
-};
-
-export function calculateMatchScore(mentorTags: string[]): number {
-  let mySkills: string[] = ['Python', 'React', 'Figma', 'Communication', 'Calculus', 'TypeScript', 'TensorFlow'];
-  try {
-    if (typeof localStorage !== 'undefined') {
-      const prof = JSON.parse(localStorage.getItem('my_profile') || 'null');
-      if (prof && prof.tags && prof.tags.length > 0) {
-        mySkills = [...prof.tags, ...(prof.interests || [])];
-      }
-    }
-  } catch (e) {}
-
-  if (!mentorTags || mentorTags.length === 0) return 75;
-
-  const matches = mentorTags.filter(tag => 
-    mySkills.some(s => s.toLowerCase().includes(tag.toLowerCase()) || tag.toLowerCase().includes(s.toLowerCase()))
-  ).length;
-
-  if (matches > 0) {
-    return Math.min(75 + matches * 10, 99);
-  }
-  
-  const seedString = mentorTags.join('');
-  const hash = seedString.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return 70 + (hash % 24);
-}
-
-export function MentorCard({ m }: { m: Mentor }) {
-  const navigation = useNavigation<any>();
-  const Icon = badgeIcon[m.badge];
-  const unavailable = m.status === 'offline';
-
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        {/* Avatar Image container */}
-        <View style={styles.avatarWrapper}>
-          <Image source={{ uri: m.avatar }} style={styles.avatar} />
-          <View style={[styles.statusDot, { backgroundColor: statusColor[m.status] }]} />
-        </View>
-
-        {/* Mentor Info */}
-        <View style={styles.infoWrapper}>
-          <View style={styles.titleRow}>
-            <View style={styles.titleColumn}>
-              <Text style={styles.mentorName} numberOfLines={1}>{m.name}</Text>
-              <Text style={styles.mentorExpertise} numberOfLines={1}>
-                {m.expertise} · {m.level}
-              </Text>
-            </View>
-            <View style={styles.ratingBox}>
-              <Star color="#F59E0B" size={14} fill="#F59E0B" />
-              <Text style={styles.ratingText}>{m.rating}</Text>
-            </View>
-          </View>
-          <Text style={styles.mentorReviews} numberOfLines={1}>
-            Teaches {m.teaches} skills · {m.reviews} reviews
-          </Text>
-        </View>
-      </View>
-
-      {/* Tags List */}
-      <View style={styles.tagsContainer}>
-        {m.tags.map((t) => (
-          <View key={t} style={styles.tag}>
-            <Text style={styles.tagText}>{t}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Badges and Mode */}
-      <View style={styles.badgesContainer}>
-        <View style={styles.badgeMatch}>
-          <Sparkles color="#8b5cf6" size={11} style={styles.badgeIcon} />
-          <Text style={styles.badgeMatchText}>{calculateMatchScore(m.tags)}% Match</Text>
-        </View>
-        <View style={styles.badgeMint}>
-          <Icon color="#22C55E" size={12} style={styles.badgeIcon} />
-          <Text style={styles.badgeMintText}>{m.badge}</Text>
-        </View>
-        <View style={styles.badgeBlue}>
-          <Text style={styles.badgeBlueText}>
-            {m.mode === 'Online' ? '🎥' : m.mode === 'Offline' ? '📍' : '🔄'} {m.mode}
-          </Text>
-        </View>
-        <View style={styles.badgeLavender}>
-          <Text style={styles.badgeLavenderText}>{m.confidence}</Text>
-        </View>
-      </View>
-
-      {/* Unavailable Banner */}
-      {unavailable && (
-        <View style={styles.unavailableBanner}>
-          <Text style={styles.unavailableText}>⚠️ Currently Unavailable</Text>
-        </View>
+      {doubleMatches.length > 0 && (
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 border border-amber-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+              <Sparkles className="w-5 h-5 fill-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Perfect Double-Matches Found!</h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                We found {doubleMatches.length} peers who want to learn your skills and can teach yours.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowMatchModal(true)}
+            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition-colors shrink-0"
+          >
+            View Double-Matches
+          </button>
+        </div>
       )}
 
-      {/* Call to Actions */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate('ProfileDetails', { id: m.id })}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.profileButtonText}>View Profile</Text>
-        </TouchableOpacity>
+      {/* Filter Chips & Sort Controls */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          
+          {/* Category Chips Scroller */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full sm:w-auto">
+            {categories.map((c) => {
+              const active = c === cat;
+              return (
+                <button
+                  key={c}
+                  onClick={() => setCat(c)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                    active
+                      ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
 
-        <TouchableOpacity
-          style={styles.chatButton}
-          onPress={() => navigation.navigate('ChatDetails', { id: m.id })}
-          activeOpacity={0.7}
-        >
-          <MessageCircle color="#342F3D" size={18} />
-        </TouchableOpacity>
+          {/* Sort Selector */}
+          <div className="relative shrink-0 self-end sm:self-auto">
+            <button
+              onClick={() => setSortOpen(!sortOpen)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-purple-600" />
+              <span>Sort: <strong className="text-purple-700">{sort}</strong></span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
 
-        <TouchableOpacity
-          style={[
-            styles.bookButton,
-            unavailable ? styles.bookButtonDisabled : styles.bookButtonActive,
-          ]}
-          disabled={unavailable}
-          onPress={() => navigation.navigate('Book', { id: m.id })}
-          activeOpacity={0.7}
-        >
-          <CalendarPlus color={unavailable ? '#8C8797' : '#ffffff'} size={18} />
-        </TouchableOpacity>
-      </View>
-    </View>
+            {sortOpen && (
+              <div className="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-30">
+                {sortOptions.map((o) => (
+                  <button
+                    key={o}
+                    onClick={() => {
+                      setSort(o);
+                      setSortOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                      sort === o ? 'bg-purple-50 text-purple-700' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {o}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Search Suggestions Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs">
+          <span className="font-semibold text-slate-400 shrink-0">Popular:</span>
+          {searchSuggestions.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSearch(s)}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 text-slate-600 hover:text-purple-700 font-medium transition-colors shrink-0"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Mentor Cards Grid */}
+      {loading ? (
+        <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-semibold text-slate-500">Discovering Mentors...</p>
+        </div>
+      ) : mentorsList.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 p-8">
+          <h3 className="text-lg font-bold text-slate-800">No Mentors Found</h3>
+          <p className="text-xs text-slate-500 mt-1">Try adjusting your search query or category filter.</p>
+          <button
+            onClick={() => { setCat('All'); setSearch(''); }}
+            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold text-xs"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mentorsList.map((mentor) => (
+            <div
+              key={mentor.id}
+              className="bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group"
+            >
+              {/* Cover Banner */}
+              <div className="h-32 w-full relative bg-slate-100 overflow-hidden">
+                <img
+                  src={mentor.coverImage || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=600&q=80'}
+                  alt="Cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full text-amber-300 text-xs font-bold flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-300" />
+                  <span>{mentor.rating || 4.9}</span>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-5 pt-0 flex-1 flex flex-col relative">
+                {/* Avatar Badge */}
+                <div className="-mt-10 mb-3 flex items-end justify-between">
+                  <div className="relative">
+                    <img
+                      src={mentor.avatar}
+                      alt={mentor.name}
+                      className="w-16 h-16 rounded-2xl border-4 border-white bg-slate-100 shadow-md object-cover"
+                    />
+                    <span className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${
+                      mentor.online ? 'bg-emerald-500' : 'bg-amber-500'
+                    }`} />
+                  </div>
+
+                  <span className="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-[11px] font-bold border border-purple-200">
+                    {mentor.mode || 'Online'}
+                  </span>
+                </div>
+
+                {/* Info */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-base font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+                      {mentor.name}
+                    </h3>
+                    <ShieldCheck className="w-4 h-4 text-purple-600 fill-purple-100" />
+                  </div>
+                  <p className="text-xs font-semibold text-purple-600 mt-0.5">
+                    {mentor.expertise}
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                    {mentor.bio || 'Experienced mentor ready to swap knowledge and help you master new skills.'}
+                  </p>
+
+                  {/* Skills Tags */}
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    {mentor.tags && mentor.tags.slice(0, 3).map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {mentor.tags && mentor.tags.length > 3 && (
+                      <span className="px-2 py-1 rounded-lg bg-slate-50 text-slate-400 text-[11px] font-medium">
+                        +{mentor.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer Action Buttons */}
+                <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => router.navigate({ to: `/profile/$id`, params: { id: mentor.id } })}
+                    className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => router.navigate({ to: '/book', search: { id: mentor.id } as any })}
+                    className="py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1"
+                  >
+                    <span>Book Session</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Double Match Modal */}
+      {showMatchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 relative max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4 border-b pb-3">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400" />
+                <span>Smart Double-Matches</span>
+              </h3>
+              <button
+                onClick={() => setShowMatchModal(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {doubleMatches.map((peer) => (
+                <div key={peer.id} className="p-4 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <img src={peer.avatar} alt={peer.name} className="w-12 h-12 rounded-xl bg-white border object-cover" />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{peer.name}</h4>
+                      <p className="text-xs font-semibold text-purple-600">{peer.expertise}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-white p-3 rounded-xl border border-purple-100">
+                    <div>
+                      <span className="font-bold text-slate-500 block text-[10px] uppercase">You Learn:</span>
+                      <span className="font-bold text-purple-700">{peer.tags?.slice(0, 2).join(', ')}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-500 block text-[10px] uppercase">They Learn:</span>
+                      <span className="font-bold text-indigo-700">React, TypeScript</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setShowMatchModal(false);
+                      router.navigate({ to: `/chat/$id`, params: { id: peer.id } });
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Start Skill Swap</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 110,
-    backgroundColor: '#FAF9FC',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  headerWelcome: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginBottom: 2,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  notificationButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#8b5cf6',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 12,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#342F3D',
-    padding: 0,
-  },
-  horizontalScrollWrapper: {
-    marginHorizontal: -20,
-    marginBottom: 16,
-  },
-  horizontalScroll: {
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  suggestionBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 99,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    marginRight: 8,
-  },
-  suggestionText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#342F3D',
-  },
-  sortWrapper: {
-    zIndex: 20,
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  sortLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#342F3D',
-    marginRight: 8,
-  },
-  sortValue: {
-    color: '#8b5cf6',
-  },
-  dropdownContainer: {
-    position: 'absolute',
-    top: 48,
-    left: 0,
-    width: 220,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    padding: 8,
-    shadowColor: 'rgba(94, 84, 112, 0.15)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 32,
-    elevation: 5,
-    zIndex: 30,
-  },
-  dropdownItem: {
-    width: '100%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    marginBottom: 4,
-  },
-  dropdownItemActive: {
-    backgroundColor: '#8b5cf6',
-  },
-  dropdownItemText: {
-    fontSize: 14,
-    color: '#342F3D',
-  },
-  dropdownItemTextActive: {
-    color: '#ffffff',
-    fontWeight: '500',
-  },
-  categoryBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    marginRight: 8,
-    borderWidth: 1,
-  },
-  categoryBadgeInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  categoryBadgeActive: {
-    backgroundColor: '#8b5cf6',
-    borderColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  categoryTextInactive: {
-    color: '#342F3D',
-  },
-  categoryTextActive: {
-    color: '#ffffff',
-  },
-  cardList: {
-    width: '100%',
-  },
-  card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarWrapper: {
-    position: 'relative',
-    marginRight: 12,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: '#FAF9FC',
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  infoWrapper: {
-    flex: 1,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  titleColumn: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  mentorName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  mentorExpertise: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  ratingBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#342F3D',
-    marginLeft: 4,
-  },
-  mentorReviews: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 4,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 12,
-  },
-  tag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 99,
-    backgroundColor: 'rgba(196, 181, 253, 0.4)',
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  tagText: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#5E5470',
-  },
-  badgesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  badgeMint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(167, 243, 208, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  badgeIcon: {
-    marginRight: 4,
-  },
-  badgeMintText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#065F46',
-  },
-  badgeBlue: {
-    backgroundColor: 'rgba(191, 219, 254, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  badgeBlueText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#1E40AF',
-  },
-  badgeLavender: {
-    backgroundColor: 'rgba(233, 213, 255, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  badgeLavenderText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#5B21B6',
-  },
-  badgeMatch: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(139, 92, 246, 0.12)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-    marginRight: 6,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.25)',
-  },
-  badgeMatchText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#8b5cf6',
-  },
-  unavailableBanner: {
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 12,
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  unavailableText: {
-    fontSize: 12,
-    color: '#92400E',
-    fontWeight: '500',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-  },
-  profileButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profileButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  chatButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bookButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bookButtonActive: {
-    backgroundColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  bookButtonDisabled: {
-    backgroundColor: '#E8E5EC',
-  },
-  matchBannerContainer: {
-    backgroundColor: '#8b5cf6',
-    borderRadius: 24,
-    padding: 20,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  matchBannerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  matchBannerTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  matchBannerText: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.85)',
-    lineHeight: 16,
-    marginBottom: 16,
-  },
-  matchBannerBtn: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  matchBannerBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#8b5cf6',
-  },
-  matchModalCard: {
-    width: '92%',
-    maxHeight: '80%',
-    backgroundColor: '#ffffff',
-    borderRadius: 28,
-    padding: 24,
-    shadowColor: 'rgba(94, 84, 112, 0.2)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 1,
-    shadowRadius: 36,
-    elevation: 8,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  modalTitleText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalScroll: {
-    flexGrow: 0,
-  },
-  matchPeerCard: {
-    backgroundColor: '#FAF9FC',
-    borderWidth: 1,
-    borderColor: '#F3F0F6',
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-  },
-  matchCardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  matchAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: '#E8E5EC',
-  },
-  matchMeta: {
-    flex: 1,
-  },
-  matchPeerName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  matchExpertise: {
-    fontSize: 11,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  matchSplitContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  matchSplitCol: {
-    flex: 1,
-  },
-  splitLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#8C8797',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-  },
-  splitTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 4,
-  },
-  splitTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  learnTag: {
-    backgroundColor: 'rgba(34, 197, 94, 0.08)',
-  },
-  teachTag: {
-    backgroundColor: 'rgba(139, 92, 246, 0.08)',
-  },
-  splitTagText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#5E5470',
-  },
-  startSwapBtn: {
-    backgroundColor: '#8b5cf6',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 14,
-  },
-  startSwapBtnText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  headerRightActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  myProfileButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#8b5cf6',
-    overflow: 'hidden',
-  },
-  myProfileAvatar: {
-    width: '100%',
-    height: '100%',
-  },
-});
