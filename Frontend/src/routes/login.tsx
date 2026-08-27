@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
+import { Mail, Lock, Sparkles, ArrowRight, Zap, AlertCircle } from 'lucide-react';
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -19,7 +19,8 @@ export default function Login(props: any) {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setEmailError(false);
     setPasswordError(false);
 
@@ -45,7 +46,6 @@ export default function Login(props: any) {
 
       if (error) {
         setErrorMessage(error.message);
-        Alert.alert('Login Error', error.message);
         return;
       }
 
@@ -54,7 +54,6 @@ export default function Login(props: any) {
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'An unexpected error occurred');
-      Alert.alert('Error', err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -67,281 +66,137 @@ export default function Login(props: any) {
   };
 
   return (
-    <SafeAreaView style={styles.rootView}>
-      <ScrollView
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-950 p-4 md:p-8 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Login Card Container */}
+      <div className="w-full max-w-md relative z-10">
         {/* Brand Header Banner */}
-        <View style={styles.headerBanner}>
-          <View style={styles.logoBadge}>
-            <Text style={{ fontSize: 32 }}>✨</Text>
-          </View>
-          <Text style={styles.brandTitle}>SkillSwap</Text>
-          <Text style={styles.brandTagline}>Learn • Teach • Grow Together</Text>
-        </View>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-500 to-purple-400 text-white shadow-lg shadow-purple-500/30 mb-4">
+            <Sparkles className="w-8 h-8" />
+          </div>
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">
+            SkillSwap
+          </h1>
+          <p className="text-sm font-medium text-purple-200/80 mt-1">
+            Learn • Teach • Grow Together
+          </p>
+        </div>
 
-        {/* Form Card */}
-        <View style={styles.formCard}>
-          <Text style={styles.welcomeTitle}>Welcome Back 👋</Text>
-          <Text style={styles.welcomeSubtitle}>Sign in to your account to continue</Text>
+        {/* Glassmorphic Form Card */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/50 border border-white/40">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">Welcome Back 👋</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Sign in to your account to continue
+            </p>
+          </div>
 
-          {errorMessage ? (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
-            </View>
-          ) : null}
+          {errorMessage && (
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-center gap-2 text-red-600 text-xs font-semibold">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-          <Text style={styles.fieldLabel}>Email or Username</Text>
-          <View style={[styles.inputBox, emailError && styles.inputBoxError]}>
-            <Text style={{ fontSize: 18, marginRight: 10 }}>📧</Text>
-            <TextInput
-              placeholder="Enter your email"
-              placeholderTextColor="#94a3b8"
-              value={email}
-              onChangeText={(text: string) => { setEmail(text); setEmailError(false); setErrorMessage(''); }}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.textInput}
-              editable={!loading}
-            />
-          </View>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Email or Username
+              </label>
+              <div className={`flex items-center rounded-2xl border px-3.5 py-3 transition-all duration-200 ${
+                emailError ? 'border-red-500 bg-red-50/50' : 'border-slate-200 bg-slate-50/50 focus-within:border-purple-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-purple-500/10'
+              }`}>
+                <Mail className="w-5 h-5 text-slate-400 mr-2.5 shrink-0" />
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailError(false);
+                    setErrorMessage('');
+                  }}
+                  disabled={loading}
+                  className="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 outline-none font-medium"
+                />
+              </div>
+            </div>
 
-          <Text style={styles.fieldLabel}>Password</Text>
-          <View style={[styles.inputBox, passwordError && styles.inputBoxError]}>
-            <Text style={{ fontSize: 18, marginRight: 10 }}>🔒</Text>
-            <TextInput
-              placeholder="Enter your password"
-              placeholderTextColor="#94a3b8"
-              value={password}
-              onChangeText={(text: string) => { setPassword(text); setPasswordError(false); setErrorMessage(''); }}
-              secureTextEntry
-              style={styles.textInput}
-              editable={!loading}
-            />
-          </View>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className={`flex items-center rounded-2xl border px-3.5 py-3 transition-all duration-200 ${
+                passwordError ? 'border-red-500 bg-red-50/50' : 'border-slate-200 bg-slate-50/50 focus-within:border-purple-600 focus-within:bg-white focus-within:ring-4 focus-within:ring-purple-500/10'
+              }`}>
+                <Lock className="w-5 h-5 text-slate-400 mr-2.5 shrink-0" />
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError(false);
+                    setErrorMessage('');
+                  }}
+                  disabled={loading}
+                  className="w-full bg-transparent text-sm text-slate-900 placeholder-slate-400 outline-none font-medium"
+                />
+              </div>
+            </div>
 
-          <TouchableOpacity style={styles.forgotBtn} activeOpacity={0.7} disabled={loading}>
-            <Text style={styles.forgotText}>Forgot password?</Text>
-          </TouchableOpacity>
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                className="text-xs font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
 
-          <TouchableOpacity
-            style={[styles.primaryBtn, loading && styles.disabledBtn]}
-            onPress={handleLogin}
-            activeOpacity={0.85}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <View style={styles.btnRow}>
-                <Text style={styles.primaryBtnText}>Log In</Text>
-                <Text style={{ color: '#ffffff', fontSize: 16, marginLeft: 8 }}>➜</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-600/30 transition-all duration-200 flex items-center justify-center gap-2 group active:scale-[0.99] disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Log In</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </button>
 
-          {/* Quick Demo Bypass Button */}
-          <TouchableOpacity
-            style={styles.bypassBtn}
-            onPress={bypassToApp}
-            activeOpacity={0.8}
-          >
-            <Text style={{ fontSize: 16, marginRight: 8, color: '#ffffff' }}>⚡</Text>
-            <Text style={styles.bypassBtnText}>Explore App (Demo Mode)</Text>
-          </TouchableOpacity>
-        </View>
+            {/* Quick Demo Bypass Button */}
+            <button
+              type="button"
+              onClick={bypassToApp}
+              className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.99]"
+            >
+              <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
+              <span>Explore App (Demo Mode)</span>
+            </button>
+          </form>
 
-        {/* Signup Redirect Footer */}
-        <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>
+          {/* Footer Signup Redirect */}
+          <div className="mt-6 text-center text-xs text-slate-500 font-medium">
             Don't have an account?{' '}
-            <Text
-              style={styles.signupLink}
-              onPress={() => navigation && navigation.navigate('Signup')}
+            <button
+              type="button"
+              onClick={() => navigation && navigation.navigate('Signup')}
+              className="text-purple-600 font-bold hover:underline ml-1"
             >
               Create Account
-            </Text>
-          </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  rootView: {
-    flex: 1,
-    backgroundColor: '#FAF9FC',
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 36,
-    paddingBottom: 40,
-  },
-  headerBanner: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  logoBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 22,
-    backgroundColor: '#f3e8ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: '#7c3aed',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  brandTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1e1b4b',
-    letterSpacing: 0.5,
-  },
-  brandTagline: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  formCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 28,
-    padding: 22,
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 4,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-  },
-  welcomeTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1e1b4b',
-    marginBottom: 4,
-  },
-  welcomeSubtitle: {
-    fontSize: 13,
-    color: '#64748b',
-    marginBottom: 18,
-  },
-  errorBanner: {
-    backgroundColor: '#fef2f2',
-    borderWidth: 1,
-    borderColor: '#fecaca',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#dc2626',
-    fontSize: 13,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 6,
-    marginTop: 4,
-  },
-  inputBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
-    borderWidth: 1.5,
-    borderColor: '#cbd5e1',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 16,
-  },
-  inputBoxError: {
-    borderColor: '#ef4444',
-    backgroundColor: '#fff5f5',
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#0f172a',
-    padding: 0,
-  },
-  forgotBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#7c3aed',
-  },
-  primaryBtn: {
-    backgroundColor: '#7c3aed',
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#7c3aed',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  primaryBtnText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  btnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  disabledBtn: {
-    opacity: 0.6,
-  },
-  bypassBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0f172a',
-    borderRadius: 16,
-    paddingVertical: 15,
-    marginTop: 12,
-  },
-  bypassBtnText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  footerContainer: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  signupLink: {
-    color: '#7c3aed',
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
-});
