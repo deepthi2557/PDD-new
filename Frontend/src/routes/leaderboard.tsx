@@ -1,4 +1,4 @@
-import { createFileRoute } from '../lib/router-bridge';
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Trophy, TrendingUp, Crown } from 'lucide-react-native';

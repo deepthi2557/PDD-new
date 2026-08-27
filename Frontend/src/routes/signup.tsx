@@ -1,11 +1,9 @@
-import { createFileRoute } from '../lib/router-bridge';
+import { createFileRoute } from '@tanstack/react-router';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Phone, Mail, Lock, GraduationCap, BookOpen, Brain, Award, Camera } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
-
-import * as ImagePicker from 'expo-image-picker';
 
 export const Route = createFileRoute('/signup')({
   component: Signup,
@@ -41,35 +39,10 @@ export default function Signup() {
 
   const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
 
-  const pickImageFromGallery = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant permission to access your device gallery.');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-      });
-
-      if (!result.canceled && result.assets && result.assets[0]) {
-        setFormState(prev => ({ ...prev, avatarUrl: result.assets[0].uri }));
-      }
-    } catch (err: any) {
-      console.error('ImagePicker error:', err);
-      // Fallback
-      if (typeof document !== 'undefined' && fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }
-  };
-
   const triggerFileSelect = () => {
-    pickImageFromGallery();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileUpload = async (e: any) => {

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CommunityRouteImport } from './routes/community'
@@ -33,6 +34,11 @@ const SignupRoute = SignupRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/community': typeof CommunityRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/community': typeof CommunityRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/signup': typeof SignupRoute
   '/chat/$id': typeof ChatIdRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/home'
     | '/leaderboard'
+    | '/login'
     | '/notifications'
     | '/signup'
     | '/chat/$id'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/home'
     | '/leaderboard'
+    | '/login'
     | '/notifications'
     | '/signup'
     | '/chat/$id'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/home'
     | '/leaderboard'
+    | '/login'
     | '/notifications'
     | '/signup'
     | '/chat/$id'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   CommunityRoute: typeof CommunityRoute
   HomeRoute: typeof HomeRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   SignupRoute: typeof SignupRoute
   ChatIdRoute: typeof ChatIdRoute
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -344,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityRoute: CommunityRoute,
   HomeRoute: HomeRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   SignupRoute: SignupRoute,
   ChatIdRoute: ChatIdRoute,

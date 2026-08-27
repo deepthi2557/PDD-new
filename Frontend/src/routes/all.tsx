@@ -1,4 +1,4 @@
-import { createFileRoute } from '../lib/router-bridge';
+import { createFileRoute } from '@tanstack/react-router';
 import { Link } from "../lib/router-bridge";
 
 export const Route = createFileRoute("/all")({
