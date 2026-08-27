@@ -1,130 +1,103 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import React from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft } from 'lucide-react-native';
-import { notifications } from '../lib/data';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Bell, CheckCircle2, Trash2, Sparkles, MessageCircle } from 'lucide-react';
+import { notifications as initialNotifications } from '../lib/data';
 
 export const Route = createFileRoute('/notifications')({
   component: Notifs,
 });
 
 export default function Notifs() {
-  const navigation = useNavigation<any>();
-  const [notifList, setNotifList] = React.useState<any[]>([]);
+  const router = useRouter();
+  const [notifList, setNotifList] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const localNotifs = localStorage.getItem('my_notifications');
     if (localNotifs) {
       setNotifList(JSON.parse(localNotifs));
     } else {
-      setNotifList(notifications);
-      localStorage.setItem('my_notifications', JSON.stringify(notifications));
+      setNotifList(initialNotifications);
+      localStorage.setItem('my_notifications', JSON.stringify(initialNotifications));
     }
   }, []);
 
+  const clearAll = () => {
+    setNotifList([]);
+    localStorage.removeItem('my_notifications');
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.7}
-      >
-        <ArrowLeft color="#8C8797" size={16} style={styles.backIcon} />
-        <Text style={styles.backText}>Back</Text>
-      </TouchableOpacity>
+    <div className="max-w-3xl mx-auto space-y-6">
+      
+      {/* Back Button & Header */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => router.navigate({ to: '/home' })}
+          className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-purple-700 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Explore</span>
+        </button>
 
-      {/* Title */}
-      <Text style={styles.title}>Notifications</Text>
+        {notifList.length > 0 && (
+          <button
+            onClick={clearAll}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 text-xs font-bold transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Clear All</span>
+          </button>
+        )}
+      </div>
 
-      {/* Notifications List */}
-      <View style={styles.notifList}>
-        {notifList.map((n) => (
-          <View key={n.id} style={styles.notifCard}>
-            <View style={styles.iconContainer}>
-              <Text style={styles.iconEmoji}>{n.icon}</Text>
-            </View>
-            <View style={styles.notifContent}>
-              <Text style={styles.notifTitle}>{n.title}</Text>
-              <Text style={styles.notifTime}>{n.time} ago</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+      {/* Main Title Card */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+              <Bell className="w-6 h-6 text-purple-600 fill-purple-100" />
+              <span>Notifications</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              Updates on booking requests, chat messages, and skill match alerts.
+            </p>
+          </div>
+
+          <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+            {notifList.length} New
+          </span>
+        </div>
+
+        {/* Notifications List */}
+        {notifList.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 text-xs font-medium space-y-2">
+            <Sparkles className="w-8 h-8 text-slate-300 mx-auto" />
+            <p>No notifications yet. You're all caught up!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {notifList.map((n) => (
+              <div
+                key={n.id}
+                className="p-4 rounded-2xl bg-slate-50/80 hover:bg-purple-50/30 border border-slate-100 transition-colors flex items-start gap-3.5"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-base shrink-0">
+                  {n.icon || '📩'}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
+                    {n.title}
+                  </p>
+                  <span className="text-[10px] text-slate-400 font-medium mt-1 block">
+                    {n.time}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 40,
-    backgroundColor: '#FAF9FC',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-  },
-  backIcon: {
-    marginRight: 6,
-  },
-  backText: {
-    fontSize: 14,
-    color: '#8C8797',
-    fontWeight: '500',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 20,
-  },
-  notifList: {
-    width: '100%',
-  },
-  notifCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: '#ebdfff', // mapped from gradient-hero background
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  iconEmoji: {
-    fontSize: 18,
-  },
-  notifContent: {
-    flex: 1,
-  },
-  notifTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#342F3D',
-    lineHeight: 18,
-  },
-  notifTime: {
-    fontSize: 10,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-});

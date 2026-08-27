@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
 import React, { useState } from 'react';
-import { Heart, MessageSquare, Sparkles, Plus } from 'lucide-react-native';
-import { community } from '../lib/data';
+import { Heart, MessageSquare, Sparkles, Plus, ThumbsUp, ExternalLink, X } from 'lucide-react';
+import { community as initialFeed } from '../lib/data';
 
 interface Submission {
   id: number;
@@ -21,10 +20,14 @@ export default function Community() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newLink, setNewLink] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  
   const [submissions, setSubmissions] = useState<Submission[]>([
     { id: 1, author: 'Tara L.', title: 'Interactive Figma Landing Page', link: 'figma.com/file/1234', votes: 12, userVoted: false },
     { id: 2, author: 'Jamal R.', title: 'Figma Auto-Layout Portfolio template', link: 'figma.com/file/5678', votes: 8, userVoted: false },
   ]);
+
+  const [feed, setFeed] = useState(initialFeed);
 
   const toggleVote = (subId: number) => {
     setSubmissions(prev => prev.map(sub => {
@@ -39,7 +42,20 @@ export default function Community() {
     }));
   };
 
-  const handleSubmit = () => {
+  const toggleLike = (postId: number) => {
+    setFeed(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          likes: post.likes + 1
+        };
+      }
+      return post;
+    }));
+  };
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!newTitle.trim() || !newLink.trim()) return;
     setSubmissions(prev => [
       ...prev,
@@ -56,468 +72,209 @@ export default function Community() {
     setNewLink('');
     setShowSubmitModal(false);
   };
+
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <div className="max-w-5xl mx-auto space-y-6">
+      
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Community</Text>
-        <TouchableOpacity style={styles.plusBtn} activeOpacity={0.7}>
-          <Plus color="#ffffff" size={20} />
-        </TouchableOpacity>
-      </View>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Peer Community
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+            Join weekly challenges, ask questions, and share project portfolios with learners.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setShowSubmitModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-md transition-colors shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Join Challenge</span>
+        </button>
+      </div>
 
       {/* Weekly Challenge Banner */}
-      <View style={styles.challengeCard}>
-        <View style={styles.challengeHeaderRow}>
-          <Sparkles color="#342F3D" size={16} style={styles.challengeIcon} />
-          <Text style={styles.challengeHeader}>Weekly Challenge</Text>
-        </View>
-        <Text style={styles.challengeTitle}>Build a 1-min portfolio in Figma</Text>
-        <Text style={styles.challengeSubtitle}>{142 + (submissions.length - 2)} students participating</Text>
-        <TouchableOpacity style={styles.challengeBtn} onPress={() => setShowSubmitModal(true)} activeOpacity={0.7}>
-          <Text style={styles.challengeBtnText}>Join challenge</Text>
-        </TouchableOpacity>
-      </View>
+      <div className="rounded-3xl bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-6 sm:p-8 text-white border border-purple-800/40 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Submissions Section */}
-      <View style={styles.submissionsSection}>
-        <Text style={styles.sectionHeading}>Challenge Submissions ({submissions.length})</Text>
-        {submissions.map((sub) => (
-          <View key={sub.id} style={styles.submissionCard}>
-            <View style={styles.subLeft}>
-              <Text style={styles.subTitle} numberOfLines={1}>{sub.title}</Text>
-              <Text style={styles.subAuthor} numberOfLines={1}>by {sub.author} · {sub.link}</Text>
-            </View>
-            <TouchableOpacity 
-              style={[styles.voteBtn, sub.userVoted ? styles.voteBtnActive : null]}
-              onPress={() => toggleVote(sub.id)}
-              activeOpacity={0.7}
+        <div className="relative z-10 space-y-3 max-w-xl">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Weekly Design Challenge</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Build a 1-min Portfolio in Figma
+          </h2>
+          <p className="text-xs sm:text-sm text-purple-200/80 font-medium">
+            {142 + (submissions.length - 2)} peers actively participating this week.
+          </p>
+
+          <button
+            onClick={() => setShowSubmitModal(true)}
+            className="mt-2 px-5 py-2.5 rounded-xl bg-white hover:bg-purple-50 text-purple-900 font-bold text-xs shadow-md transition-colors inline-flex items-center gap-2"
+          >
+            <span>Submit Your Link</span>
+            <ExternalLink className="w-3.5 h-3.5 text-purple-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* Challenge Submissions Grid */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+        <h3 className="text-lg font-bold text-slate-900">
+          Challenge Submissions ({submissions.length})
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {submissions.map((sub) => (
+            <div
+              key={sub.id}
+              className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 hover:border-purple-200 transition-colors"
             >
-              <Text style={[styles.voteText, sub.userVoted ? styles.voteTextActive : null]}>
-                ▲ {sub.votes}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">{sub.title}</h4>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5 truncate">by {sub.author} · {sub.link}</p>
+              </div>
+
+              <button
+                onClick={() => toggleVote(sub.id)}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-extrabold flex items-center gap-1 transition-all ${
+                  sub.userVoted
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-purple-50'
+                }`}
+              >
+                <span>▲</span>
+                <span>{sub.votes}</span>
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {['All', 'Discussions', 'Challenges', 'Posts', 'Q&A'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setActiveFilter(f)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeFilter === f
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            {f}
+          </button>
         ))}
-      </View>
+      </div>
 
-      {/* Filters Horizontal Scroll */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalScroll}
-        style={styles.horizontalScrollWrapper}
-      >
-        {['All', 'Discussions', 'Challenges', 'Posts', 'Q&A'].map((f, i) => {
-          const active = i === 0;
-          return (
-            <TouchableOpacity
-              key={f}
-              style={[
-                styles.filterBtn,
-                active ? styles.filterBtnActive : styles.filterBtnInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.filterText, active ? styles.textActive : styles.textInactive]}>
-                {f}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      {/* Feed Posts */}
+      <div className="space-y-4">
+        {feed.map((p) => (
+          <div key={p.id} className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img src={p.avatar} alt={p.author} className="w-10 h-10 rounded-full border bg-slate-100 object-cover" />
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900">{p.author}</h4>
+                  <span className="text-[10px] text-slate-400 font-medium">{p.time} ago</span>
+                </div>
+              </div>
 
-      {/* Feed List */}
-      <View style={styles.feedContainer}>
-        {community.map((p) => (
-          <View key={p.id} style={styles.feedCard}>
-            <View style={styles.feedHeader}>
-              <Image source={{ uri: p.avatar }} style={styles.feedAvatar} />
-              <View style={styles.feedUser}>
-                <Text style={styles.feedAuthorName}>{p.author}</Text>
-                <Text style={styles.feedTime}>{p.time} ago</Text>
-              </View>
-              <View style={styles.mintBadge}>
-                <Text style={styles.mintBadgeText}>{p.tag}</Text>
-              </View>
-            </View>
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                {p.tag}
+              </span>
+            </div>
 
-            <Text style={styles.feedTitle}>{p.title}</Text>
+            <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+              {p.title}
+            </p>
 
-            <View style={styles.actionsRow}>
-              <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7}>
-                <Heart color="#8C8797" size={16} style={styles.actionIcon} />
-                <Text style={styles.actionText}>{p.likes}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7}>
-                <MessageSquare color="#8C8797" size={16} style={styles.actionIcon} />
-                <Text style={styles.actionText}>{p.comments}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            <div className="flex items-center gap-4 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => toggleLike(p.id)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-purple-600 transition-colors"
+              >
+                <Heart className="w-4 h-4 text-purple-500 hover:fill-purple-500" />
+                <span>{p.likes}</span>
+              </button>
+
+              <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-purple-600 transition-colors">
+                <MessageSquare className="w-4 h-4 text-indigo-500" />
+                <span>{p.comments} Comments</span>
+              </button>
+            </div>
+          </div>
         ))}
-      </View>
+      </div>
 
       {/* Submit Project Modal */}
       {showSubmitModal && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Submit your Figma Project</Text>
-            <Text style={styles.modalSubtitle}>Share your 1-minute portfolio design</Text>
-            
-            <TextInput
-              value={newTitle}
-              onChangeText={setNewTitle}
-              placeholder="Project Title (e.g. My Clean Portfolio)"
-              placeholderTextColor="#8C8797"
-              style={styles.modalInput}
-            />
-            
-            <TextInput
-              value={newLink}
-              onChangeText={setNewLink}
-              placeholder="Figma / Design URL Link"
-              placeholderTextColor="#8C8797"
-              style={styles.modalInput}
-            />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 relative space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="text-lg font-bold text-slate-900">Submit Challenge Project</h3>
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                className="p-1 text-slate-400 hover:bg-slate-100 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowSubmitModal(false)} activeOpacity={0.7}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} activeOpacity={0.7}>
-                <Text style={styles.submitText}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Project Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. My Figma Landing Page"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Figma / Portfolio URL
+                </label>
+                <input
+                  type="text"
+                  placeholder="figma.com/file/..."
+                  value={newLink}
+                  onChange={(e) => setNewLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSubmitModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border text-slate-600 font-bold text-xs hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-700 shadow-sm"
+                >
+                  Submit Link
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
-    </ScrollView>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 110,
-    backgroundColor: '#FAF9FC',
-  },
-  submissionsSection: {
-    marginBottom: 20,
-  },
-  sectionHeading: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#342F3D',
-    marginBottom: 10,
-  },
-  submissionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: 'rgba(94, 84, 112, 0.04)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  subLeft: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  subTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  subAuthor: {
-    fontSize: 11,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  voteBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: '#FAF9FC',
-    borderWidth: 1,
-    borderColor: '#E8E5EC',
-  },
-  voteBtnActive: {
-    backgroundColor: 'rgba(139, 92, 246, 0.12)',
-    borderColor: 'rgba(139, 92, 246, 0.25)',
-  },
-  voteText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#5E5470',
-  },
-  voteTextActive: {
-    color: '#8b5cf6',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(52, 47, 61, 0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 99,
-  },
-  modalCard: {
-    width: '90%',
-    maxWidth: 360,
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: 'rgba(94, 84, 112, 0.25)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 1,
-    shadowRadius: 48,
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 4,
-  },
-  modalSubtitle: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginBottom: 16,
-  },
-  modalInput: {
-    width: '100%',
-    backgroundColor: '#FAF9FC',
-    borderWidth: 1,
-    borderColor: '#E8E5EC',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#342F3D',
-    marginBottom: 12,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 8,
-  },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#5E5470',
-  },
-  submitBtn: {
-    flex: 1.5,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  plusBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 16,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  challengeCard: {
-    backgroundColor: '#ebdfff', // mapped from gradient-hero background
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
-  },
-  challengeHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  challengeIcon: {
-    marginRight: 6,
-  },
-  challengeHeader: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  challengeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    lineHeight: 22,
-  },
-  challengeSubtitle: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 4,
-  },
-  challengeBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginTop: 12,
-  },
-  challengeBtnText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  horizontalScrollWrapper: {
-    marginHorizontal: -20,
-    marginBottom: 16,
-  },
-  horizontalScroll: {
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  filterBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    marginRight: 8,
-    borderWidth: 1,
-  },
-  filterBtnInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  filterBtnActive: {
-    backgroundColor: '#8b5cf6',
-    borderColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  textActive: {
-    color: '#ffffff',
-  },
-  textInactive: {
-    color: '#342F3D',
-  },
-  feedContainer: {
-    width: '100%',
-  },
-  feedCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  feedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  feedAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#F3F0F6',
-    marginRight: 10,
-  },
-  feedUser: {
-    flex: 1,
-  },
-  feedAuthorName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  feedTime: {
-    fontSize: 10,
-    color: '#8C8797',
-    marginTop: 1,
-  },
-  mintBadge: {
-    backgroundColor: 'rgba(167, 243, 208, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 99,
-  },
-  mintBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#065F46',
-  },
-  feedTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#342F3D',
-    lineHeight: 18,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 16,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionIcon: {
-    marginRight: 4,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#8C8797',
-  },
-});

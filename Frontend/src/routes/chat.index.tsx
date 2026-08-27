@@ -1,8 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Search } from 'lucide-react-native';
+import { Search, MessageSquare, Sparkles } from 'lucide-react';
 import { fetchMentors } from '../lib/api';
 
 export const Route = createFileRoute('/chat/')({
@@ -10,7 +8,7 @@ export const Route = createFileRoute('/chat/')({
 });
 
 export default function ChatList() {
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const [chatsList, setChatsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -22,13 +20,12 @@ export default function ChatList() {
     fetchMentors()
       .then((users) => {
         if (!active) return;
-        // Map real registered users to chat cards
         const realChatUsers = users.map((u, idx) => ({
           id: u.id,
           name: u.name,
           avatar: u.avatar,
-          last: u.expertise ? `Available for ${u.expertise} skill swap session` : 'Let\'s connect and swap skills!',
-          time: `${(idx % 5) + 1}h`,
+          last: u.expertise ? `Available for ${u.expertise} skill swap session` : "Let's connect and swap skills!",
+          time: `${(idx % 5) + 1}h ago`,
           unread: idx % 3 === 0 ? 1 : 0,
           online: u.status === 'online' || idx % 2 === 0,
         }));
@@ -50,182 +47,82 @@ export default function ChatList() {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Title */}
-      <Text style={styles.title}>Messages</Text>
+    <div className="max-w-4xl mx-auto space-y-6">
+      
+      {/* Title Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+          <MessageSquare className="w-7 h-7 text-purple-600 fill-purple-100" />
+          <span>Messages & Skill Swaps</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+          Direct messaging with your mentors and learning peers.
+        </p>
+      </div>
 
       {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Search color="#8C8797" size={20} style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search conversations"
-          placeholderTextColor="#8C8797"
+      <div className="bg-white rounded-2xl p-2 border border-slate-200/80 shadow-sm flex items-center gap-2">
+        <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
+        <input
+          type="text"
+          placeholder="Search messages by mentor or skill title..."
           value={search}
-          onChangeText={setSearch}
-          style={styles.searchInput}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-2 py-2 text-sm text-slate-900 placeholder-slate-400 outline-none font-medium bg-transparent"
         />
-      </View>
+      </div>
 
       {/* Conversations List */}
-      <View style={styles.chatList}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
-        ) : filteredChats.length === 0 ? (
-          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 32 }}>
-            No conversations found matching your search.
-          </Text>
-        ) : (
-          filteredChats.map((c) => (
-            <TouchableOpacity
-              key={c.id}
-              onPress={() => navigation.navigate('ChatDetails', { id: c.id })}
-              style={styles.chatCard}
-              activeOpacity={0.7}
-            >
-              <View style={styles.avatarContainer}>
-                <Image source={{ uri: c.avatar }} style={styles.avatar} />
-                {c.online && <View style={styles.statusDot} />}
-              </View>
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
+        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">
+          Active Conversations ({filteredChats.length})
+        </h2>
 
-              <View style={styles.chatContent}>
-                <View style={styles.row}>
-                  <Text style={styles.name}>{c.name}</Text>
-                  <Text style={styles.time}>{c.time}</Text>
-                </View>
-                <View style={[styles.row, styles.messageRow]}>
-                  <Text style={styles.lastMessage} numberOfLines={1}>
-                    {c.last}
-                  </Text>
-                  {c.unread > 0 && (
-                    <View style={styles.unreadBadge}>
-                      <Text style={styles.unreadText}>{c.unread}</Text>
-                    </View>
+        {loading ? (
+          <div className="py-12 flex justify-center">
+            <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : filteredChats.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 text-xs font-medium">
+            No conversations found matching your search.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredChats.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => router.navigate({ to: `/chat/$id`, params: { id: c.id } })}
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-purple-50/50 border border-slate-100 transition-colors flex items-center gap-4 cursor-pointer group"
+              >
+                <div className="relative shrink-0">
+                  <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-2xl border bg-white object-cover" />
+                  {c.online && (
+                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
                   )}
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+                      {c.name}
+                    </h3>
+                    <span className="text-[10px] text-slate-400 font-medium">{c.time}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-xs text-slate-500 truncate pr-2 font-medium">{c.last}</p>
+                    {c.unread > 0 && (
+                      <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-extrabold flex items-center justify-center shrink-0">
+                        {c.unread}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-      </View>
-    </ScrollView>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 110,
-    backgroundColor: '#FAF9FC',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#342F3D',
-    padding: 0,
-  },
-  chatList: {
-    width: '100%',
-  },
-  chatCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 8,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: '#F3F0F6',
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#22C55E',
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  chatContent: {
-    flex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  messageRow: {
-    marginTop: 2,
-  },
-  name: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  time: {
-    fontSize: 10,
-    color: '#8C8797',
-  },
-  lastMessage: {
-    fontSize: 12,
-    color: '#8C8797',
-    flex: 1,
-    paddingRight: 8,
-  },
-  unreadBadge: {
-    backgroundColor: '#8b5cf6',
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unreadText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-});

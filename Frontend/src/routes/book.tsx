@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
-import React, { useState } from 'react';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
+import React, { useState, useEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, Calendar, Clock, Video, MapPin, Sparkles } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -16,15 +15,21 @@ const days = Array.from({ length: 7 }, (_, i) => i);
 const times = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM', '5:00 PM', '7:00 PM'];
 
 export default function Book() {
+  const router = useRouter();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const targetMentorId = route.params?.id || localStorage.getItem('selected_mentor_id');
+
+  let targetMentorId = route?.params?.id;
+  if (!targetMentorId && typeof window !== 'undefined') {
+    const searchParams = new URLSearchParams(window.location.search);
+    targetMentorId = searchParams.get('id') || localStorage.getItem('selected_mentor_id');
+  }
 
   const [skill, setSkill] = useState('');
   const [targetMentor, setTargetMentor] = useState<Mentor | null>(null);
   const [loadingMentor, setLoadingMentor] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let active = true;
     setLoadingMentor(true);
     
@@ -72,7 +77,8 @@ export default function Book() {
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!targetMentor) return;
     setSubmitting(true);
 
@@ -80,12 +86,11 @@ export default function Book() {
     bookingDate.setDate(bookingDate.getDate() + (day - 2));
     const dateString = bookingDate.toISOString().split('T')[0];
 
-    // 1. Try writing to Supabase
     try {
       const { data: userData } = await supabase.auth.getUser();
       const learnerId = userData?.user?.id;
       if (learnerId) {
-        const { error } = await supabase
+        await supabase
           .from('bookings')
           .insert([
             {
@@ -99,46 +104,19 @@ export default function Book() {
               status: 'UPCOMING'
             }
           ]);
-        if (error) console.warn('Supabase booking insert warning:', error);
       }
     } catch (err) {
       console.warn('Supabase insert fail:', err);
     }
 
-    // 2. Try writing to Spring Boot REST API
-    try {
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      if (token) {
-        await fetch(`${VITE_API_URL}/api/bookings`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            mentorId: targetMentor.id,
-            skill: skill,
-            date: dateString,
-            timeSlot: time,
-            type: type,
-            notes: notes
-          })
-        });
-      }
-    } catch (err) {
-      console.warn('Backend server insert fail:', err);
-    }
-
-    // 3. Update localStorage to ensure UI updates are fully interactive
     try {
       const localBookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
       const newBooking = {
         id: Math.random().toString(36).substring(2),
-        skill: skill,
+        skill: skill || 'General Swap',
         with: targetMentor.name,
         time: `${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]} · ${time}`,
-        rating: 0,
+        rating: 5,
         status: 'upcoming'
       };
       localBookings.push(newBooking);
@@ -149,37 +127,10 @@ export default function Book() {
         id: Date.now(),
         type: 'booking',
         title: `Session request sent to ${targetMentor.name} for ${skill}`,
-        time: '1s',
+        time: '1s ago',
         icon: '📩'
       });
       localStorage.setItem('my_notifications', JSON.stringify(localNotifs));
-
-      const localChats = JSON.parse(localStorage.getItem(`chat_msgs_${targetMentor.id}`) || '[]');
-      localChats.push({
-        from: 'me',
-        text: `Hello! I booked a session with you for ${skill} on ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]} at ${time}. Notes: ${notes || 'No extra notes.'}`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-      localStorage.setItem(`chat_msgs_${targetMentor.id}`, JSON.stringify(localChats));
-
-      const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
-      const chatIdx = chatsList.findIndex((c: any) => c.id === targetMentor.id);
-      const chatDetails = {
-        id: targetMentor.id,
-        name: targetMentor.name,
-        avatar: targetMentor.avatar,
-        last: `Requested session for ${skill}`,
-        time: 'now',
-        unread: 0,
-        online: true
-      };
-      if (chatIdx > -1) {
-        chatsList[chatIdx].last = `Requested session for ${skill}`;
-        chatsList[chatIdx].time = 'now';
-      } else {
-        chatsList.push(chatDetails);
-      }
-      localStorage.setItem('chats_list', JSON.stringify(chatsList));
     } catch (err) {
       console.error('LocalStorage booking sync error:', err);
     }
@@ -190,410 +141,207 @@ export default function Book() {
 
   if (loadingMentor || !targetMentor) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', minHeight: 400 }]}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
-      </View>
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-semibold text-slate-500">Preparing Booking Calendar...</p>
+      </div>
     );
   }
 
   if (done) {
     return (
-      <View style={styles.successContainer}>
-        <View style={styles.successIconBox}>
-          <CheckCircle2 color="#ffffff" size={48} />
-        </View>
-        <Text style={styles.successTitle}>🎉 Session Booked Successfully</Text>
-        <Text style={styles.successSubtitle}>
-          We've notified your mentor. See you on {time}.
-        </Text>
-        <TouchableOpacity
-          style={styles.successBtn}
-          onPress={() => navigation.navigate('Main', { screen: 'ActivityTab' })}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.successBtnText}>View my sessions</Text>
-        </TouchableOpacity>
-      </View>
+      <div className="max-w-md mx-auto py-12 text-center">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-xl space-y-4">
+          <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+            <CheckCircle2 className="w-10 h-10" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-slate-900">🎉 Session Booked!</h2>
+          <p className="text-sm text-slate-500 leading-relaxed font-medium">
+            We've notified <strong>{targetMentor.name}</strong> for <strong>{skill}</strong> on {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day]} at {time}.
+          </p>
+          <div className="pt-4 flex gap-3">
+            <button
+              onClick={() => router.navigate({ to: '/activity' })}
+              className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md transition-colors"
+            >
+              View My Sessions
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.7}
-      >
-        <ArrowLeft color="#8C8797" size={16} style={styles.backIcon} />
-        <Text style={styles.backText}>Back</Text>
-      </TouchableOpacity>
+    <div className="max-w-3xl mx-auto space-y-6">
+      
+      {/* Top Header */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => router.navigate({ to: '/home' })}
+          className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-purple-700 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </button>
 
-      <Text style={styles.title}>Book a session</Text>
-      <Text style={styles.subtitle}>with {targetMentor.name}</Text>
+        <div className="flex items-center gap-2">
+          <img src={targetMentor.avatar} alt={targetMentor.name} className="w-8 h-8 rounded-full border bg-slate-100 object-cover" />
+          <span className="text-xs font-bold text-slate-800">{targetMentor.name}</span>
+        </div>
+      </div>
 
-      {/* Select Skill */}
-      <Label>Select skill</Label>
-      <View style={styles.chipRow}>
-        {(targetMentor.tags || []).map((s) => {
-          const active = skill === s;
-          return (
-            <TouchableOpacity
-              key={s}
-              onPress={() => setSkill(s)}
-              style={[
-                styles.chipBtn,
-                active ? styles.chipBtnActive : styles.chipBtnInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.chipText, active ? styles.textActive : styles.textInactive]}>
-                {s}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {/* Main Booking Card */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md space-y-6">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900">Book a Skill Swap Session</h1>
+          <p className="text-xs sm:text-sm text-purple-700 font-semibold mt-0.5">
+            with {targetMentor.name} ({targetMentor.expertise})
+          </p>
+        </div>
 
-      {/* Select Date */}
-      <Label>Select date</Label>
-      <View style={styles.dateGrid}>
-        {days.map((i) => {
-          const active = i === day;
-          return (
-            <TouchableOpacity
-              key={i}
-              onPress={() => setDay(i)}
-              style={[
-                styles.dateCard,
-                active ? styles.dateCardActive : styles.dateCardInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.dateDay, active ? styles.textActiveSub : styles.textInactiveSub]}>
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
-              </Text>
-              <Text style={[styles.dateNum, active ? styles.textActive : styles.textInactive]}>
-                {12 + i}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+        <form onSubmit={handleConfirm} className="space-y-6">
+          
+          {/* Select Skill */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              1. Select Skill to Learn
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {(targetMentor.tags && targetMentor.tags.length > 0 ? targetMentor.tags : ['General Swap']).map((s) => {
+                const active = skill === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSkill(s)}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      active
+                        ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                        : 'bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Time Slot */}
-      <Label>Time slot</Label>
-      <View style={styles.grid3Column}>
-        {times.map((t) => {
-          const active = time === t;
-          return (
-            <TouchableOpacity
-              key={t}
-              onPress={() => setTime(t)}
-              style={[
-                styles.gridBtn,
-                active ? styles.gridBtnActive : styles.gridBtnInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.gridBtnText, active ? styles.textActive : styles.textInactive]}>
-                {t}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+          {/* Select Day */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              2. Select Date
+            </label>
+            <div className="grid grid-cols-7 gap-2">
+              {days.map((i) => {
+                const active = i === day;
+                const dayName = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i];
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setDay(i)}
+                    className={`py-3 rounded-2xl border text-center transition-all ${
+                      active
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-md'
+                        : 'bg-slate-50/80 border-slate-200 text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className={`text-[10px] font-bold block ${active ? 'text-purple-200' : 'text-slate-400'}`}>
+                      {dayName}
+                    </span>
+                    <span className="text-base font-extrabold block mt-0.5">
+                      {12 + i}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Session Type */}
-      <Label>Session type</Label>
-      <View style={styles.grid2Column}>
-        {(['Online', 'Offline'] as const).map((t) => {
-          const active = type === t;
-          return (
-            <TouchableOpacity
-              key={t}
-              onPress={() => setType(t)}
-              style={[
-                styles.gridBtn2,
-                active ? styles.gridBtnActive : styles.gridBtnInactive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.gridBtnText, active ? styles.textActive : styles.textInactive]}>
-                {t === 'Online' ? '🎥' : '📍'} {t}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+          {/* Select Time Slot */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              3. Select Time Slot
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {times.map((t) => {
+                const active = time === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTime(t)}
+                    className={`py-3 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      active
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{t}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Notes */}
-      <Label>Notes</Label>
-      <TextInput
-        value={notes}
-        onChangeText={setNotes}
-        multiline
-        numberOfLines={3}
-        placeholder="What do you want to focus on?"
-        placeholderTextColor="#8C8797"
-        style={styles.notesInput}
-      />
+          {/* Session Format */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              4. Session Format
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['Online', 'Offline'] as const).map((t) => {
+                const active = type === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setType(t)}
+                    className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                      active
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {t === 'Online' ? <Video className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                    <span>{t} Session</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Submit Button */}
-      <TouchableOpacity
-        style={[styles.confirmBtn, submitting && { opacity: 0.7 }]}
-        onPress={handleConfirm}
-        activeOpacity={0.8}
-        disabled={submitting}
-      >
-        {submitting ? (
-          <ActivityIndicator color="#ffffff" size="small" />
-        ) : (
-          <Text style={styles.confirmBtnText}>Confirm Session</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+          {/* Notes */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              5. Session Notes / Goals
+            </label>
+            <textarea
+              rows={3}
+              placeholder="What topics or questions do you want to focus on during this swap?"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm font-medium text-slate-900 outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-500/10 transition-all"
+            />
+          </div>
+
+          {/* Confirm Button */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <span>Confirm Swap Booking</span>
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.label}>{children}</Text>;
-}
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 40,
-    backgroundColor: '#FAF9FC',
-  },
-  successContainer: {
-    flex: 1,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  successIconBox: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  successTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  successSubtitle: {
-    fontSize: 14,
-    color: '#8C8797',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  successBtn: {
-    backgroundColor: '#8b5cf6',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  successBtnText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-  },
-  backIcon: {
-    marginRight: 6,
-  },
-  backText: {
-    fontSize: 14,
-    color: '#8C8797',
-    fontWeight: '500',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#8C8797',
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-    marginBottom: 10,
-    marginTop: 8,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
-  },
-  chipBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    borderWidth: 1,
-  },
-  chipBtnInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  chipBtnActive: {
-    backgroundColor: '#8b5cf6',
-    borderColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  textActive: {
-    color: '#ffffff',
-  },
-  textInactive: {
-    color: '#342F3D',
-  },
-  dateGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  dateCard: {
-    width: '13%',
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  dateCardInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  dateCardActive: {
-    backgroundColor: '#8b5cf6',
-    borderColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  dateDay: {
-    fontSize: 10,
-    marginBottom: 4,
-  },
-  dateNum: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  textActiveSub: {
-    color: '#ffffff',
-    opacity: 0.7,
-  },
-  textInactiveSub: {
-    color: '#8C8797',
-  },
-  grid3Column: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 8,
-  },
-  gridBtn: {
-    width: '31%',
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  gridBtnInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  gridBtnActive: {
-    backgroundColor: '#8b5cf6',
-    borderColor: '#8b5cf6',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  gridBtnText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  grid2Column: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 8,
-  },
-  gridBtn2: {
-    width: '48%',
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  notesInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    fontSize: 14,
-    color: '#342F3D',
-    textAlignVertical: 'top',
-    height: 96,
-    marginBottom: 24,
-  },
-  confirmBtn: {
-    width: '100%',
-    backgroundColor: '#8b5cf6',
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  confirmBtnText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

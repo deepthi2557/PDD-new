@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react-native';
+import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles, User, Calendar } from 'lucide-react';
 import { fetchMentors } from '../lib/api';
 import { Mentor } from '../lib/data';
 
@@ -13,6 +12,7 @@ export const Route = createFileRoute('/activity')({
 const tabs = ['Learning', 'Teaching', 'Upcoming', 'Completed'] as const;
 
 export default function Activity() {
+  const router = useRouter();
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const [tab, setTab] = useState<typeof tabs[number]>('Learning');
@@ -39,7 +39,7 @@ export default function Activity() {
   }, []);
 
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused || typeof window !== 'undefined') {
       try {
         const bookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
         setLocalBookings(bookings);
@@ -60,377 +60,159 @@ export default function Activity() {
   const trustScore = Math.min(100, Math.max(70, 95 + completedSessions * 2 - missedSessions * 5));
 
   const getItems = () => {
-    const mergedLearning = localBookings;
+    const mergedLearning = localBookings.length > 0 ? localBookings : [
+      { id: 'b1', skill: 'Public Speaking', with: 'ENAMALA SHANI PRIYA', time: 'Wednesday · 3:00 PM', status: 'upcoming', rating: 5 },
+      { id: 'b2', skill: 'Technical Writing', with: 'ENAMALA SHANI PRIYA', time: 'Thursday · 4:00 PM', status: 'upcoming', rating: 4.9 },
+      { id: 'b3', skill: 'Full-Stack Development', with: 'P.Venkata Sai Pradeep Reddy', time: 'Wednesday · 5:00 PM', status: 'completed', rating: 5 }
+    ];
     const mergedTeaching: any[] = [];
 
     if (tab === 'Learning') return mergedLearning;
     if (tab === 'Teaching') return mergedTeaching;
-    if (tab === 'Upcoming') return [...mergedLearning, ...mergedTeaching].filter((x) => x.status === 'upcoming');
-    return [...mergedLearning, ...mergedTeaching].filter((x) => x.status === 'completed');
+    if (tab === 'Upcoming') return mergedLearning.filter((x) => x.status === 'upcoming');
+    return mergedLearning.filter((x) => x.status === 'completed');
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Title */}
-      <Text style={styles.title}>My Activity</Text>
+    <div className="max-w-5xl mx-auto space-y-6">
+      
+      {/* Title Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          My Swap Activity
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+          Track your active skill learning, teaching sessions, and trust score metrics.
+        </p>
+      </div>
 
       {/* Grid Stats */}
-      <View style={styles.gridStats}>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Trust score</Text>
-          <Text style={[styles.statValue, styles.statValuePurple]}>{trustScore}</Text>
-          <Text style={styles.statSubTextOnline}>⭐ {trustScore > 90 ? 'Top tier' : 'Verified'}</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Attendance</Text>
-          <Text style={styles.statValue}>{attendancePct}%</Text>
-          <Text style={styles.statSubTextMuted}>{missedSessions} missed sessions</Text>
-        </View>
-      </View>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Trust Score</span>
+            <span className="text-3xl font-extrabold text-purple-600 mt-1 block">{trustScore}</span>
+            <span className="text-xs font-semibold text-emerald-600 mt-1 inline-flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span>{trustScore > 90 ? 'Top tier reliability' : 'Verified peer'}</span>
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xl">
+            🛡️
+          </div>
+        </div>
+
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Attendance Rate</span>
+            <span className="text-3xl font-extrabold text-slate-900 mt-1 block">{attendancePct}%</span>
+            <span className="text-xs font-semibold text-slate-400 mt-1 block">
+              {missedSessions} missed sessions
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl">
+            📅
+          </div>
+        </div>
+      </div>
 
       {/* Navigation Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabScrollContent}
-        style={styles.tabScrollWrapper}
-      >
-        <View style={styles.tabContainer}>
-          {tabs.map((t) => {
-            const active = tab === t;
-            return (
-              <TouchableOpacity
-                key={t}
-                onPress={() => setTab(t)}
-                style={[
-                  styles.tabButton,
-                  active ? styles.tabButtonActive : null,
-                ]}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    active ? styles.tabButtonTextActive : styles.tabButtonTextInactive,
-                  ]}
-                >
-                  {t}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar bg-slate-100 p-1.5 rounded-2xl border border-slate-200/60">
+        {tabs.map((t) => {
+          const active = tab === t;
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 min-w-[100px] py-2 px-4 rounded-xl text-xs font-bold transition-all text-center ${
+                active
+                  ? 'bg-white text-purple-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {t}
+            </button>
+          );
+        })}
+      </div>
 
-      {/* List Items */}
-      <View style={styles.itemList}>
+      {/* List Items Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-900 mb-4">{tab} Sessions ({getItems().length})</h2>
+        
         {getItems().length === 0 ? (
-          <Text style={{ textAlign: 'center', color: '#8C8797', marginVertical: 20 }}>
+          <div className="text-center py-12 text-slate-400 text-xs font-medium">
             No sessions found in {tab.toLowerCase()}.
-          </Text>
+          </div>
         ) : (
-          getItems().map((it) => (
-            <View key={it.id || it.skill + it.time} style={styles.itemCard}>
-              <View
-                style={[
-                  styles.itemIconBox,
-                  it.status === 'upcoming' ? styles.iconBoxPurple : styles.iconBoxMint,
-                ]}
+          <div className="space-y-3">
+            {getItems().map((it) => (
+              <div
+                key={it.id || it.skill + it.time}
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-purple-50/30 border border-slate-100 transition-colors flex items-center justify-between gap-4"
               >
-                {it.status === 'upcoming' ? (
-                  <Clock color="#ffffff" size={20} />
-                ) : (
-                  <CheckCircle2 color="#22C55E" size={20} />
+                <div className="flex items-center gap-3">
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                    it.status === 'upcoming' ? 'bg-purple-600 text-white' : 'bg-emerald-500 text-white'
+                  }`}>
+                    {it.status === 'upcoming' ? <Clock className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">{it.skill}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">with <strong className="text-slate-700">{it.with}</strong></p>
+                    <span className="text-[11px] text-slate-400 mt-1 block font-medium">{it.time}</span>
+                  </div>
+                </div>
+
+                {it.rating > 0 && (
+                  <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-xs font-bold text-amber-700">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span>{it.rating}</span>
+                  </div>
                 )}
-              </View>
-
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemTitle} numberOfLines={1}>{it.skill}</Text>
-                <Text style={styles.itemSubtitle} numberOfLines={1}>with {it.with}</Text>
-                <Text style={styles.itemTime}>{it.time}</Text>
-              </View>
-
-              {it.rating > 0 && (
-                <View style={styles.ratingBadge}>
-                  <Star color="#F59E0B" size={10} fill="#F59E0B" />
-                  <Text style={styles.ratingText}>{it.rating}</Text>
-                </View>
-              )}
-            </View>
-          ))
+              </div>
+            ))}
+          </div>
         )}
-      </View>
+      </div>
 
-      {/* Suggested For You Header */}
-      <View style={styles.sectionHeader}>
-        <Sparkles color="#8b5cf6" size={16} style={styles.sectionIcon} />
-        <Text style={styles.sectionTitle}>Suggested peers for you</Text>
-      </View>
+      {/* Suggested Peers Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-600" />
+          <h2 className="text-lg font-bold text-slate-900">Suggested Peers for You</h2>
+        </div>
 
-      {/* Suggested List */}
-      <View style={styles.suggestedList}>
-        {loading ? (
-          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginVertical: 16 }} />
-        ) : (
-          suggestedList.map((m) => (
-            <View key={m.id} style={styles.suggestedCard}>
-              <Image source={{ uri: m.avatar }} style={styles.suggestedAvatar} />
-              <View style={styles.suggestedInfo}>
-                <Text style={styles.suggestedName} numberOfLines={1}>{m.name}</Text>
-                <Text style={styles.suggestedExpertise} numberOfLines={1}>
-                  {m.expertise || 'SkillSwap Peer'}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ProfileDetails', { id: m.id })}
-                activeOpacity={0.7}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {suggestedList.map((m) => (
+            <div key={m.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+              <img src={m.avatar} alt={m.name} className="w-10 h-10 rounded-xl bg-white border object-cover shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-bold text-slate-900 truncate">{m.name}</h4>
+                <p className="text-[11px] text-purple-600 font-semibold truncate">{m.expertise || 'SkillSwap Peer'}</p>
+              </div>
+              <button
+                onClick={() => router.navigate({ to: `/profile/$id`, params: { id: m.id } })}
+                className="text-xs font-bold text-purple-600 hover:underline shrink-0"
               >
-                <Text style={styles.suggestedViewLink}>View Profile</Text>
-              </TouchableOpacity>
-            </View>
-          ))
-        )}
-      </View>
+                View
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Caution Reminder Banner */}
-      <View style={styles.cautionBanner}>
-        <AlertTriangle color="#D97706" size={20} style={styles.cautionIcon} />
-        <View style={styles.cautionContent}>
-          <Text style={styles.cautionTitle}>Reliability reminder</Text>
-          <Text style={styles.cautionDesc}>
-            Missing 3+ sessions flags your profile as low reliability.
-          </Text>
-        </View>
-      </View>
-    </ScrollView>
+      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-amber-900">
+        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div>
+          <h4 className="text-xs font-bold">Reliability reminder</h4>
+          <p className="text-xs text-amber-800 mt-0.5">
+            Missing 3+ sessions flags your profile as low reliability and reduces your match score visibility.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 110,
-    backgroundColor: '#FAF9FC',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 16,
-  },
-  gridStats: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 1,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  statValuePurple: {
-    color: '#8b5cf6',
-  },
-  statSubTextOnline: {
-    fontSize: 10,
-    color: '#22C55E',
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  statSubTextMuted: {
-    fontSize: 10,
-    color: '#8C8797',
-    marginTop: 4,
-  },
-  tabScrollWrapper: {
-    marginHorizontal: -20,
-    marginBottom: 20,
-  },
-  tabScrollContent: {
-    paddingHorizontal: 20,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 6,
-  },
-  tabButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  tabButtonActive: {
-    backgroundColor: '#8b5cf6',
-  },
-  tabButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  tabButtonTextActive: {
-    color: '#ffffff',
-  },
-  tabButtonTextInactive: {
-    color: '#8C8797',
-  },
-  itemList: {
-    marginBottom: 24,
-  },
-  itemCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  itemIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  iconBoxPurple: {
-    backgroundColor: '#8b5cf6',
-  },
-  iconBoxMint: {
-    backgroundColor: 'rgba(167, 243, 208, 0.5)',
-  },
-  itemInfo: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  itemTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  itemSubtitle: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  itemTime: {
-    fontSize: 10,
-    color: '#8C8797',
-    marginTop: 4,
-  },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#B45309',
-    marginLeft: 4,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionIcon: {
-    marginRight: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  suggestedList: {
-    marginBottom: 24,
-  },
-  suggestedCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 8,
-  },
-  suggestedAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#F3F0F6',
-    marginRight: 12,
-  },
-  suggestedInfo: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  suggestedName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  suggestedExpertise: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  suggestedViewLink: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#8b5cf6',
-  },
-  cautionBanner: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(254, 243, 199, 0.6)',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  cautionIcon: {
-    marginRight: 12,
-  },
-  cautionContent: {
-    flex: 1,
-  },
-  cautionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#78350F',
-  },
-  cautionDesc: {
-    fontSize: 12,
-    color: '#92400E',
-    marginTop: 2,
-  },
-});

@@ -1,9 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import React, { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Crown } from 'lucide-react-native';
+import { Trophy, TrendingUp, Crown, Star, Award, Sparkles } from 'lucide-react';
 import { fetchMentors } from '../lib/api';
-import { Mentor } from '../lib/data';
 
 export const Route = createFileRoute('/leaderboard')({
   component: Board,
@@ -12,6 +10,7 @@ export const Route = createFileRoute('/leaderboard')({
 const tabs = ['Mentors', 'Learners', 'Skills'] as const;
 
 export default function Board() {
+  const router = useRouter();
   const [tab, setTab] = useState<typeof tabs[number]>('Mentors');
   const [realUsers, setRealUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,10 +21,10 @@ export default function Board() {
     fetchMentors()
       .then((data) => {
         if (!active) return;
-        // Rank real users dynamically based on points/rating/sessions
         const ranked = data.map((user, idx) => {
           const calculatedScore = Math.round((user.rating || 4.8) * 900 + (user.sessions || 10) * 45 + (user.reviews || 5) * 12);
           return {
+            id: user.id,
             rank: idx + 1,
             name: user.name,
             avatar: user.avatar,
@@ -50,333 +49,167 @@ export default function Board() {
   const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Trophy color="#8b5cf6" size={24} style={styles.headerIcon} />
-        <Text style={styles.title}>Leaderboard</Text>
-      </View>
+    <div className="max-w-5xl mx-auto space-y-6">
+      
+      {/* Title Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+          <Trophy className="w-7 h-7 text-amber-500 fill-amber-400" />
+          <span>SkillSwap Leaderboard</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+          Top-rated community mentors, active learners, and trending skill exchange topics.
+        </p>
+      </div>
 
-      {/* Podium Card Banner */}
-      <View style={styles.podiumBanner}>
-        <Text style={styles.podiumSubTitle}>Live Rankings</Text>
+      {/* Live Podium Card Banner */}
+      <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-purple-800/40 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {loading ? (
-          <ActivityIndicator size="small" color="#8b5cf6" style={{ marginVertical: 20 }} />
-        ) : (
-          <View style={styles.podiumContainer}>
-            {podiumOrder.map((user, i) => {
-              if (!user) return null;
-              const isFirst = user.rank === 1;
-              const heights = [80, 112, 64];
+        <div className="relative z-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-4">
+            ✨ Live Top Contributor Podium
+          </span>
 
-              return (
-                <View key={user.name + i} style={styles.podiumColumn}>
-                  {isFirst && <Crown color="#D97706" size={20} style={styles.crownIcon} />}
-                  <Image source={{ uri: user.avatar }} style={styles.podiumAvatar} />
-                  <Text style={styles.podiumName} numberOfLines={1}>
-                    {user.name.split(' ')[0]}
-                  </Text>
-                  <Text style={styles.podiumScore}>{user.score} pts</Text>
-                  <View style={[styles.podiumBox, { height: heights[i % heights.length] }]}>
-                    <Text style={styles.podiumRankText}>#{user.rank}</Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </View>
+          {loading ? (
+            <div className="py-12 flex justify-center">
+              <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="flex items-end justify-center gap-4 sm:gap-8 pt-4">
+              {podiumOrder.map((user, i) => {
+                if (!user) return null;
+                const isFirst = user.rank === 1;
+                const podiumHeights = ['h-24', 'h-36', 'h-20'];
+
+                return (
+                  <div key={user.name + i} className="flex flex-col items-center flex-1 max-w-[140px]">
+                    {isFirst && <Crown className="w-7 h-7 text-amber-400 fill-amber-400 mb-1 animate-bounce" />}
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className={`rounded-2xl border-4 ${isFirst ? 'border-amber-400 w-16 h-16 sm:w-20 sm:h-20 shadow-lg shadow-amber-400/30' : 'border-white/40 w-12 h-12 sm:w-14 sm:h-14'} bg-slate-100 object-cover`}
+                    />
+                    <span className="text-xs sm:text-sm font-bold text-white mt-2 truncate w-full text-center">
+                      {user.name.split(' ')[0]}
+                    </span>
+                    <span className="text-[11px] font-semibold text-purple-200">
+                      {user.score} pts
+                    </span>
+
+                    <div className={`w-full ${podiumHeights[i % 3]} mt-2 rounded-t-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center`}>
+                      <span className="text-lg font-extrabold text-white">#{user.rank}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Tabs Menu */}
-      <View style={styles.tabContainer}>
+      <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/60">
         {tabs.map((t) => {
           const active = tab === t;
           return (
-            <TouchableOpacity
+            <button
               key={t}
-              onPress={() => setTab(t)}
-              style={[
-                styles.tabButton,
-                active ? styles.tabButtonActive : null,
-              ]}
-              activeOpacity={0.7}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
+                active
+                  ? 'bg-white text-purple-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <Text
-                style={[
-                  styles.tabButtonText,
-                  active ? styles.tabButtonTextActive : styles.tabButtonTextInactive,
-                ]}
-              >
-                {t}
-              </Text>
-            </TouchableOpacity>
+              {t}
+            </button>
           );
         })}
-      </View>
+      </div>
 
-      {/* Tab Contents */}
-      {loading ? (
-        <ActivityIndicator size="large" color="#8b5cf6" style={{ marginVertical: 32 }} />
-      ) : tab !== 'Skills' ? (
-        <View style={styles.listContainer}>
-          {realUsers.map((m) => (
-            <View key={m.name + m.rank} style={styles.listCard}>
-              <Text style={styles.rankIndex}>#{m.rank}</Text>
-              <Image source={{ uri: m.avatar }} style={styles.listAvatar} />
-              <View style={styles.listInfo}>
-                <Text style={styles.listName}>{m.name}</Text>
-                <Text style={styles.listScore}>{m.score} pts · {m.expertise}</Text>
-              </View>
-              {m.badge && <Text style={styles.listBadgeEmoji}>{m.badge}</Text>}
-            </View>
-          ))}
-        </View>
-      ) : (
-        <View style={styles.listContainer}>
+      {/* Leaderboard Table / Cards */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        {loading ? (
+          <div className="py-12 flex justify-center">
+            <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : tab !== 'Skills' ? (
+          <div className="space-y-3">
+            {realUsers.map((m) => (
+              <div
+                key={m.name + m.rank}
+                onClick={() => router.navigate({ to: `/profile/$id`, params: { id: m.id } })}
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-purple-50/40 border border-slate-100 transition-colors flex items-center justify-between gap-4 cursor-pointer"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <span className={`w-8 text-center text-sm font-extrabold ${
+                    m.rank === 1 ? 'text-amber-500' : m.rank === 2 ? 'text-slate-400' : m.rank === 3 ? 'text-amber-700' : 'text-slate-400'
+                  }`}>
+                    #{m.rank}
+                  </span>
+
+                  <img src={m.avatar} alt={m.name} className="w-10 h-10 rounded-xl bg-white border object-cover shrink-0" />
+
+                  <div className="min-w-0">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">{m.name}</h4>
+                    <p className="text-[11px] text-slate-500 font-medium truncate">{m.expertise}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                    {m.score} pts
+                  </span>
+                  <span className="text-lg">{m.badge}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {[
+              { name: 'Python & AI Machine Learning', growth: '+42% this week' },
+              { name: 'React & TypeScript Engineering', growth: '+38% this week' },
+              { name: 'UI/UX Design & Figma Prototyping', growth: '+31% this week' },
+              { name: 'Node.js & Cloud Backend Services', growth: '+25% this week' },
+            ].map((s, i) => (
+              <div key={s.name} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-extrabold text-slate-400">#{i + 1}</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-900">{s.name}</span>
+                </div>
+
+                <span className="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>{s.growth}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Badges Grid */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+          <Award className="w-5 h-5 text-amber-500" />
+          <span>Your Unlocked Badges</span>
+        </h3>
+
+        <div className="grid grid-cols-3 gap-3">
           {[
-            { name: 'Python & AI', growth: '+42% this week' },
-            { name: 'React & TypeScript', growth: '+38% this week' },
-            { name: 'UI/UX & Figma', growth: '+31% this week' },
-            { name: 'Node.js & Backend', growth: '+25% this week' },
-          ].map((s, i) => (
-            <View key={s.name} style={styles.listCard}>
-              <Text style={styles.rankIndex}>#{i + 1}</Text>
-              <Text style={styles.skillName}>{s.name}</Text>
-              <View style={styles.growthBadge}>
-                <TrendingUp color="#22C55E" size={12} style={styles.growthIcon} />
-                <Text style={styles.growthText}>{s.growth}</Text>
-              </View>
-            </View>
+            { e: '📚', l: 'Fast Learner' },
+            { e: '🎯', l: 'Session Master' },
+            { e: '🚀', l: 'Explorer' },
+          ].map((b) => (
+            <div key={b.l} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+              <span className="text-3xl block mb-1">{b.e}</span>
+              <span className="text-xs font-bold text-slate-800">{b.l}</span>
+            </div>
           ))}
-        </View>
-      )}
-
-      {/* Your Badges Grid */}
-      <Text style={styles.badgesSectionTitle}>Your badges</Text>
-      <View style={styles.badgesGrid}>
-        {[
-          { e: '📚', l: 'Fast Learner' },
-          { e: '🎯', l: 'Session Master' },
-          { e: '🚀', l: 'Explorer' },
-        ].map((b) => (
-          <View key={b.l} style={styles.badgeItemCard}>
-            <Text style={styles.badgeEmoji}>{b.e}</Text>
-            <Text style={styles.badgeLabel} numberOfLines={1}>{b.l}</Text>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 110,
-    backgroundColor: '#FAF9FC',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  headerIcon: {
-    marginRight: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  podiumBanner: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
-  },
-  podiumSubTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#8C8797',
-    opacity: 0.8,
-  },
-  podiumContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    marginTop: 16,
-    gap: 8,
-  },
-  podiumColumn: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  crownIcon: {
-    marginBottom: 4,
-  },
-  podiumAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-    backgroundColor: '#F3F0F6',
-  },
-  podiumName: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
-    textAlign: 'center',
-    color: '#342F3D',
-  },
-  podiumScore: {
-    fontSize: 10,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  podiumBox: {
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.65)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    marginTop: 4,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 4,
-  },
-  podiumRankText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 6,
-    marginBottom: 16,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  tabButtonActive: {
-    backgroundColor: '#8b5cf6',
-  },
-  tabButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  tabButtonTextActive: {
-    color: '#ffffff',
-  },
-  tabButtonTextInactive: {
-    color: '#8C8797',
-  },
-  listContainer: {
-    width: '100%',
-  },
-  listCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 8,
-  },
-  rankIndex: {
-    width: 28,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 14,
-    color: '#8C8797',
-    marginRight: 6,
-  },
-  listAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#F3F0F6',
-    marginRight: 12,
-  },
-  listInfo: {
-    flex: 1,
-  },
-  listName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  listScore: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 2,
-  },
-  listBadgeEmoji: {
-    fontSize: 18,
-  },
-  skillName: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#342F3D',
-  },
-  growthBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(167, 243, 208, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 99,
-  },
-  growthIcon: {
-    marginRight: 4,
-  },
-  growthText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#065F46',
-  },
-  badgesSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  badgesGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  badgeItemCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 16,
-    padding: 12,
-    alignItems: 'center',
-  },
-  badgeEmoji: {
-    fontSize: 28,
-    marginBottom: 4,
-  },
-  badgeLabel: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#342F3D',
-  },
-});
