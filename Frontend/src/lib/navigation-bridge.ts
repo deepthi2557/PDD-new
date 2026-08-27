@@ -8,18 +8,6 @@ export function useIsFocused() {
 export function useNavigation<T = any>() {
   const navigate = useNavigate();
 
-  try {
-    const { AppNavigationContext } = require('../../App');
-    if (AppNavigationContext) {
-      const ctx = useContext(AppNavigationContext) as any;
-      if (ctx && ctx.navigation && ctx.navigation.navigate) {
-        return ctx.navigation;
-      }
-    }
-  } catch (e) {
-    // Fallback
-  }
-
   return {
     navigate: (screenName: string, params?: Record<string, any>) => {
       const routeMap: Record<string, string> = {
@@ -78,18 +66,6 @@ export function useNavigation<T = any>() {
 }
 
 export function useRoute<T = any>(): { params: T; name: string } {
-  try {
-    const { AppNavigationContext } = require('../../App');
-    if (AppNavigationContext) {
-      const ctx = useContext(AppNavigationContext) as any;
-      if (ctx && ctx.route) {
-        return ctx.route;
-      }
-    }
-  } catch (e) {
-    // Fallback
-  }
-
   const location = useLocation();
   const routeParams = useParams({ strict: false });
 

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 
-export const Route = (createFileRoute as any)('/login')({
+export const Route = createFileRoute('/login')({
   component: Login,
 });
 

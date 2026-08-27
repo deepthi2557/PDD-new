@@ -18,11 +18,16 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: [
+        { find: /react-native-web[/\\]dist[/\\]modules[/\\]prefixStyles/, replacement: path.resolve(__dirname, "./src/lib/prefixStyles-bridge.ts") },
+        { find: "react-native/Libraries/Utilities/codegenNativeComponent", replacement: path.resolve(__dirname, "./src/lib/codegen-bridge.ts") },
         { find: /^react-native$/, replacement: "react-native-web" },
-        { find: "react-native", replacement: "react-native-web" },
         { find: "lucide-react-native", replacement: "lucide-react" },
         { find: "@expo/vector-icons", replacement: path.resolve(__dirname, "./src/lib/expo-icons-bridge.tsx") },
       ],
+    },
+    ssr: {
+      noExternal: ["react-native-web"],
+      external: ["inline-style-prefixer"],
     },
     plugins: [
       nitro({

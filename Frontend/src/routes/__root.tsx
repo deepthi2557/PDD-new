@@ -6,7 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-} from "../lib/router-bridge";
+} from "@tanstack/react-router";
 import { Platform, View, Text } from "react-native";
 
 import appCss from "../styles.css?url";
@@ -58,8 +58,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <p className="mt-2 text-sm text-red-500 font-mono text-left break-all max-h-60 overflow-auto whitespace-pre-wrap bg-red-50 p-2 rounded">
+          {error?.stack || error?.message || 'Something went wrong.'}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -83,7 +83,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = (createRootRouteWithContext as any)({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
