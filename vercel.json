@@ -1,0 +1,6 @@
+{
+  "name": "skillswap-app",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".vercel/output"
+}
