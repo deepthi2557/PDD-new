@@ -1,0 +1,6 @@
+# Selenium Test Suite local cache & temporary artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+screenshots/
+reports/
