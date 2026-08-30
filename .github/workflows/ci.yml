@@ -68,7 +68,7 @@ jobs:
           retention-days: 30
 
   appium-tests:
-    name: appium-tests
+    name: appium-tests (345 E2E Tests)
     needs: [setup-node]
     runs-on: ubuntu-latest
     steps:
@@ -83,16 +83,16 @@ jobs:
       - name: Install Dependencies
         run: pip install openpyxl
 
-      - name: Run Appium Mobile UI Suite
+      - name: Run Appium 345 E2E Test Suite
         run: |
-          python -m selenium_tests.run_appium_tests
+          python appium_test_suite/run_all_appium_tests.py
 
-      - name: Upload Appium Report Artifact
+      - name: Upload Appium Excel Analysis Report Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: appium-report
-          path: selenium_tests/appium_test_report.xlsx
+          name: appium-e2e-test-analysis-report
+          path: appium_test_suite/appium_test_analysis_report.xlsx
           retention-days: 30
 
   load-tests:
