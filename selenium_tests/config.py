@@ -3,10 +3,10 @@ import os
 # Configuration for Web Application Selenium Testing Framework
 
 # Web Application Target URL (Vercel Link / Localhost fallback)
-DEFAULT_VERCEL_LINK = "https://skillswap-app.vercel.app"
+DEFAULT_VERCEL_LINK = "https://pdd-new.vercel.app/"
 DEFAULT_LOCAL_LINK = "http://localhost:5173"
 
-BASE_URL = os.getenv("TEST_BASE_URL", os.getenv("VERCEL_URL", DEFAULT_LOCAL_LINK))
+BASE_URL = os.getenv("TEST_BASE_URL", os.getenv("VERCEL_URL", DEFAULT_VERCEL_LINK))
 
 # Login Credentials
 DEFAULT_EMAIL = os.getenv("TEST_USER_EMAIL", "testuser@skillswap.com")

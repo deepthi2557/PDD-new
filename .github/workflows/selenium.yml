@@ -21,17 +21,17 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: "selenium_tests/requirements.txt"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install System Dependencies & Google Chrome
+      - name: Install System Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip libgconf-2-4
-          sudo apt-get install -y google-chrome-stable || true
+          sudo apt-get update || true
+          sudo apt-get install -y wget unzip libgconf-2-4 || true
 
       - name: Install Python Test Dependencies
         run: |
@@ -41,14 +41,14 @@ jobs:
       - name: Build & Run Local App (or target Vercel URL)
         env:
           HEADLESS: "true"
-          TEST_BASE_URL: "https://skillswap-app.vercel.app"
+          TEST_BASE_URL: "https://pdd-new.vercel.app/"
         run: |
           echo "Target Base URL: $TEST_BASE_URL"
 
       - name: Execute Selenium E2E Test Suite
         env:
           HEADLESS: "true"
-          TEST_BASE_URL: "https://skillswap-app.vercel.app"
+          TEST_BASE_URL: "https://pdd-new.vercel.app/"
         run: |
           python -m selenium_tests.run_tests
 

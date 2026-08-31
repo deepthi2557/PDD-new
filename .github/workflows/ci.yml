@@ -46,6 +46,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: "selenium_tests/requirements.txt"
 
       - name: Install Selenium & Excel Dependencies
         run: |
@@ -55,7 +56,7 @@ jobs:
       - name: Run Selenium 340 E2E Test Suite
         env:
           HEADLESS: "true"
-          TEST_BASE_URL: "https://skillswap-app.vercel.app"
+          TEST_BASE_URL: "https://pdd-new.vercel.app/"
         run: |
           python -m selenium_tests.run_tests
 
@@ -111,7 +112,11 @@ jobs:
       - name: Install Dependencies
         run: pip install openpyxl
 
-      - name: Run Load Performance Tests
+      - name: Run Baseline Load Performance Tests (100 Virtual Users)
+        env:
+          TEST_BASE_URL: "https://pdd-new.vercel.app/"
+          LOAD_TEST_USERS: "100"
+          LOAD_TEST_DURATION: "60"
         run: |
           python -m selenium_tests.run_load_tests
 

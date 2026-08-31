@@ -74,16 +74,19 @@ def driver(browser_options):
     """Fixture providing a resilient WebDriver instance (Chrome -> Edge -> Fallback)."""
     driver_instance = None
     try:
-        service = ChromeService(ChromeDriverManager().install())
-        driver_instance = webdriver.Chrome(service=service, options=browser_options)
+        driver_instance = webdriver.Chrome(options=browser_options)
     except Exception:
         try:
-            from selenium.webdriver.edge.options import Options as EdgeOptions
-            edge_opts = EdgeOptions()
-            edge_opts.add_argument("--headless=new")
-            driver_instance = webdriver.Edge(options=edge_opts)
+            service = ChromeService(ChromeDriverManager().install())
+            driver_instance = webdriver.Chrome(service=service, options=browser_options)
         except Exception:
-            driver_instance = MockWebDriver(BASE_URL)
+            try:
+                from selenium.webdriver.edge.options import Options as EdgeOptions
+                edge_opts = EdgeOptions()
+                edge_opts.add_argument("--headless=new")
+                driver_instance = webdriver.Edge(options=edge_opts)
+            except Exception:
+                driver_instance = MockWebDriver(BASE_URL)
             
     try:
         driver_instance.implicitly_wait(IMPLICIT_WAIT)
