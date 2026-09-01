@@ -27,7 +27,7 @@ ENDPOINTS = [
 ]
 
 def make_request(url):
-    """Sends a single HTTP GET request and returns (status_code, latency_ms)."""
+    """Sends a single HTTP GET request and returns (status_code, latency_ms, error)."""
     start = time.time()
     req = urllib.request.Request(
         url,
