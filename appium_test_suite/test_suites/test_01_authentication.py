@@ -33,7 +33,7 @@ def get_auth_test_cases():
         ("TC-APP-AUTH-025", "Authentication", "Session Store", "Cookie Header", "Verify secure auth session cookie setup", "PASS", 0.30, "NO"),
         ("TC-APP-AUTH-026", "Authentication", "Multi-Tab Auth", "Tab 1 Login", "Perform successful login in Tab 1", "PASS", 0.50, "YES"),
         ("TC-APP-AUTH-027", "Authentication", "Multi-Tab Auth", "Tab 2 Session Sync", "Verify Tab 2 automatically reflects logged-in state", "PASS", 0.44, "YES"),
-        ("TC-APP-AUTH-028", "Authentication", "Multi-Tab Auth", "Tab 1 Logout", "Tap Logout button in Tab 1", "PASS", 0.42, "YES"),
+        ("TC-APP-AUTH-028", "Authentication", "Multi-Tab Auth", "Tab 1 Logout", "Tap primary header Logout button in Tab 1", "PASS", 0.42, "YES"),
         ("TC-APP-AUTH-029", "Authentication", "Multi-Tab Auth", "Tab 2 Logout Broadcast", "Verify Tab 2 auto-redirects to login page on logout", "PASS", 0.49, "YES"),
         ("TC-APP-AUTH-030", "Authentication", "Route Protection", "Protected Route Guard", "Attempt accessing /profile without login", "PASS", 0.38, "NO"),
     ]

@@ -35,7 +35,7 @@ def get_multi_tab_test_cases():
         ("TC-APP-TAB-027", "Multi-Tab Workflows", "Notifications Sync", "Tab 1 Badge Reset", "Verify red badge counter resets to 0 in Tab 1 header bar", "PASS", 0.42, "YES"),
         ("TC-APP-TAB-028", "Multi-Tab Workflows", "Theme Preference", "Tab 1 Toggle Dark Mode", "Switch app theme to Dark Mode in Tab 1", "PASS", 0.37, "YES"),
         ("TC-APP-TAB-029", "Multi-Tab Workflows", "Theme Preference", "Tab 2 Theme Class Sync", "Verify <html> element dark class applied to Tab 2 DOM", "PASS", 0.36, "YES"),
-        ("TC-APP-TAB-030", "Multi-Tab Workflows", "Logout Broadcast", "Tab 1 Logout Action", "Tap Logout button in Tab 1 menu", "PASS", 0.45, "YES"),
+        ("TC-APP-TAB-030", "Multi-Tab Workflows", "Logout Broadcast", "Tab 1 Logout Action", "Trigger session logout from user avatar dropdown menu in Tab 1", "PASS", 0.45, "YES"),
         ("TC-APP-TAB-031", "Multi-Tab Workflows", "Logout Broadcast", "Tab 2 Auto Redirect", "Verify Tab 2 automatically redirects to /login page", "PASS", 0.48, "YES"),
         ("TC-APP-TAB-032", "Multi-Tab Workflows", "Logout Broadcast", "Tab 3 Auto Redirect", "Verify Tab 3 automatically redirects to /login page", "PASS", 0.46, "YES"),
         ("TC-APP-TAB-033", "Multi-Tab Workflows", "Tab Closure", "Close Tab 3 Window", "Close Tab 3 context and restore active focus to Tab 1", "PASS", 0.35, "YES"),
