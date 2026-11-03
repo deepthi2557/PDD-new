@@ -19,7 +19,8 @@ import {
   Flame, 
   Trophy,
   ArrowLeft,
-  Share2
+  Share2,
+  Video
 } from 'lucide-react';
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
@@ -281,6 +282,15 @@ export default function Profile() {
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Chat</span>
+                  </button>
+
+                  <button
+                    onClick={() => router.navigate({ to: `/video/$id`, params: { id: m.id } })}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-xs sm:text-sm transition-colors"
+                    title="Video Call & Real-Time Screen Share"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Video Call</span>
                   </button>
 
                   <button

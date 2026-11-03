@@ -13,7 +13,8 @@ import {
   BookOpen, 
   Search,
   Menu,
-  X
+  X,
+  Video
 } from 'lucide-react';
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { label: 'Explore', path: '/home', icon: Home },
+    { label: 'Video Call', path: '/video', icon: Video, live: true },
     { label: 'Community', path: '/community', icon: Users },
     { label: 'Activity', path: '/activity', icon: Activity },
     { label: 'Leaderboard', path: '/leaderboard', icon: Trophy },
@@ -58,6 +60,9 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
   const isActive = (path: string) => {
     if (path === '/profile/me') {
       return pathname.startsWith('/profile');
+    }
+    if (path === '/video') {
+      return pathname.startsWith('/video');
     }
     return pathname === path;
   };
@@ -103,6 +108,9 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                 >
                   <Icon className={`w-4 h-4 ${active ? 'text-purple-600' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
+                  {item.live && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" title="Live Video & Screen Share" />
+                  )}
                 </button>
               );
             })}
@@ -169,7 +177,12 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? 'text-purple-600' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.live && (
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                      Live HD
+                    </span>
+                  )}
                 </button>
               );
             })}

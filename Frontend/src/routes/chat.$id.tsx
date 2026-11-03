@@ -152,8 +152,25 @@ export default function ChatRoom() {
         {/* Action Header Icons */}
         <div className="flex items-center gap-2">
           <button
+            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-sm"
+            title="Start Video Call & Real-Time Screen Share"
+          >
+            <Video className="w-4 h-4" />
+            <span className="hidden sm:inline">Video Call</span>
+          </button>
+
+          <button
+            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
+            className="p-1.5 rounded-xl text-slate-500 hover:text-purple-600 hover:bg-purple-50 border border-slate-200 transition-colors"
+            title="Audio Call"
+          >
+            <Phone className="w-4 h-4" />
+          </button>
+
+          <button
             onClick={() => router.navigate({ to: '/book', search: { id: m.id } as any })}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-colors border border-purple-200"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-colors border border-purple-200"
           >
             <Calendar className="w-4 h-4" />
             <span>Book Swap</span>

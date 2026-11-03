@@ -15,7 +15,8 @@ import {
   X, 
   SlidersHorizontal,
   ArrowRight,
-  BookOpen
+  BookOpen,
+  Video
 } from 'lucide-react';
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
@@ -149,9 +150,19 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-semibold mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Peer-to-Peer Skill Exchange</span>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Peer-to-Peer Skill Exchange</span>
+            </div>
+            <button
+              onClick={() => router.navigate({ to: '/video' })}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 text-xs font-bold transition-all"
+            >
+              <Video className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Live Video & Screen Share Hub</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+            </button>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -369,18 +380,26 @@ export default function Home() {
                 </div>
 
                 {/* Footer Action Buttons */}
-                <div className="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2">
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2">
                   <button
                     onClick={() => router.navigate({ to: `/profile/$id`, params: { id: mentor.id } })}
-                    className="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors"
+                    className="flex-1 py-2.5 px-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors text-center"
                   >
-                    View Profile
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => router.navigate({ to: `/video/$id`, params: { id: mentor.id } })}
+                    className="py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                    title="Video Call & Real-Time Screen Share"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                    <span>Call</span>
                   </button>
                   <button
                     onClick={() => router.navigate({ to: '/book', search: { id: mentor.id } as any })}
-                    className="py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-2.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1"
                   >
-                    <span>Book Session</span>
+                    <span>Book</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

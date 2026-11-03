@@ -1,8 +1,27 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, TextInput, Platform } from 'react-native';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft, Mic, MicOff, Video as VideoIcon, VideoOff, Palette, RotateCcw, PhoneOff, Star, CheckCircle2, Send } from 'lucide-react-native';
+import { 
+  ArrowLeft, 
+  Mic, 
+  MicOff, 
+  Video as VideoIcon, 
+  VideoOff, 
+  Monitor, 
+  MonitorOff, 
+  MessageSquare, 
+  Palette, 
+  RotateCcw, 
+  PhoneOff, 
+  Star, 
+  CheckCircle2, 
+  Send, 
+  Sparkles, 
+  ExternalLink, 
+  Wifi, 
+  Maximize2,
+  Users,
+  Settings
+} from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 
@@ -11,79 +30,61 @@ export const Route = createFileRoute('/video/$id')({
 });
 
 export default function VideoRoom() {
-  const navigation = useNavigation<any>();
-  const route = useRoute<any>();
-  const id = route.params?.id;
+  const router = useRouter();
 
-  const [m, setM] = useState<Mentor | null>(null);
+  // Extract ID from pathname or fallback
+  let id: string = 'aria-shah';
+  if (typeof window !== 'undefined') {
+    const parts = window.location.pathname.split('/');
+    const lastPart = parts[parts.length - 1];
+    if (lastPart && lastPart !== 'video') {
+      id = lastPart;
+    }
+  }
+
+  const [mentor, setMentor] = useState<Mentor | null>(null);
   const [loading, setLoading] = useState(true);
-  const [muted, setMuted] = useState(false);
-  const [videoOff, setVideoOff] = useState(false);
-  const [peerVideoOff, setPeerVideoOff] = useState(false);
-  const [showWhiteboard, setShowWhiteboard] = useState(true);
-  const [drawColor, setDrawColor] = useState('#8b5cf6'); // Default violet
+
+  // Audio / Video / Screen Share states
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [screenShareError, setScreenShareError] = useState<string | null>(null);
+
+  // Layout / Panels
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [drawColor, setDrawColor] = useState('#8b5cf6');
   const [lineWidth, setLineWidth] = useState(4);
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 mins in seconds
+  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
+
+  // Review modal
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(5);
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const [showChat, setShowChat] = useState(false);
+  // In-call chat
   const [msgs, setMsgs] = useState<any[]>([]);
   const [chatText, setChatText] = useState('');
 
-  useEffect(() => {
-    if (!id) return;
-    const localMsgs = localStorage.getItem(`chat_msgs_${id}`);
-    if (localMsgs) {
-      setMsgs(JSON.parse(localMsgs));
-    }
-  }, [id]);
+  // Video Refs
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
 
-  const sendChatMessage = () => {
-    if (!chatText.trim() || !id) return;
-    const newMsg = {
-      from: 'me',
-      text: chatText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    const updated = [...msgs, newMsg];
-    setMsgs(updated);
-    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
-    setChatText('');
-    
-    // Update last message in chat list
-    const chatsList = JSON.parse(localStorage.getItem('chats_list') || '[]');
-    const chatIdx = chatsList.findIndex((c: any) => c.id === id);
-    if (chatIdx > -1) {
-      chatsList[chatIdx].last = chatText;
-      chatsList[chatIdx].time = 'now';
-      localStorage.setItem('chats_list', JSON.stringify(chatsList));
-    }
-  };
-
-  const getVideoContainerStyle = () => {
-    if (showWhiteboard && showChat) {
-      return { width: '25%' };
-    }
-    if (showWhiteboard) {
-      return styles.videoContainerMini;
-    }
-    return styles.videoContainerFull;
-  };
-
+  // Canvas Ref
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawing = useRef(false);
 
-  // Fetch mentor profile
+  // Load Mentor Data
   useEffect(() => {
-    if (!id) return;
     let active = true;
     fetchMentorById(id)
       .then((data) => {
         if (active) {
-          setM(data);
+          setMentor(data);
           setLoading(false);
         }
       })
@@ -91,7 +92,7 @@ export default function VideoRoom() {
         console.error(err);
         if (active) {
           const fallback = mentors.find((x) => x.id === id) || mentors[0];
-          setM(fallback);
+          setMentor(fallback);
           setLoading(false);
         }
       });
@@ -100,7 +101,24 @@ export default function VideoRoom() {
     };
   }, [id]);
 
-  // Countdown timer
+  // Load Chat Messages
+  useEffect(() => {
+    if (!id || typeof window === 'undefined') return;
+    const localMsgs = localStorage.getItem(`chat_msgs_${id}`);
+    if (localMsgs) {
+      try {
+        setMsgs(JSON.parse(localMsgs));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setMsgs([
+        { from: 'them', text: `Welcome to our live swap session! I am ready whenever you are.`, time: 'Now' }
+      ]);
+    }
+  }, [id]);
+
+  // Session Timer
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -108,33 +126,155 @@ export default function VideoRoom() {
     return () => clearInterval(timer);
   }, []);
 
-  // Format timer
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const remainingSecs = secs % 60;
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Draw handlers for HTML5 Canvas
+  // Start Camera Stream on mount
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true,
+        })
+        .then((s) => {
+          stream = s;
+          localStreamRef.current = s;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = s;
+          }
+        })
+        .catch((err) => {
+          console.warn('Camera / Mic permission denied or unavailable:', err);
+        });
+    }
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  // Toggle Mute
+  const toggleMute = () => {
+    if (localStreamRef.current) {
+      const audioTracks = localStreamRef.current.getAudioTracks();
+      audioTracks.forEach((t) => {
+        t.enabled = isMuted;
+      });
+    }
+    setIsMuted(!isMuted);
+  };
+
+  // Toggle Video
+  const toggleVideo = () => {
+    if (localStreamRef.current) {
+      const videoTracks = localStreamRef.current.getVideoTracks();
+      videoTracks.forEach((t) => {
+        t.enabled = isVideoOff;
+      });
+    }
+    setIsVideoOff(!isVideoOff);
+  };
+
+  // Real-Time Screen Share Toggle
+  const startScreenShare = async () => {
+    setScreenShareError(null);
+    try {
+      if (!navigator.mediaDevices?.getDisplayMedia) {
+        setScreenShareError('Screen sharing is not supported by your current browser.');
+        return;
+      }
+
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: 'always' as any,
+          displaySurface: 'monitor' as any,
+        },
+        audio: true,
+      });
+
+      screenStreamRef.current = displayStream;
+      if (screenVideoRef.current) {
+        screenVideoRef.current.srcObject = displayStream;
+      }
+      setIsScreenSharing(true);
+
+      // Listen for browser's native "Stop Sharing" floating button
+      const videoTrack = displayStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.onended = () => {
+          stopScreenShare();
+        };
+      }
+    } catch (err: any) {
+      console.warn('Screen share error:', err);
+      if (err.name !== 'NotAllowedError') {
+        setScreenShareError('Could not start screen share: ' + (err.message || 'Permission denied'));
+      }
+    }
+  };
+
+  const stopScreenShare = () => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((t) => t.stop());
+      screenStreamRef.current = null;
+    }
+    if (screenVideoRef.current) {
+      screenVideoRef.current.srcObject = null;
+    }
+    setIsScreenSharing(false);
+  };
+
+  const toggleScreenShare = () => {
+    if (isScreenSharing) {
+      stopScreenShare();
+    } else {
+      startScreenShare();
+    }
+  };
+
+  // In-call Chat Message Send
+  const sendChatMessage = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!chatText.trim() || !id) return;
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      from: 'me',
+      text: chatText.trim(),
+      time: timeNow,
+    };
+    const updated = [...msgs, newMsg];
+    setMsgs(updated);
+    localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+    setChatText('');
+  };
+
+  // Whiteboard Canvas Handlers
   useEffect(() => {
     if (!showWhiteboard || !canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // Set high resolution canvas drawing
     canvas.width = canvas.parentElement?.clientWidth || 800;
     canvas.height = canvas.parentElement?.clientHeight || 450;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-  }, [showWhiteboard, canvasRef.current]);
+  }, [showWhiteboard]);
 
   const handleStartDraw = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
-
     ctx.strokeStyle = drawColor;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
@@ -147,7 +287,6 @@ export default function VideoRoom() {
     const rect = canvasRef.current.getBoundingClientRect();
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
-
     ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
   };
@@ -167,26 +306,18 @@ export default function VideoRoom() {
     try {
       const snapshotUrl = canvasRef.current.toDataURL('image/png');
       const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      const localMsgsStr = localStorage.getItem(`chat_msgs_${id}`);
-      const chatMsgs = localMsgsStr ? JSON.parse(localMsgsStr) : [];
-      
       const snapshotMsg = {
         from: 'me',
-        type: 'image',
-        mediaUrl: snapshotUrl,
+        text: '🎨 Shared a whiteboard snapshot to chat',
+        image: snapshotUrl,
         time: timeNow,
-        caption: '🎨 Shared a snapshot of the whiteboard'
       };
-      
-      const updated = [...chatMsgs, snapshotMsg];
-      localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+      const updated = [...msgs, snapshotMsg];
       setMsgs(updated);
-      
-      alert('Whiteboard snapshot shared successfully to chat!');
+      localStorage.setItem(`chat_msgs_${id}`, JSON.stringify(updated));
+      setShowChat(true);
     } catch (err) {
-      console.error('Failed to export canvas:', err);
-      alert('Could not share canvas snapshot.');
+      console.error(err);
     }
   };
 
@@ -194,731 +325,439 @@ export default function VideoRoom() {
     setSubmitted(true);
     setTimeout(() => {
       setShowReviewModal(false);
-      navigation.navigate('ChatDetails', { id });
-    }, 1500);
+      router.navigate({ to: '/activity' });
+    }, 1200);
   };
 
-  if (loading || !m) {
+  if (loading || !mentor) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#8b5cf6" />
-      </View>
+      <div className="min-h-[75vh] flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-semibold text-slate-500">Connecting to Video Classroom...</p>
+      </div>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header Info */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ArrowLeft color="#342F3D" size={20} />
-        </TouchableOpacity>
-        <View style={styles.mentorInfo}>
-          <Text style={styles.title}>Swap Session</Text>
-          <Text style={styles.subtitle}>with {m.name}</Text>
-        </View>
-        <View style={styles.timerCard}>
-          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-        </View>
-      </View>
+    <div className="min-h-[88vh] flex flex-col bg-slate-950 text-white rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative">
+      
+      {/* Top Header Bar */}
+      <header className="px-5 py-3.5 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex items-center justify-between z-20 shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.navigate({ to: '/chat/$id', params: { id } })}
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            title="Leave to Chat"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
-      {/* Main Content (Split screen style: Video and Canvas) */}
-      <View style={styles.contentSplit}>
-        {/* Left Side: Video Streams */}
-        <View style={[styles.videoContainer, getVideoContainerStyle()]}>
-           {/* Peer Stream (Mentor) */}
-          <View style={styles.peerVideoCard}>
-            {peerVideoOff ? (
-              <View style={styles.videoOffPlaceholder}>
-                <Image source={{ uri: m.avatar }} style={styles.offlineAvatar} />
-                <Text style={styles.videoOffText}>{m.name}'s camera off</Text>
-              </View>
-            ) : (
-              <View style={styles.peerVideoOverlay}>
-                <Image source={{ uri: m.avatar }} style={styles.videoStreamMock} />
-                <View style={styles.nameBadge}>
-                  <Text style={styles.nameBadgeText}>{m.name}</Text>
-                </View>
-              </View>
-            )}
-          </View>
+          <div className="flex items-center gap-2.5">
+            <div className="relative">
+              <img
+                src={mentor.avatar}
+                alt={mentor.name}
+                className="w-9 h-9 rounded-full object-cover border border-purple-500/50"
+              />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-bold text-white">{mentor.name}</h1>
+                <span className="px-2 py-0.5 rounded-md bg-purple-900/60 border border-purple-500/30 text-purple-300 text-[10px] font-semibold">
+                  {mentor.expertise}
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-medium">1-on-1 Skill Swap Session</span>
+            </div>
+          </div>
+        </div>
 
-          {/* Self Stream */}
-          <View style={styles.selfVideoCard}>
-            {videoOff ? (
-              <View style={styles.videoOffPlaceholder}>
-                <Text style={[styles.videoOffText, { fontSize: 11 }]}>Your camera off</Text>
-              </View>
-            ) : (
-              <View style={styles.peerVideoOverlay}>
-                <Image source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80' }} style={styles.videoStreamMock} />
-                <View style={styles.nameBadge}>
-                  <Text style={styles.nameBadgeText}>You (Alex)</Text>
-                </View>
-              </View>
-            )}
-          </View>
-        </View>
+        {/* Center / Right Badges: Timer & Screen Share Status */}
+        <div className="flex items-center gap-2.5">
+          {isScreenSharing && (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>LIVE SCREEN SHARE</span>
+            </div>
+          )}
 
-        {/* Right Side: Interactive Whiteboard */}
-        {showWhiteboard && (
-          <View style={styles.whiteboardContainer}>
-            <View style={styles.whiteboardHeader}>
-              <View style={styles.whiteboardTitleRow}>
-                <Palette color="#8b5cf6" size={16} />
-                <Text style={styles.whiteboardTitle}>Interactive Whiteboard</Text>
-              </View>
-              
-              {/* Whiteboard Color Tools */}
-              <View style={styles.toolsRow}>
-                {['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#000000'].map((color) => (
-                  <TouchableOpacity
-                    key={color}
-                    onPress={() => setDrawColor(color)}
-                    style={[
-                      styles.colorDot,
-                      { backgroundColor: color },
-                      drawColor === color ? styles.colorDotActive : null,
-                    ]}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-mono font-bold text-purple-300">
+            <span>⏱️ {formatTime(timeLeft)}</span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1 text-slate-400 text-xs px-2.5 py-1 rounded-lg bg-slate-800/50">
+            <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+            <span>HD 1080p</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Screen Share Error Alert */}
+      {screenShareError && (
+        <div className="bg-red-500/20 border-b border-red-500/40 px-4 py-2 text-red-200 text-xs flex items-center justify-between z-20">
+          <span>{screenShareError}</span>
+          <button onClick={() => setScreenShareError(null)} className="font-bold hover:text-white">✕</button>
+        </div>
+      )}
+
+      {/* Main Classroom Stage */}
+      <div className="flex-1 flex overflow-hidden relative">
+        
+        {/* Stage Content: Screen Share / Video Tiles / Whiteboard */}
+        <div className="flex-1 flex flex-col p-3 sm:p-4 gap-3 overflow-hidden">
+          
+          {/* Main Stage (Screen Share View OR Large Peer View) */}
+          <div className="flex-1 min-h-0 bg-slate-900 rounded-2xl border border-slate-800/90 overflow-hidden relative flex items-center justify-center shadow-inner">
+            
+            {/* 1. Real-time Screen Sharing Display */}
+            <div className={`w-full h-full ${isScreenSharing ? 'flex' : 'hidden'} items-center justify-center bg-black relative`}>
+              <video
+                ref={screenVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-semibold text-white">
+                <Monitor className="w-4 h-4 text-emerald-400" />
+                <span>Your Shared Screen</span>
+              </div>
+              <button
+                onClick={stopScreenShare}
+                className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-xl bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+              >
+                <MonitorOff className="w-3.5 h-3.5" />
+                <span>Stop Sharing</span>
+              </button>
+            </div>
+
+            {/* 2. Whiteboard View (When Active and not Screen Sharing) */}
+            {showWhiteboard && !isScreenSharing && (
+              <div className="w-full h-full flex flex-col bg-slate-950 p-2">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800 px-2 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-bold text-slate-200">Interactive Canvas Whiteboard</span>
+                  </div>
+                  
+                  {/* Whiteboard Controls */}
+                  <div className="flex items-center gap-1.5">
+                    {['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ffffff'].map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setDrawColor(c)}
+                        style={{ backgroundColor: c }}
+                        className={`w-5 h-5 rounded-full transition-transform ${drawColor === c ? 'ring-2 ring-white scale-110' : 'opacity-80'}`}
+                      />
+                    ))}
+                    <button
+                      onClick={clearCanvas}
+                      title="Clear Canvas"
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 ml-1"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={shareWhiteboardSnapshot}
+                      className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold ml-1 flex items-center gap-1"
+                    >
+                      <Send className="w-3 h-3" />
+                      <span>Send to Chat</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 relative cursor-crosshair bg-slate-900/60 rounded-xl mt-2 overflow-hidden">
+                  <canvas
+                    ref={canvasRef}
+                    onMouseDown={handleStartDraw}
+                    onMouseMove={handleDrawing}
+                    onMouseUp={handleStopDraw}
+                    onMouseLeave={handleStopDraw}
+                    className="w-full h-full block"
                   />
-                ))}
-                
-                <TouchableOpacity onPress={clearCanvas} style={styles.toolBtn}>
-                  <RotateCcw color="#5E5470" size={16} />
-                </TouchableOpacity>
+                </div>
+              </div>
+            )}
 
-                <TouchableOpacity 
-                  onPress={shareWhiteboardSnapshot} 
-                  style={[styles.toolBtn, styles.shareBtn]}
-                  activeOpacity={0.8}
-                >
-                  <Send color="#ffffff" size={12} style={{ marginRight: 6 }} />
-                  <Text style={styles.shareBtnText}>Share to Chat</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Canvas Area */}
-            <View style={styles.canvasWrapper}>
-              {Platform.OS === 'web' ? (
-                <canvas
-                  ref={canvasRef}
-                  onMouseDown={handleStartDraw}
-                  onMouseMove={handleDrawing}
-                  onMouseUp={handleStopDraw}
-                  onMouseLeave={handleStopDraw}
-                  style={styles.htmlCanvas}
+            {/* 3. Peer Video View (Default when not screen sharing and not in whiteboard mode) */}
+            {!isScreenSharing && !showWhiteboard && (
+              <div className="w-full h-full flex items-center justify-center relative bg-gradient-to-br from-slate-900 to-slate-950">
+                <img
+                  src={mentor.avatar}
+                  alt={mentor.name}
+                  className="w-32 h-32 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-purple-500/30 shadow-2xl"
                 />
-              ) : (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F3F0F7', borderRadius: 8 }}>
-                  <Text style={{ color: '#8C8797' }}>Whiteboard is only available on Web</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        )}
 
-        {/* Right Side / Drawer: Chat Panel */}
+                {/* Animated Audio Waveform simulation for Peer */}
+                <div className="absolute bottom-6 left-6 z-10 flex items-center gap-3 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700/80">
+                  <div className="flex items-center gap-1">
+                    <span className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="w-1 h-5 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.2s]" />
+                    <span className="w-1 h-2 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.4s]" />
+                  </div>
+                  <span className="text-xs font-bold text-white">{mentor.name} (Speaking)</span>
+                </div>
+
+                <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-700 text-[11px] font-semibold text-slate-300">
+                    Host • {mentor.role || 'Mentor'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Picture-in-Picture: Local Camera Feed */}
+            <div className="absolute bottom-4 right-4 z-20 w-36 h-24 sm:w-48 sm:h-32 bg-slate-800 rounded-2xl border-2 border-slate-700 overflow-hidden shadow-2xl">
+              {isVideoOff ? (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-400 p-2">
+                  <VideoOff className="w-5 h-5 mb-1 text-red-400" />
+                  <span className="text-[10px] font-semibold">Camera Off</span>
+                </div>
+              ) : (
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover transform -scale-x-100"
+                />
+              )}
+              <div className="absolute bottom-1.5 left-2 bg-slate-900/80 px-2 py-0.5 rounded text-[9px] font-bold text-white flex items-center gap-1">
+                {isMuted ? <MicOff className="w-2.5 h-2.5 text-red-400" /> : <Mic className="w-2.5 h-2.5 text-emerald-400" />}
+                <span>You</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Drawer: In-Call Live Chat */}
         {showChat && (
-          <View style={styles.chatDrawerContainer}>
-            <View style={styles.chatDrawerHeader}>
-              <Text style={styles.chatDrawerTitle}>Live Chat</Text>
-            </View>
-            <ScrollView 
-              style={styles.chatDrawerMessages}
-              contentContainerStyle={{ paddingBottom: 16 }}
-              showsVerticalScrollIndicator={false}
-            >
-              {msgs.map((msg, i) => {
-                const me = msg.from === 'me';
+          <aside className="w-80 border-l border-slate-800 bg-slate-900 flex flex-col shrink-0 z-20">
+            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-purple-400" />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">In-Call Messages</h3>
+              </div>
+              <button
+                onClick={() => setShowChat(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {msgs.map((m, idx) => {
+                const isMe = m.from === 'me';
                 return (
-                  <View key={i} style={[styles.msgWrapper, me ? styles.msgRight : styles.msgLeft]}>
-                    <View style={[styles.msgBubble, me ? styles.bubbleMe : styles.bubbleThem]}>
-                      <Text style={[styles.msgText, me ? styles.textMe : styles.textThem]}>{msg.text}</Text>
-                      <Text style={[styles.msgTime, me ? styles.timeMe : styles.timeThem]}>{msg.time}</Text>
-                    </View>
-                  </View>
+                  <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs font-medium ${
+                        isMe
+                          ? 'bg-purple-600 text-white rounded-br-none'
+                          : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
+                      }`}
+                    >
+                      {m.image && (
+                        <img src={m.image} alt="Whiteboard" className="rounded-lg mb-1.5 max-h-36 object-contain bg-white" />
+                      )}
+                      <p className="leading-relaxed">{m.text}</p>
+                    </div>
+                    <span className="text-[9px] text-slate-500 mt-0.5 px-1">{m.time}</span>
+                  </div>
                 );
               })}
-            </ScrollView>
-            <View style={styles.chatDrawerInputWrapper}>
-              <TextInput
+            </div>
+
+            <form onSubmit={sendChatMessage} className="p-3 border-t border-slate-800 flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Message in call..."
                 value={chatText}
-                onChangeText={setChatText}
-                onSubmitEditing={sendChatMessage}
-                placeholder="Type message..."
-                placeholderTextColor="#8C8797"
-                style={styles.chatDrawerInput}
+                onChange={(e) => setChatText(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-400 outline-none focus:border-purple-500"
               />
-              <TouchableOpacity onPress={sendChatMessage} style={styles.chatDrawerSendBtn}>
-                <Send color="#ffffff" size={14} />
-              </TouchableOpacity>
-            </View>
-          </View>
+              <button
+                type="submit"
+                disabled={!chatText.trim()}
+                className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white transition-colors"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </aside>
         )}
-      </View>
+      </div>
 
-      {/* Footer Controls */}
-      <View style={styles.controlsBar}>
-        <TouchableOpacity
-          onPress={() => setMuted(!muted)}
-          style={[styles.controlCircleBtn, muted ? styles.controlCircleBtnActive : styles.controlCircleBtnInactive]}
-        >
-          {muted ? <MicOff color="#ef4444" size={22} /> : <Mic color="#5E5470" size={22} />}
-        </TouchableOpacity>
+      {/* Bottom Floating Call Controls Bar */}
+      <footer className="px-4 py-3.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2 z-20 shrink-0">
+        
+        {/* Left: Meeting Metadata */}
+        <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="font-semibold text-slate-300">Room: swap-{id}</span>
+        </div>
 
-        <TouchableOpacity
-          onPress={() => setVideoOff(!videoOff)}
-          style={[styles.controlCircleBtn, videoOff ? styles.controlCircleBtnActive : styles.controlCircleBtnInactive]}
-        >
-          {videoOff ? <VideoOff color="#ef4444" size={22} /> : <VideoIcon color="#5E5470" size={22} />}
-        </TouchableOpacity>
+        {/* Center: Main Media Controls */}
+        <div className="flex items-center gap-2.5 mx-auto">
+          
+          {/* Mute Button */}
+          <button
+            onClick={toggleMute}
+            title={isMuted ? 'Unmute Microphone' : 'Mute Microphone'}
+            className={`p-3 rounded-2xl transition-all ${
+              isMuted
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
+                : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+            }`}
+          >
+            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
 
-        <TouchableOpacity
-          onPress={() => setShowWhiteboard(!showWhiteboard)}
-          style={[styles.whiteboardToggleBtn, showWhiteboard ? styles.whiteboardToggleBtnActive : null]}
-        >
-          <Text style={[styles.whiteboardToggleText, showWhiteboard ? styles.whiteboardToggleTextActive : null]}>
-            {showWhiteboard ? 'Hide Board' : 'Show Whiteboard'}
-          </Text>
-        </TouchableOpacity>
+          {/* Camera Button */}
+          <button
+            onClick={toggleVideo}
+            title={isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'}
+            className={`p-3 rounded-2xl transition-all ${
+              isVideoOff
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
+                : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+            }`}
+          >
+            {isVideoOff ? <VideoOff className="w-5 h-5" /> : <VideoIcon className="w-5 h-5" />}
+          </button>
 
-        <TouchableOpacity
-          onPress={() => setShowChat(!showChat)}
-          style={[styles.whiteboardToggleBtn, showChat ? styles.whiteboardToggleBtnActive : null, { marginLeft: 8 }]}
-        >
-          <Text style={[styles.whiteboardToggleText, showChat ? styles.whiteboardToggleTextActive : null]}>
-            {showChat ? 'Hide Chat' : 'Show Chat'}
-          </Text>
-        </TouchableOpacity>
+          {/* REAL-TIME SCREEN SHARE BUTTON */}
+          <button
+            onClick={toggleScreenShare}
+            title={isScreenSharing ? 'Stop Screen Share' : 'Share Screen in Real Time'}
+            className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-xs transition-all shadow-md ${
+              isScreenSharing
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-400 ring-2 ring-emerald-500/30'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+            }`}
+          >
+            {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+            <span className="hidden sm:inline">{isScreenSharing ? 'Stop Sharing' : 'Share Screen'}</span>
+          </button>
 
-        <TouchableOpacity
-          onPress={() => setShowReviewModal(true)}
-          style={[styles.controlCircleBtn, styles.hangUpBtn]}
-        >
-          <PhoneOff color="#ffffff" size={22} />
-        </TouchableOpacity>
-      </View>
+          {/* Whiteboard Toggle */}
+          <button
+            onClick={() => setShowWhiteboard(!showWhiteboard)}
+            title="Toggle Whiteboard"
+            className={`p-3 rounded-2xl transition-all ${
+              showWhiteboard
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+            }`}
+          >
+            <Palette className="w-5 h-5" />
+          </button>
 
-      {/* Review & Feedback Modal */}
+          {/* In-Call Chat Toggle */}
+          <button
+            onClick={() => setShowChat(!showChat)}
+            title="Toggle Chat"
+            className={`p-3 rounded-2xl transition-all relative ${
+              showChat
+                ? 'bg-purple-600 text-white shadow-md'
+                : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
+            }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            {!showChat && msgs.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-purple-400 rounded-full" />
+            )}
+          </button>
+
+          {/* Hang Up Button */}
+          <button
+            onClick={() => setShowReviewModal(true)}
+            title="End Video Session"
+            className="p-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white transition-all shadow-lg hover:shadow-red-600/30 ml-2"
+          >
+            <PhoneOff className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Right: Jitsi Meet External Link Fallback */}
+        <div className="hidden lg:flex items-center gap-2">
+          <a
+            href={`https://meet.jit.si/SkillSwap-${id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Open in Jitsi</span>
+          </a>
+        </div>
+      </footer>
+
+      {/* Review Modal on End Call */}
       {showReviewModal && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl text-center space-y-4">
             {submitted ? (
-              <View style={styles.successWrapper}>
-                <CheckCircle2 color="#22c55e" size={48} />
-                <Text style={styles.successTitle}>Swap Completed!</Text>
-                <Text style={styles.successSub}>Thank you for sharing your skills.</Text>
-              </View>
+              <div className="py-6 space-y-2">
+                <CheckCircle2 className="w-14 h-14 text-emerald-400 mx-auto" />
+                <h3 className="text-lg font-bold text-white">Swap Session Completed!</h3>
+                <p className="text-xs text-slate-400">Your feedback has been recorded and your trust score updated.</p>
+              </div>
             ) : (
               <>
-                <Text style={styles.modalTitle}>Rate your swap with {m.name}</Text>
-                <Text style={styles.modalSubtitle}>How was the learning experience?</Text>
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto">
+                  <Sparkles className="w-6 h-6" />
+                </div>
 
-                {/* Stars Rating Selector */}
-                <View style={styles.starsRowModal}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Rate your session with {mentor.name}</h3>
+                  <p className="text-xs text-slate-400 mt-1">How was the skill exchange and screen share experience?</p>
+                </div>
+
+                {/* Stars Rating */}
+                <div className="flex items-center justify-center gap-2 py-2">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setRating(s)}
+                      className="p-1 transition-transform hover:scale-125"
+                    >
                       <Star
-                        color="#f59e0b"
-                        size={32}
-                        fill={star <= rating ? '#f59e0b' : 'transparent'}
-                        style={styles.modalStar}
+                        className={`w-7 h-7 ${s <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`}
                       />
-                    </TouchableOpacity>
+                    </button>
                   ))}
-                </View>
+                </div>
 
-                {/* Feedback Input */}
-                <TextInput
+                <textarea
                   value={feedback}
-                  onChangeText={setFeedback}
-                  placeholder="Share a short feedback review..."
-                  placeholderTextColor="#8C8797"
-                  multiline={true}
-                  style={{
-                    width: '100%',
-                    height: 80,
-                    borderRadius: 12,
-                    borderColor: '#E8E5EC',
-                    borderWidth: 1,
-                    padding: 12,
-                    fontSize: 14,
-                    marginBottom: 20,
-                    textAlignVertical: 'top',
-                  }}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Leave a short note for the mentor..."
+                  className="w-full h-20 p-3 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-400 outline-none resize-none focus:border-purple-500"
                 />
 
-                {/* Modal Actions */}
-                <View style={styles.modalActions}>
-                  <TouchableOpacity
-                    style={styles.cancelBtn}
-                    onPress={() => setShowReviewModal(false)}
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <button
+                    onClick={() => setShowReviewModal(false)}
+                    className="py-2.5 px-4 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold text-xs"
                   >
-                    <Text style={styles.cancelBtnText}>Back</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.submitBtnModal}
-                    onPress={submitReview}
+                    Back to Call
+                  </button>
+                  <button
+                    onClick={submitReview}
+                    className="py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md"
                   >
-                    <Text style={styles.submitBtnText}>Submit & End</Text>
-                  </TouchableOpacity>
-                </View>
+                    Complete & Exit
+                  </button>
+                </div>
               </>
             )}
-          </View>
-        </View>
+          </div>
+        </div>
       )}
-    </View>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF9FC',
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 16,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderColor: '#F3F0F6',
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  mentorInfo: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#342F3D',
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#8C8797',
-    marginTop: 1,
-  },
-  timerCard: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 99,
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-  },
-  timerText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#8b5cf6',
-  },
-  contentSplit: {
-    flex: 1,
-    flexDirection: 'row',
-    padding: 16,
-    gap: 16,
-  },
-  videoContainer: {
-    gap: 16,
-  },
-  videoContainerMini: {
-    width: '35%',
-  },
-  videoContainerFull: {
-    width: '100%',
-  },
-  peerVideoCard: {
-    flex: 1,
-    borderRadius: 24,
-    backgroundColor: '#E8E5EC',
-    overflow: 'hidden',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 2,
-  },
-  peerVideoOverlay: {
-    flex: 1,
-  },
-  selfVideoCard: {
-    height: 160,
-    borderRadius: 24,
-    backgroundColor: '#E8E5EC',
-    overflow: 'hidden',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 2,
-  },
-  videoStreamMock: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  videoOffPlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#342F3D',
-  },
-  offlineAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    marginBottom: 12,
-  },
-  videoOffText: {
-    fontSize: 12,
-    color: '#FAF9FC',
-    fontWeight: '500',
-  },
-  nameBadge: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: 'rgba(52, 47, 61, 0.75)',
-  },
-  nameBadgeText: {
-    fontSize: 11,
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  whiteboardContainer: {
-    flex: 1,
-    borderRadius: 24,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#F3F0F6',
-    overflow: 'hidden',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 2,
-  },
-  whiteboardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#F3F0F6',
-  },
-  whiteboardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  whiteboardTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#342F3D',
-  },
-  toolsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  colorDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  colorDotActive: {
-    borderColor: '#FAF9FC',
-    outline: '2px solid #8b5cf6',
-  },
-  toolBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 4,
-  },
-  canvasWrapper: {
-    flex: 1,
-    backgroundColor: '#FAF9FC',
-  },
-  htmlCanvas: {
-    width: '100%',
-    height: '100%',
-  },
-  controlsBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    paddingVertical: 16,
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderColor: '#F3F0F6',
-  },
-  controlCircleBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(94, 84, 112, 0.05)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 1,
-  },
-  controlCircleBtnInactive: {
-    backgroundColor: '#FAF9FC',
-  },
-  controlCircleBtnActive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-  },
-  whiteboardToggleBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 99,
-    backgroundColor: '#FAF9FC',
-  },
-  whiteboardToggleBtnActive: {
-    backgroundColor: '#8b5cf6',
-  },
-  whiteboardToggleText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#5E5470',
-  },
-  whiteboardToggleTextActive: {
-    color: '#ffffff',
-  },
-  hangUpBtn: {
-    backgroundColor: '#ef4444',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(52, 47, 61, 0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 99,
-  },
-  modalCard: {
-    width: '90%',
-    maxWidth: 400,
-    backgroundColor: '#ffffff',
-    borderRadius: 28,
-    padding: 24,
-    alignItems: 'center',
-    shadowColor: 'rgba(94, 84, 112, 0.25)',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 1,
-    shadowRadius: 48,
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginBottom: 4,
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: '#8C8797',
-    marginBottom: 20,
-  },
-  starsRowModal: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  modalStar: {
-    marginHorizontal: 2,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: 12,
-    width: '100%',
-  },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: '#FAF9FC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#5E5470',
-  },
-  submitBtnModal: {
-    flex: 2,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  successWrapper: {
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  successTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#342F3D',
-    marginTop: 16,
-    marginBottom: 4,
-  },
-  successSub: {
-    fontSize: 13,
-    color: '#8C8797',
-  },
-  chatDrawerContainer: {
-    width: 280,
-    borderRadius: 24,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#F3F0F6',
-    overflow: 'hidden',
-    shadowColor: 'rgba(94, 84, 112, 0.08)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 16,
-    elevation: 2,
-    height: '100%',
-    justifyContent: 'space-between',
-  },
-  chatDrawerHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#F3F0F6',
-    backgroundColor: '#ffffff',
-  },
-  chatDrawerTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#342F3D',
-  },
-  chatDrawerMessages: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: '#FAF9FC',
-  },
-  chatDrawerInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderTopWidth: 1,
-    borderColor: '#F3F0F6',
-    backgroundColor: '#ffffff',
-    gap: 8,
-  },
-  chatDrawerInput: {
-    flex: 1,
-    backgroundColor: '#FAF9FC',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 13,
-    color: '#342F3D',
-  },
-  chatDrawerSendBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#8b5cf6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  msgWrapper: {
-    flexDirection: 'row',
-    marginBottom: 10,
-    width: '100%',
-  },
-  msgLeft: {
-    justifyContent: 'flex-start',
-  },
-  msgRight: {
-    justifyContent: 'flex-end',
-  },
-  msgBubble: {
-    maxWidth: '85%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  bubbleMe: {
-    backgroundColor: '#8b5cf6',
-    borderBottomRightRadius: 2,
-  },
-  bubbleThem: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#E8E5EC',
-    borderBottomLeftRadius: 2,
-  },
-  msgText: {
-    fontSize: 13,
-  },
-  textMe: {
-    color: '#ffffff',
-  },
-  textThem: {
-    color: '#342F3D',
-  },
-  msgTime: {
-    fontSize: 8,
-    marginTop: 2,
-    alignSelf: 'flex-end',
-  },
-  timeMe: {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  timeThem: {
-    color: '#8C8797',
-  },
-  shareBtn: {
-    backgroundColor: '#8b5cf6',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  shareBtnText: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-});

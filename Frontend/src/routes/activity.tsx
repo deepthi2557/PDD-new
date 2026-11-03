@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import React, { useState, useEffect } from 'react';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles, User, Calendar } from 'lucide-react';
+import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles, User, Calendar, Video } from 'lucide-react';
 import { fetchMentors } from '../lib/api';
 import { Mentor } from '../lib/data';
 
@@ -165,12 +165,24 @@ export default function Activity() {
                   </div>
                 </div>
 
-                {it.rating > 0 && (
-                  <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-xs font-bold text-amber-700">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    <span>{it.rating}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {it.status === 'upcoming' && (
+                    <button
+                      onClick={() => router.navigate({ to: '/video/$id', params: { id: it.mentorId || 'aria-shah' } })}
+                      className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                      title="Join Live Video Call & Screen Share"
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Join Call</span>
+                    </button>
+                  )}
+                  {it.rating > 0 && (
+                    <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-xs font-bold text-amber-700">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <span>{it.rating}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
