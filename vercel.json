@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "cd Frontend && npm install --legacy-peer-deps --include=dev && npm run build && rm -rf ../.vercel && cp -r .vercel ../",
-  "outputDirectory": ".vercel/output"
+  "buildCommand": "cd Frontend && DANGEROUSLY_DEPLOY_VULNERABLE_TANSTACK_START_XSS=1 npm install --legacy-peer-deps --include=dev && npm run build && rm -rf ../.vercel && cp -r .vercel ../",
+  "outputDirectory": ".vercel/output",
+  "build": {
+    "env": {
+      "DANGEROUSLY_DEPLOY_VULNERABLE_TANSTACK_START_XSS": "1"
+    }
+  }
 }
