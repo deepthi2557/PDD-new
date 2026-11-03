@@ -6,6 +6,6 @@
     "node": ">=20.x"
   },
   "scripts": {
-    "build": "cd Frontend && npm install --legacy-peer-deps && npm run build && cp -r .vercel ../"
+    "build": "cd Frontend && npm install --legacy-peer-deps --include=dev && npm run build && rm -rf ../.vercel && cp -r .vercel ../"
   }
 }

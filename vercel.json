@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd Frontend && npm install --legacy-peer-deps && npm run build && cp -r .vercel ../",
+  "framework": null,
+  "buildCommand": "cd Frontend && npm install --legacy-peer-deps --include=dev && npm run build && rm -rf ../.vercel && cp -r .vercel ../",
   "outputDirectory": ".vercel/output"
 }
