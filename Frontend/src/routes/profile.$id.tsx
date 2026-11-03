@@ -20,7 +20,9 @@ import {
   Trophy,
   ArrowLeft,
   Share2,
-  Video
+  Video,
+  Monitor,
+  Radio
 } from 'lucide-react';
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
@@ -369,6 +371,39 @@ export default function Profile() {
               <span className="text-xs font-semibold text-slate-400 mt-0.5 block">Skills Offered</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Live Video & Real-Time Screen Share Interactive Card */}
+      <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-purple-500/20 rounded-full blur-2xl pointer-events-none" />
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-purple-300 shadow-inner shrink-0">
+            <Monitor className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-white">Live Video & Screen Share Room</h3>
+              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                <Radio className="w-3 h-3 animate-pulse" />
+                Active Hub
+              </span>
+            </div>
+            <p className="text-xs text-purple-200/80 mt-1 max-w-lg leading-relaxed">
+              Connect directly with {m.name} with real-time screen sharing, HD video, whiteboard collaboration, and in-call messaging.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto relative z-10 shrink-0">
+          <button
+            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/50 transition-all active:scale-[0.98]"
+          >
+            <Video className="w-4 h-4" />
+            <span>Join 1-on-1 Video & Screen Share</span>
+          </button>
         </div>
       </div>
 

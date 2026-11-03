@@ -18,9 +18,15 @@ import {
   Sparkles, 
   ExternalLink, 
   Wifi, 
+  Eye,
+  EyeOff,
   Maximize2,
+  Minimize2,
   Users,
-  Settings
+  LayoutGrid,
+  Tv,
+  ShieldCheck,
+  Radio
 } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
@@ -49,10 +55,11 @@ export default function VideoRoom() {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [showScreenPreview, setShowScreenPreview] = useState(false); // Off by default to eliminate infinite mirror loop!
   const [screenShareError, setScreenShareError] = useState<string | null>(null);
 
-  // Layout / Panels
-  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  // Layout View Modes: 'split' (side-by-side profile cards) | 'stage' (presentation focus) | 'whiteboard'
+  const [layoutMode, setLayoutMode] = useState<'split' | 'stage' | 'whiteboard'>('split');
   const [showChat, setShowChat] = useState(false);
   const [drawColor, setDrawColor] = useState('#8b5cf6');
   const [lineWidth, setLineWidth] = useState(4);
@@ -71,6 +78,7 @@ export default function VideoRoom() {
   // Video Refs
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const stageScreenVideoRef = useRef<HTMLVideoElement | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
 
@@ -163,6 +171,25 @@ export default function VideoRoom() {
     };
   }, []);
 
+  // Sync Local Video Ref when video state changes or component re-renders
+  useEffect(() => {
+    if (localVideoRef.current && localStreamRef.current && !isVideoOff) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+  }, [isVideoOff, layoutMode, isScreenSharing]);
+
+  // Sync Screen Share Video Ref whenever preview or stage is active
+  useEffect(() => {
+    if (isScreenSharing && screenStreamRef.current) {
+      if (screenVideoRef.current) {
+        screenVideoRef.current.srcObject = screenStreamRef.current;
+      }
+      if (stageScreenVideoRef.current) {
+        stageScreenVideoRef.current.srcObject = screenStreamRef.current;
+      }
+    }
+  }, [isScreenSharing, showScreenPreview, layoutMode]);
+
   // Toggle Mute
   const toggleMute = () => {
     if (localStreamRef.current) {
@@ -203,10 +230,8 @@ export default function VideoRoom() {
       });
 
       screenStreamRef.current = displayStream;
-      if (screenVideoRef.current) {
-        screenVideoRef.current.srcObject = displayStream;
-      }
       setIsScreenSharing(true);
+      setShowScreenPreview(false); // Keep off by default to avoid recursive loop
 
       // Listen for browser's native "Stop Sharing" floating button
       const videoTrack = displayStream.getVideoTracks()[0];
@@ -231,7 +256,11 @@ export default function VideoRoom() {
     if (screenVideoRef.current) {
       screenVideoRef.current.srcObject = null;
     }
+    if (stageScreenVideoRef.current) {
+      stageScreenVideoRef.current.srcObject = null;
+    }
     setIsScreenSharing(false);
+    setShowScreenPreview(false);
   };
 
   const toggleScreenShare = () => {
@@ -260,7 +289,7 @@ export default function VideoRoom() {
 
   // Whiteboard Canvas Handlers
   useEffect(() => {
-    if (!showWhiteboard || !canvasRef.current) return;
+    if (layoutMode !== 'whiteboard' || !canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -268,7 +297,7 @@ export default function VideoRoom() {
     canvas.height = canvas.parentElement?.clientHeight || 450;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-  }, [showWhiteboard]);
+  }, [layoutMode]);
 
   const handleStartDraw = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
@@ -342,7 +371,9 @@ export default function VideoRoom() {
     <div className="min-h-[88vh] flex flex-col bg-slate-950 text-white rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative">
       
       {/* Top Header Bar */}
-      <header className="px-5 py-3.5 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex items-center justify-between z-20 shrink-0">
+      <header className="px-4 sm:px-6 py-3.5 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex items-center justify-between z-20 shrink-0 gap-3">
+        
+        {/* Left: Mentor Details */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.navigate({ to: '/chat/$id', params: { id } })}
@@ -357,28 +388,70 @@ export default function VideoRoom() {
               <img
                 src={mentor.avatar}
                 alt={mentor.name}
-                className="w-9 h-9 rounded-full object-cover border border-purple-500/50"
+                className="w-10 h-10 rounded-full object-cover border-2 border-purple-500/60 shadow-md"
               />
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-slate-900" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold text-white">{mentor.name}</h1>
-                <span className="px-2 py-0.5 rounded-md bg-purple-900/60 border border-purple-500/30 text-purple-300 text-[10px] font-semibold">
+                <h1 className="text-sm font-bold text-white truncate max-w-[140px] sm:max-w-none">{mentor.name}</h1>
+                <span className="px-2 py-0.5 rounded-md bg-purple-900/60 border border-purple-500/30 text-purple-300 text-[10px] font-semibold hidden sm:inline-block">
                   {mentor.expertise}
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-medium">1-on-1 Skill Swap Session</span>
+              <span className="text-[11px] text-slate-400 font-medium block">1-on-1 Skill Swap Session</span>
             </div>
           </div>
         </div>
 
-        {/* Center / Right Badges: Timer & Screen Share Status */}
+        {/* Center: View Layout Switcher (Profiles Grid vs Stage vs Whiteboard) */}
+        <div className="hidden md:flex items-center bg-slate-800/80 p-1 rounded-2xl border border-slate-700/60 gap-1">
+          <button
+            onClick={() => setLayoutMode('split')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              layoutMode === 'split'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            }`}
+            title="Side-by-Side Profiles Grid (Screen Share in Profile)"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Profile Grid</span>
+          </button>
+
+          <button
+            onClick={() => setLayoutMode('stage')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              layoutMode === 'stage'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            }`}
+            title="Theater / Stage Mode"
+          >
+            <Tv className="w-3.5 h-3.5" />
+            <span>Stage View</span>
+          </button>
+
+          <button
+            onClick={() => setLayoutMode('whiteboard')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              layoutMode === 'whiteboard'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            }`}
+            title="Collaborative Whiteboard Canvas"
+          >
+            <Palette className="w-3.5 h-3.5" />
+            <span>Whiteboard</span>
+          </button>
+        </div>
+
+        {/* Right Badges: Timer & Screen Share Status */}
         <div className="flex items-center gap-2.5">
           {isScreenSharing && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>LIVE SCREEN SHARE</span>
+              <Radio className="w-3 h-3 text-emerald-400 animate-spin" />
+              <span className="hidden sm:inline">SCREEN ACTIVE</span>
             </div>
           )}
 
@@ -388,7 +461,7 @@ export default function VideoRoom() {
 
           <div className="hidden sm:flex items-center gap-1 text-slate-400 text-xs px-2.5 py-1 rounded-lg bg-slate-800/50">
             <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-            <span>HD 1080p</span>
+            <span>HD</span>
           </div>
         </div>
       </header>
@@ -404,132 +477,409 @@ export default function VideoRoom() {
       {/* Main Classroom Stage */}
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* Stage Content: Screen Share / Video Tiles / Whiteboard */}
-        <div className="flex-1 flex flex-col p-3 sm:p-4 gap-3 overflow-hidden">
+        {/* Stage Content Area */}
+        <div className="flex-1 flex flex-col p-3 sm:p-5 gap-4 overflow-hidden">
           
-          {/* Main Stage (Screen Share View OR Large Peer View) */}
-          <div className="flex-1 min-h-0 bg-slate-900 rounded-2xl border border-slate-800/90 overflow-hidden relative flex items-center justify-center shadow-inner">
-            
-            {/* 1. Real-time Screen Sharing Display */}
-            <div className={`w-full h-full ${isScreenSharing ? 'flex' : 'hidden'} items-center justify-center bg-black relative`}>
-              <video
-                ref={screenVideoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-contain"
-              />
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-semibold text-white">
-                <Monitor className="w-4 h-4 text-emerald-400" />
-                <span>Your Shared Screen</span>
-              </div>
-              <button
-                onClick={stopScreenShare}
-                className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-xl bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
-              >
-                <MonitorOff className="w-3.5 h-3.5" />
-                <span>Stop Sharing</span>
-              </button>
-            </div>
-
-            {/* 2. Whiteboard View (When Active and not Screen Sharing) */}
-            {showWhiteboard && !isScreenSharing && (
-              <div className="w-full h-full flex flex-col bg-slate-950 p-2">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800 px-2 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-purple-400" />
-                    <span className="text-xs font-bold text-slate-200">Interactive Canvas Whiteboard</span>
+          {/* ============================================================ */}
+          {/* MODE 1: PROFILES GRID (Screen share is inside each profile) */}
+          {/* ============================================================ */}
+          {layoutMode === 'split' && (
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0 overflow-hidden">
+              
+              {/* ---------------------------------------------------- */}
+              {/* PERSON 1: MENTOR'S PROFILE CARD                      */}
+              {/* ---------------------------------------------------- */}
+              <div className="flex flex-col bg-slate-900 rounded-3xl border border-slate-800 shadow-xl overflow-hidden relative group">
+                
+                {/* Profile Card Header */}
+                <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800/80 flex items-center justify-between z-10 shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={mentor.avatar}
+                      alt={mentor.name}
+                      className="w-7 h-7 rounded-full object-cover border border-purple-500/50"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-white">{mentor.name}</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-purple-400 fill-purple-950" />
+                    </div>
                   </div>
-                  
-                  {/* Whiteboard Controls */}
-                  <div className="flex items-center gap-1.5">
-                    {['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ffffff'].map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setDrawColor(c)}
-                        style={{ backgroundColor: c }}
-                        className={`w-5 h-5 rounded-full transition-transform ${drawColor === c ? 'ring-2 ring-white scale-110' : 'opacity-80'}`}
-                      />
-                    ))}
-                    <button
-                      onClick={clearCanvas}
-                      title="Clear Canvas"
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 ml-1"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={shareWhiteboardSnapshot}
-                      className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold ml-1 flex items-center gap-1"
-                    >
-                      <Send className="w-3 h-3" />
-                      <span>Send to Chat</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 relative cursor-crosshair bg-slate-900/60 rounded-xl mt-2 overflow-hidden">
-                  <canvas
-                    ref={canvasRef}
-                    onMouseDown={handleStartDraw}
-                    onMouseMove={handleDrawing}
-                    onMouseUp={handleStopDraw}
-                    onMouseLeave={handleStopDraw}
-                    className="w-full h-full block"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* 3. Peer Video View (Default when not screen sharing and not in whiteboard mode) */}
-            {!isScreenSharing && !showWhiteboard && (
-              <div className="w-full h-full flex items-center justify-center relative bg-gradient-to-br from-slate-900 to-slate-950">
-                <img
-                  src={mentor.avatar}
-                  alt={mentor.name}
-                  className="w-32 h-32 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-purple-500/30 shadow-2xl"
-                />
-
-                {/* Animated Audio Waveform simulation for Peer */}
-                <div className="absolute bottom-6 left-6 z-10 flex items-center gap-3 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700/80">
-                  <div className="flex items-center gap-1">
-                    <span className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse" />
-                    <span className="w-1 h-5 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.2s]" />
-                    <span className="w-1 h-2 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.4s]" />
-                  </div>
-                  <span className="text-xs font-bold text-white">{mentor.name} (Speaking)</span>
-                </div>
-
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-700 text-[11px] font-semibold text-slate-300">
-                    Host • {mentor.role || 'Mentor'}
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-300 font-semibold">
+                    Mentor • {mentor.expertise}
                   </span>
                 </div>
-              </div>
-            )}
 
-            {/* Picture-in-Picture: Local Camera Feed */}
-            <div className="absolute bottom-4 right-4 z-20 w-36 h-24 sm:w-48 sm:h-32 bg-slate-800 rounded-2xl border-2 border-slate-700 overflow-hidden shadow-2xl">
-              {isVideoOff ? (
-                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-400 p-2">
-                  <VideoOff className="w-5 h-5 mb-1 text-red-400" />
-                  <span className="text-[10px] font-semibold">Camera Off</span>
+                {/* Profile Video / Avatar Stage */}
+                <div className="flex-1 relative flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-950 p-6">
+                  
+                  {/* Big Glowing Avatar */}
+                  <div className="relative flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute inset-0 rounded-full bg-purple-500/20 blur-xl animate-pulse" />
+                      <img
+                        src={mentor.avatar}
+                        alt={mentor.name}
+                        className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-purple-500/40 shadow-2xl relative z-10"
+                      />
+                      <span className="absolute bottom-1 right-2 w-5 h-5 rounded-full bg-emerald-500 ring-4 ring-slate-900 z-20" title="Online" />
+                    </div>
+
+                    <h3 className="text-base font-bold text-white mt-4">{mentor.name}</h3>
+                    <p className="text-xs text-purple-400 font-medium mt-0.5">{mentor.role || 'Host Mentor'}</p>
+
+                    {/* Audio Speaking Waveform for Mentor */}
+                    <div className="flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60">
+                      <span className="w-1 h-3.5 bg-emerald-400 rounded-full animate-pulse" />
+                      <span className="w-1 h-5 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.15s]" />
+                      <span className="w-1 h-2.5 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.3s]" />
+                      <span className="w-1 h-4 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.45s]" />
+                      <span className="text-[10px] font-bold text-slate-300 ml-1">Live Audio</span>
+                    </div>
+                  </div>
+
+                  {/* Mentor Badge in Bottom Corner */}
+                  <div className="absolute bottom-3 left-4 flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] font-semibold text-slate-300">
+                      ⭐ {mentor.rating} ({mentor.reviewsCount} sessions)
+                    </span>
+                  </div>
                 </div>
-              ) : (
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover transform -scale-x-100"
-                />
-              )}
-              <div className="absolute bottom-1.5 left-2 bg-slate-900/80 px-2 py-0.5 rounded text-[9px] font-bold text-white flex items-center gap-1">
-                {isMuted ? <MicOff className="w-2.5 h-2.5 text-red-400" /> : <Mic className="w-2.5 h-2.5 text-emerald-400" />}
-                <span>You</span>
+
+                {/* Profile Card Footer */}
+                <div className="px-4 py-2.5 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="text-[11px] font-medium">Microphone Active</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500">Host Stream</span>
+                </div>
+              </div>
+
+              {/* ---------------------------------------------------- */}
+              {/* PERSON 2: YOUR PROFILE CARD (WITH SCREEN SHARE INSIDE)*/}
+              {/* ---------------------------------------------------- */}
+              <div className={`flex flex-col rounded-3xl border shadow-xl overflow-hidden relative transition-all ${
+                isScreenSharing 
+                  ? 'bg-slate-900 border-emerald-500/50 ring-2 ring-emerald-500/20' 
+                  : 'bg-slate-900 border-slate-800'
+              }`}>
+                
+                {/* Profile Card Header */}
+                <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800/80 flex items-center justify-between z-10 shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold border border-purple-400/40">
+                      You
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block leading-tight">Your Profile</span>
+                      <span className="text-[10px] text-slate-400">Learner & Co-Host</span>
+                    </div>
+                  </div>
+
+                  {/* Right Header Status / Toggle in Card */}
+                  <div className="flex items-center gap-2">
+                    {isScreenSharing && (
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        Screen Sharing
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Profile Video / Screen Share Stage */}
+                <div className="flex-1 relative flex items-center justify-center bg-black overflow-hidden">
+                  
+                  {/* CASE A: SCREEN SHARING ACTIVE INSIDE YOUR PROFILE */}
+                  {isScreenSharing ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-slate-950 relative">
+                      
+                      {/* Sub-view 1: High-Definition Live Preview (When toggled on) */}
+                      {showScreenPreview ? (
+                        <div className="w-full h-full relative flex items-center justify-center bg-black rounded-2xl overflow-hidden border border-slate-800">
+                          <video
+                            ref={screenVideoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-contain"
+                          />
+                          <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-white border border-slate-700 flex items-center gap-1.5">
+                            <Monitor className="w-3 h-3 text-emerald-400" />
+                            <span>Live Screen Broadcast</span>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Sub-view 2: Anti-Mirror Presenter Mode (Default - prevents infinite screen mirror!) */
+                        <div className="flex flex-col items-center justify-center text-center max-w-sm px-4 py-6 space-y-3">
+                          <div className="relative">
+                            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shadow-lg">
+                              <Monitor className="w-8 h-8" />
+                            </div>
+                            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-ping" />
+                          </div>
+
+                          <div>
+                            <h4 className="text-sm font-bold text-white">You are sharing your screen</h4>
+                            <p className="text-xs text-slate-400 mt-1">
+                              Your screen is streaming live to <span className="text-purple-300 font-semibold">{mentor.name}</span>.
+                            </p>
+                          </div>
+
+                          {/* Anti-Mirror Infinite Reflection Helper Tip */}
+                          <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 leading-relaxed text-left flex items-start gap-2">
+                            <span className="text-amber-400 shrink-0">💡</span>
+                            <span>
+                              <strong>Anti-Mirror Mode Active:</strong> Switch to your presentation, code, or application tab to present without recursive reflections.
+                            </span>
+                          </div>
+
+                          {/* Action Buttons inside Your Profile Card */}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              onClick={() => setShowScreenPreview(true)}
+                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-purple-400" />
+                              <span>Show Live Preview</span>
+                            </button>
+
+                            <button
+                              onClick={stopScreenShare}
+                              className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md"
+                            >
+                              <MonitorOff className="w-3.5 h-3.5" />
+                              <span>Stop Sharing</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Floating Mini WebCam Feed inside Your Card when sharing screen */}
+                      <div className="absolute bottom-3 right-3 w-28 h-20 bg-slate-900 rounded-xl border border-slate-700/80 overflow-hidden shadow-2xl z-10">
+                        {isVideoOff ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 text-[9px] font-semibold">
+                            <VideoOff className="w-3.5 h-3.5 text-red-400 mb-0.5" />
+                            <span>Camera Off</span>
+                          </div>
+                        ) : (
+                          <video
+                            ref={localVideoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-cover transform -scale-x-100"
+                          />
+                        )}
+                        <span className="absolute bottom-1 left-1.5 text-[8px] font-bold text-white bg-black/60 px-1 rounded">Cam</span>
+                      </div>
+                    </div>
+                  ) : (
+                    /* CASE B: WEBCAM / PROFILE DISPLAY WHEN NOT SCREEN SHARING */
+                    <div className="w-full h-full flex items-center justify-center relative">
+                      {isVideoOff ? (
+                        <div className="flex flex-col items-center justify-center text-slate-400 p-4">
+                          <div className="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center mb-2">
+                            <VideoOff className="w-8 h-8 text-red-400" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-300">Your Camera is Off</span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Click camera button below to turn on</p>
+                        </div>
+                      ) : (
+                        <video
+                          ref={localVideoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          className="w-full h-full object-cover transform -scale-x-100"
+                        />
+                      )}
+
+                      {/* Microphone Badge */}
+                      <div className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] font-bold text-white flex items-center gap-1.5 border border-slate-700/70">
+                        {isMuted ? <MicOff className="w-3 h-3 text-red-400" /> : <Mic className="w-3 h-3 text-emerald-400" />}
+                        <span>{isMuted ? 'Muted' : 'Speaking'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Card Footer with Dedicated Action Buttons */}
+                <div className="px-4 py-2.5 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    {/* Share Screen Button right inside Your Profile Card */}
+                    <button
+                      onClick={toggleScreenShare}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                        isScreenSharing
+                          ? 'bg-red-600/90 hover:bg-red-600 text-white shadow-sm'
+                          : 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm'
+                      }`}
+                    >
+                      {isScreenSharing ? <MonitorOff className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+                      <span>{isScreenSharing ? 'Stop Screen Share' : 'Share My Screen'}</span>
+                    </button>
+
+                    {isScreenSharing && showScreenPreview && (
+                      <button
+                        onClick={() => setShowScreenPreview(false)}
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1"
+                        title="Hide Preview to avoid mirror reflection"
+                      >
+                        <EyeOff className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Hide Preview</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-slate-400 text-xs">
+                    <button 
+                      onClick={toggleMute}
+                      className={`p-1.5 rounded-lg border transition-colors ${
+                        isMuted ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-slate-800 text-slate-300 border-slate-700'
+                      }`}
+                      title={isMuted ? 'Unmute' : 'Mute'}
+                    >
+                      {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                    </button>
+
+                    <button 
+                      onClick={toggleVideo}
+                      className={`p-1.5 rounded-lg border transition-colors ${
+                        isVideoOff ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-slate-800 text-slate-300 border-slate-700'
+                      }`}
+                      title={isVideoOff ? 'Turn on Camera' : 'Turn off Camera'}
+                    >
+                      {isVideoOff ? <VideoOff className="w-3.5 h-3.5" /> : <VideoIcon className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* MODE 2: STAGE VIEW (Maximized Screen Share / Main Focus)     */}
+          {/* ============================================================ */}
+          {layoutMode === 'stage' && (
+            <div className="flex-1 flex flex-col gap-3 min-h-0 overflow-hidden">
+              <div className="flex-1 bg-black rounded-3xl border border-slate-800 overflow-hidden relative flex items-center justify-center">
+                {isScreenSharing ? (
+                  <div className="w-full h-full relative flex items-center justify-center">
+                    <video
+                      ref={stageScreenVideoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-semibold text-white">
+                      <Monitor className="w-4 h-4 text-emerald-400" />
+                      <span>Stage Presentation</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center p-6 space-y-2">
+                    <Tv className="w-12 h-12 text-slate-600 mx-auto" />
+                    <h3 className="text-sm font-bold text-white">No active screen share on stage</h3>
+                    <p className="text-xs text-slate-400">Click "Share Screen" below or switch to Profile Grid view.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Both Participants Docked Below Stage */}
+              <div className="h-28 grid grid-cols-2 gap-3 shrink-0">
+                {/* Mentor Dock Card */}
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-2.5 flex items-center gap-3">
+                  <img src={mentor.avatar} alt={mentor.name} className="w-12 h-12 rounded-xl object-cover border border-purple-500/50" />
+                  <div>
+                    <h4 className="text-xs font-bold text-white">{mentor.name}</h4>
+                    <span className="text-[10px] text-purple-400 font-semibold">{mentor.expertise}</span>
+                    <span className="text-[9px] text-slate-400 block mt-0.5">Mentor (Speaking)</span>
+                  </div>
+                </div>
+
+                {/* You Dock Card */}
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden relative">
+                      {!isVideoOff && (
+                        <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover transform -scale-x-100" />
+                      )}
+                      {isVideoOff && (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">You</div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white">Your Feed</h4>
+                      <span className="text-[10px] text-emerald-400 font-semibold">{isScreenSharing ? 'Sharing Active' : 'Camera Ready'}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={toggleScreenShare}
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5"
+                  >
+                    {isScreenSharing ? <MonitorOff className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+                    <span>{isScreenSharing ? 'Stop' : 'Share'}</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* MODE 3: COLLABORATIVE WHITEBOARD                             */}
+          {/* ============================================================ */}
+          {layoutMode === 'whiteboard' && (
+            <div className="flex-1 flex flex-col bg-slate-950 rounded-3xl border border-slate-800 p-3 overflow-hidden min-h-0">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800 px-2 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-purple-400" />
+                  <span className="text-xs font-bold text-slate-200">Interactive Canvas Whiteboard</span>
+                </div>
+                
+                {/* Whiteboard Controls */}
+                <div className="flex items-center gap-1.5">
+                  {['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ffffff'].map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setDrawColor(c)}
+                      style={{ backgroundColor: c }}
+                      className={`w-5 h-5 rounded-full transition-transform ${drawColor === c ? 'ring-2 ring-white scale-110' : 'opacity-80'}`}
+                    />
+                  ))}
+                  <button
+                    onClick={clearCanvas}
+                    title="Clear Canvas"
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 ml-1"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={shareWhiteboardSnapshot}
+                    className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold ml-1 flex items-center gap-1"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>Send to Chat</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 relative cursor-crosshair bg-slate-900/60 rounded-2xl mt-2 overflow-hidden border border-slate-800/80">
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={handleStartDraw}
+                  onMouseMove={handleDrawing}
+                  onMouseUp={handleStopDraw}
+                  onMouseLeave={handleStopDraw}
+                  className="w-full h-full block"
+                />
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Right Drawer: In-Call Live Chat */}
@@ -635,8 +985,8 @@ export default function VideoRoom() {
             title={isScreenSharing ? 'Stop Screen Share' : 'Share Screen in Real Time'}
             className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-bold text-xs transition-all shadow-md ${
               isScreenSharing
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-400 ring-2 ring-emerald-500/30'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                ? 'bg-red-600 hover:bg-red-700 text-white border border-red-400 ring-2 ring-red-500/30'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
             }`}
           >
             {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
@@ -645,10 +995,10 @@ export default function VideoRoom() {
 
           {/* Whiteboard Toggle */}
           <button
-            onClick={() => setShowWhiteboard(!showWhiteboard)}
+            onClick={() => setLayoutMode(layoutMode === 'whiteboard' ? 'split' : 'whiteboard')}
             title="Toggle Whiteboard"
             className={`p-3 rounded-2xl transition-all ${
-              showWhiteboard
+              layoutMode === 'whiteboard'
                 ? 'bg-purple-600 text-white shadow-md'
                 : 'bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700'
             }`}
