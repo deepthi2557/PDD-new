@@ -1,7 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "name": "skillswap-app",
-  "framework": null,
-  "buildCommand": "cd Frontend && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "Frontend/.vercel/output"
+  "buildCommand": "cd Frontend && npm install --legacy-peer-deps && npm run build && cp -r .vercel ../",
+  "outputDirectory": ".vercel/output"
 }
