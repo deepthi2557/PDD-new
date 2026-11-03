@@ -156,14 +156,83 @@ jobs:
           retention-days: 30
 
   summary:
-    name: Test Summary
-    needs: [selenium-tests, appium-tests, load-tests]
+    name: Test Summary & Master Report Publisher
+    needs: [setup-node, security-assessment, selenium-tests, appium-tests, load-tests]
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Reporting Dependencies
+        run: pip install openpyxl
+
+      - name: Download Security Report Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: security-report
+          path: selenium_tests/
+
+      - name: Download Selenium Report Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: selenium-report
+          path: selenium_tests/
+
+      - name: Download Appium Report Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: appium-e2e-test-analysis-report
+          path: appium_test_suite/
+
+      - name: Download Load Report Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: load-report
+          path: load_tests/
+
+      - name: Compile Master Excel & CSV Reports
+        run: |
+          python generate_github_testing_actions_excel.py
+          python export_tests_to_csv.py
+
+      - name: Upload Master Excel & CSV Reports Artifact Bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-testing-actions-master-report
+          path: |
+            github_testing_actions_master_report.xlsx
+            github_testing_actions.xlsx
+            selenium_tested_actions.csv
+            appium_tested_actions.csv
+            selenium_and_appium_tested_actions.csv
+          retention-days: 30
+
       - name: Compile Pipeline Summary Dashboard
         run: |
-          echo "# 🚀 GitHub Actions E2E & Quality Assurance Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 🚀 GitHub Actions E2E & QA Automation Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Download Testing Reports Directly from this GitHub Run" >> $GITHUB_STEP_SUMMARY
+          echo "> **Direct Artifact Download:** Scroll to the **Artifacts** section at the bottom of this run page and click **\`github-testing-actions-master-report\`** to download all Excel & CSV files in one zip." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Report Name | Format | Actions Covered | Direct GitHub Download Link |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :---: | :---: | :---: |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Master Testing Actions Report** | \`.xlsx\` | 706 Actions (Selenium, Appium, Load, SAST) | [⬇️ Download Excel (Master)](https://github.com/deepthi2557/PDD-new/raw/main/github_testing_actions_master_report.xlsx) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Combined Testing Actions** | \`.csv\` | 690 Actions (Selenium + Appium) | [⬇️ Download CSV (Combined)](https://github.com/deepthi2557/PDD-new/raw/main/selenium_and_appium_tested_actions.csv) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Selenium Web Actions** | \`.csv\` | 345 E2E Browser Actions | [⬇️ Download CSV (Selenium)](https://github.com/deepthi2557/PDD-new/raw/main/selenium_tested_actions.csv) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Appium Mobile Actions** | \`.csv\` | 345 E2E Mobile Actions | [⬇️ Download CSV (Appium)](https://github.com/deepthi2557/PDD-new/raw/main/appium_tested_actions.csv) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Pipeline Jobs Execution Status" >> $GITHUB_STEP_SUMMARY
           echo "| Job Name | Status | Artifact Produced |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :---: | :--- |" >> $GITHUB_STEP_SUMMARY
           echo "| **Setup Node.js** | ✅ PASSED | \`web-build\` |" >> $GITHUB_STEP_SUMMARY
@@ -171,4 +240,4 @@ jobs:
           echo "| **Selenium Web Tests** | ✅ PASSED | \`selenium-report\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Appium Mobile Tests** | ✅ PASSED | \`appium-e2e-test-analysis-report\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Load & Performance Tests** | ✅ PASSED | \`load-report\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Test Summary** | ✅ PASSED | Dashboard Generated |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Master Testing Reports Bundle** | ✅ PASSED | \`github-testing-actions-master-report\` |" >> $GITHUB_STEP_SUMMARY

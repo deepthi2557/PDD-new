@@ -52,10 +52,16 @@ jobs:
         run: |
           python -m selenium_tests.run_tests
 
-      - name: Upload Excel Test Analysis Report Artifact
+      - name: Generate CSV Export
+        if: always()
+        run: python export_tests_to_csv.py
+
+      - name: Upload Excel & CSV Test Analysis Report Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: selenium-test-analysis-report-excel
-          path: selenium_tests/selenium_test_analysis_report.xlsx
+          path: |
+            selenium_tests/selenium_test_analysis_report.xlsx
+            selenium_tested_actions.csv
           retention-days: 30

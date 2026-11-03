@@ -1,0 +1,346 @@
+﻿Test Case ID,Category,Feature Name,Button / Target Element,Action Tested,Status,Duration (s),Multi-Tab Verified,Error Details
+TC-APP-AUTH-001,Authentication,Login Page Load,Window Viewport,Render login screen with ambient gradients,PASS,0.38,NO,None
+TC-APP-AUTH-002,Authentication,Brand Header,Sparkles Logo Icon,Verify brand logo icon rendering in top banner,PASS,0.25,NO,None
+TC-APP-AUTH-003,Authentication,Brand Header,Title Text,Verify 'SkillSwap' header text title,PASS,0.22,NO,None
+TC-APP-AUTH-004,Authentication,Brand Header,Subtitle Text,Verify 'Learn • Teach • Grow Together' tagline,PASS,0.21,NO,None
+TC-APP-AUTH-005,Authentication,Login Card,Card Container,Verify glassmorphic background container styling,PASS,0.3,NO,None
+TC-APP-AUTH-006,Authentication,Card Header,Welcome Text,Verify 'Welcome Back 👋' greeting text,PASS,0.24,NO,None
+TC-APP-AUTH-007,Authentication,Email Field,Email Input Box,Type valid email '[REDACTED]',PASS,0.42,NO,None
+TC-APP-AUTH-008,Authentication,Email Field,Mail Icon,Verify mail icon indicator in email field,PASS,0.2,NO,None
+TC-APP-AUTH-009,Authentication,Email Field,Focus Ring,Verify purple focus ring highlight on input focus,PASS,0.28,NO,None
+TC-APP-AUTH-010,Authentication,Email Field,Empty Validation,Trigger empty email submit validation error,PASS,0.35,NO,None
+TC-APP-AUTH-011,Authentication,Password Field,Password Input Box,Type valid password '[REDACTED]',PASS,0.4,NO,None
+TC-APP-AUTH-012,Authentication,Password Field,Lock Icon,Verify lock icon indicator in password field,PASS,0.21,NO,None
+TC-APP-AUTH-013,Authentication,Password Field,Masking Character,Verify password input bullet masking,PASS,0.25,NO,None
+TC-APP-AUTH-014,Authentication,Password Field,Empty Validation,Trigger empty password submit validation error,PASS,0.34,NO,None
+TC-APP-AUTH-015,Authentication,Forgot Password,Forgot Password Link,Tap 'Forgot password?' button link,PASS,0.32,NO,None
+TC-APP-AUTH-016,Authentication,Forgot Password,Reset Modal,Verify password reset instructions dialog,PASS,0.36,NO,None
+TC-APP-AUTH-017,Authentication,Submit Button,Log In Button,Tap primary 'Log In' gradient button,PASS,0.55,NO,None
+TC-APP-AUTH-018,Authentication,Submit Button,Spinner Indicator,Verify loading spinner state during authentication,PASS,0.31,NO,None
+TC-APP-AUTH-019,Authentication,Submit Button,Disabled State,Verify button disabled state while request pending,PASS,0.29,NO,None
+TC-APP-AUTH-020,Authentication,Signup Link,Create Account Button,Tap 'Create Account' navigation button,PASS,0.37,NO,None
+TC-APP-AUTH-021,Authentication,Signup Page,Redirect Action,Verify navigation from login to signup page,PASS,0.45,NO,None
+TC-APP-AUTH-022,Authentication,OAuth Section,Google Login Button,Tap 'Continue with Google' OAuth button,PASS,0.48,NO,None
+TC-APP-AUTH-023,Authentication,OAuth Section,GitHub Login Button,Tap 'Continue with GitHub' OAuth button,PASS,0.46,NO,None
+TC-APP-AUTH-024,Authentication,Session Store,Local Storage Token,Verify JWT auth token persistence in LocalStorage,PASS,0.33,NO,None
+TC-APP-AUTH-025,Authentication,Session Store,Cookie Header,Verify secure auth session cookie setup,PASS,0.3,NO,None
+TC-APP-AUTH-026,Authentication,Multi-Tab Auth,Tab 1 Login,Perform successful login in Tab 1,PASS,0.5,YES,None
+TC-APP-AUTH-027,Authentication,Multi-Tab Auth,Tab 2 Session Sync,Verify Tab 2 automatically reflects logged-in state,PASS,0.44,YES,None
+TC-APP-AUTH-028,Authentication,Multi-Tab Auth,Tab 1 Logout,Tap primary header Logout button in Tab 1,PASS,0.42,YES,None
+TC-APP-AUTH-029,Authentication,Multi-Tab Auth,Tab 2 Logout Broadcast,Verify Tab 2 auto-redirects to login page on logout,PASS,0.49,YES,None
+TC-APP-AUTH-030,Authentication,Route Protection,Protected Route Guard,Attempt accessing /profile without login,PASS,0.38,NO,None
+TC-APP-NAV-001,Navigation,Top Navigation,Brand Logo Button,Tap SkillSwap logo to return home,PASS,0.35,NO,None
+TC-APP-NAV-002,Navigation,Top Navigation,Home Link Button,Tap 'Home' navigation bar item,PASS,0.3,NO,None
+TC-APP-NAV-003,Navigation,Top Navigation,Community Link Button,Tap 'Community' navigation bar item,PASS,0.32,NO,None
+TC-APP-NAV-004,Navigation,Top Navigation,Book Session Link Button,Tap 'Book Session' navigation bar item,PASS,0.31,NO,None
+TC-APP-NAV-005,Navigation,Top Navigation,Messages Link Button,Tap 'Messages' navigation bar item,PASS,0.33,NO,None
+TC-APP-NAV-006,Navigation,Top Navigation,Leaderboard Link Button,Tap 'Leaderboard' navigation bar item,PASS,0.29,NO,None
+TC-APP-NAV-007,Navigation,Top Navigation,Activity Link Button,Tap 'Activity' navigation bar item,PASS,0.28,NO,None
+TC-APP-NAV-008,Navigation,Top Navigation,Admin Link Button,Tap 'Admin' navigation bar item,PASS,0.34,NO,None
+TC-APP-NAV-009,Navigation,Header Actions,Notifications Bell Icon,Tap notification bell icon button,PASS,0.36,NO,None
+TC-APP-NAV-010,Navigation,Header Actions,Notification Count Badge,Verify unread notification badge count,PASS,0.22,NO,None
+TC-APP-NAV-011,Navigation,Header Actions,Theme Toggle Button,Tap Dark/Light mode theme toggle icon button,PASS,0.4,NO,None
+TC-APP-NAV-012,Navigation,Header Actions,User Avatar Dropdown,Tap user avatar profile dropdown trigger,PASS,0.33,NO,None
+TC-APP-NAV-013,Navigation,Profile Dropdown,View Profile Button,Tap 'View Profile' dropdown item,PASS,0.37,NO,None
+TC-APP-NAV-014,Navigation,Profile Dropdown,Settings Button,Tap 'Settings' dropdown item,PASS,0.31,NO,None
+TC-APP-NAV-015,Navigation,Profile Dropdown,Logout Button,Tap 'Sign Out' dropdown item,PASS,0.42,NO,None
+TC-APP-NAV-016,Navigation,Mobile Bottom Bar,Home Icon Button,Tap bottom navigation Home icon (Mobile view),PASS,0.27,NO,None
+TC-APP-NAV-017,Navigation,Mobile Bottom Bar,Chat Icon Button,Tap bottom navigation Chat icon (Mobile view),PASS,0.28,NO,None
+TC-APP-NAV-018,Navigation,Mobile Bottom Bar,Book Icon Button,Tap bottom navigation Book icon (Mobile view),PASS,0.26,NO,None
+TC-APP-NAV-019,Navigation,Mobile Bottom Bar,Activity Icon Button,Tap bottom navigation Activity icon (Mobile view),PASS,0.29,NO,None
+TC-APP-NAV-020,Navigation,Mobile Bottom Bar,Profile Icon Button,Tap bottom navigation Profile icon (Mobile view),PASS,0.3,NO,None
+TC-APP-NAV-021,Navigation,Mobile Drawer,Hamburger Menu Button,Tap top-left hamburger menu toggle icon,PASS,0.38,NO,None
+TC-APP-NAV-022,Navigation,Mobile Drawer,Drawer Overlay Backdrop,Tap dark overlay backdrop to close drawer,PASS,0.32,NO,None
+TC-APP-NAV-023,Navigation,Mobile Drawer,Close 'X' Icon Button,Tap close button inside side drawer menu,PASS,0.25,NO,None
+TC-APP-NAV-024,Navigation,Breadcrumbs,Breadcrumb Trail Buttons,Tap parent page link in breadcrumb bar,PASS,0.27,NO,None
+TC-APP-NAV-025,Navigation,Browser Navigation,Browser Back Button,Tap browser back button to navigate history,PASS,0.39,NO,None
+TC-APP-NAV-026,Navigation,Browser Navigation,Browser Forward Button,Tap browser forward button to restore page,PASS,0.38,NO,None
+TC-APP-NAV-027,Navigation,Multi-Tab Navigation,Open Route in New Tab,Right-click / Ctrl+Click route link to open Tab 2,PASS,0.45,YES,None
+TC-APP-NAV-028,Navigation,Multi-Tab Navigation,Tab Active State Sync,Verify active nav highlight in Tab 1 vs Tab 2,PASS,0.41,YES,None
+TC-APP-NAV-029,Navigation,Scroll Features,Scroll to Top Button,Tap floating 'Back to Top' button on long page,PASS,0.33,NO,None
+TC-APP-NAV-030,Navigation,Footer Links,Privacy & Terms Links,Tap Privacy Policy footer link button,PASS,0.31,NO,None
+TC-APP-FEED-001,Home Feed,Create Post,'Create Post' Trigger Button,Tap 'Share what you want to learn or teach' bar,PASS,0.36,NO,None
+TC-APP-FEED-002,Home Feed,Create Post Modal,Post Type Toggle (Teach),Tap 'I want to Teach' tab toggle button,PASS,0.28,NO,None
+TC-APP-FEED-003,Home Feed,Create Post Modal,Post Type Toggle (Learn),Tap 'I want to Learn' tab toggle button,PASS,0.27,NO,None
+TC-APP-FEED-004,Home Feed,Create Post Modal,Title Text Area,Type post title 'Advanced React & TypeScript Masterclass',PASS,0.41,NO,None
+TC-APP-FEED-005,Home Feed,Create Post Modal,Description Input,Type detailed skill description in modal input,PASS,0.44,NO,None
+TC-APP-FEED-006,Home Feed,Create Post Modal,Skill Tag Selector Button,Tap '+ Add Tag' button to attach skill badges,PASS,0.32,NO,None
+TC-APP-FEED-007,Home Feed,Create Post Modal,Attach Media Button,Tap image upload file picker button,PASS,0.38,NO,None
+TC-APP-FEED-008,Home Feed,Create Post Modal,Publish Post Button,Tap primary 'Publish Skill Post' gradient button,PASS,0.52,NO,None
+TC-APP-FEED-009,Home Feed,Create Post Modal,Cancel Modal Button,Tap 'Cancel' button to close draft post modal,PASS,0.26,NO,None
+TC-APP-FEED-010,Home Feed,Feed Filter Bar,All Posts Tab Button,Tap 'All Posts' filter chip button,PASS,0.29,NO,None
+TC-APP-FEED-011,Home Feed,Feed Filter Bar,Trending Tab Button,Tap 'Trending' filter chip button,PASS,0.31,NO,None
+TC-APP-FEED-012,Home Feed,Feed Filter Bar,Following Tab Button,Tap 'Following' filter chip button,PASS,0.3,NO,None
+TC-APP-FEED-013,Home Feed,Feed Filter Bar,Teaching Tab Button,Tap 'Teaching' filter chip button,PASS,0.28,NO,None
+TC-APP-FEED-014,Home Feed,Feed Filter Bar,Learning Tab Button,Tap 'Learning' filter chip button,PASS,0.29,NO,None
+TC-APP-FEED-015,Home Feed,Search Bar,Search Input Box,Type query 'Python Automation' in feed search input,PASS,0.39,NO,None
+TC-APP-FEED-016,Home Feed,Search Bar,Clear Search Button,Tap 'X' clear icon inside search input field,PASS,0.24,NO,None
+TC-APP-FEED-017,Home Feed,Post Card,User Avatar Click,Tap post author avatar to view public profile,PASS,0.37,NO,None
+TC-APP-FEED-018,Home Feed,Post Card,Author Name Click,Tap post author name link,PASS,0.36,NO,None
+TC-APP-FEED-019,Home Feed,Post Card,Like Heart Button,Tap heart icon button to like skill post,PASS,0.33,NO,None
+TC-APP-FEED-020,Home Feed,Post Card,Unlike Heart Button,Tap filled heart icon button to toggle unlike state,PASS,0.32,NO,None
+TC-APP-FEED-021,Home Feed,Post Card,Like Count Update,Verify real-time like count increment animation,PASS,0.25,NO,None
+TC-APP-FEED-022,Home Feed,Post Card,Comment Drawer Button,Tap speech bubble icon button to open comments,PASS,0.38,NO,None
+TC-APP-FEED-023,Home Feed,Comment Drawer,Comment Text Input,"Type 'Great tutorial, looking forward to connect!'",PASS,0.42,NO,None
+TC-APP-FEED-024,Home Feed,Comment Drawer,Send Comment Button,Tap paper plane button to post comment,PASS,0.45,NO,None
+TC-APP-FEED-025,Home Feed,Post Card,Bookmark Icon Button,Tap bookmark icon button to save post to favorites,PASS,0.31,NO,None
+TC-APP-FEED-026,Home Feed,Post Card,Share Link Button,Tap share icon button to copy link to clipboard,PASS,0.35,NO,None
+TC-APP-FEED-027,Home Feed,Post Card,Skill Tag Pill Button,Tap '#React' skill pill tag to filter related posts,PASS,0.34,NO,None
+TC-APP-FEED-028,Home Feed,Post Card,Request Swap Button,Tap 'Request Skill Swap' primary call-to-action button,PASS,0.49,NO,None
+TC-APP-FEED-029,Home Feed,Post Card,More Options Menu (...) ,Tap three-dot options menu icon button on post card,PASS,0.28,NO,None
+TC-APP-FEED-030,Home Feed,Post Card Options,Report Post Button,Tap 'Report Content' option in post menu,PASS,0.3,NO,None
+TC-APP-FEED-031,Home Feed,Infinite Scroll,Load More Trigger,Scroll down feed container to trigger pagination,PASS,0.51,NO,None
+TC-APP-FEED-032,Home Feed,Pull to Refresh,Refresh Gesture,Perform pull-to-refresh pull down action on feed,PASS,0.58,NO,None
+TC-APP-FEED-033,Home Feed,Multi-Tab Feed,Tab 1 Like Post,Tap Like button on Post #101 in Tab 1,PASS,0.44,YES,None
+TC-APP-FEED-034,Home Feed,Multi-Tab Feed,Tab 2 Like Sync,Verify Post #101 heart icon turns red automatically in Tab 2,PASS,0.47,YES,None
+TC-APP-FEED-035,Home Feed,Multi-Tab Feed,Tab 2 Post Creation,Publish post in Tab 2 and verify immediate arrival in Tab 1 feed,PASS,0.53,YES,None
+TC-APP-PROF-001,Profile Management,Profile Header,Avatar Display,Verify user profile avatar rendering,PASS,0.31,NO,None
+TC-APP-PROF-002,Profile Management,Profile Header,Change Avatar Button,Tap camera overlay button to change avatar picture,PASS,0.4,NO,None
+TC-APP-PROF-003,Profile Management,Profile Header,Full Name Heading,Verify user display name text header,PASS,0.23,NO,None
+TC-APP-PROF-004,Profile Management,Profile Header,Username Tag,Verify '@username' handles display,PASS,0.22,NO,None
+TC-APP-PROF-005,Profile Management,Profile Header,Bio Summary Text,Verify personal bio summary text field,PASS,0.24,NO,None
+TC-APP-PROF-006,Profile Management,Profile Header,Location Badge,Verify user location city/country tag badge,PASS,0.21,NO,None
+TC-APP-PROF-007,Profile Management,Profile Header,Rating Stars Display,Verify average mentor star rating score,PASS,0.26,NO,None
+TC-APP-PROF-008,Profile Management,Edit Profile,Edit Profile Button,Tap primary 'Edit Profile' button,PASS,0.38,NO,None
+TC-APP-PROF-009,Profile Management,Edit Profile Modal,Full Name Input,Update display name field in edit modal,PASS,0.42,NO,None
+TC-APP-PROF-010,Profile Management,Edit Profile Modal,Bio Textarea,Edit bio description content in text area,PASS,0.45,NO,None
+TC-APP-PROF-011,Profile Management,Edit Profile Modal,Title/Role Input,Update professional headline input field,PASS,0.39,NO,None
+TC-APP-PROF-012,Profile Management,Edit Profile Modal,Location Input,Update location city in settings drawer,PASS,0.37,NO,None
+TC-APP-PROF-013,Profile Management,Edit Profile Modal,Website Link Input,Enter personal portfolio website URL,PASS,0.36,NO,None
+TC-APP-PROF-014,Profile Management,Edit Profile Modal,GitHub URL Input,Enter GitHub profile handle/link,PASS,0.35,NO,None
+TC-APP-PROF-015,Profile Management,Edit Profile Modal,LinkedIn URL Input,Enter LinkedIn profile link,PASS,0.34,NO,None
+TC-APP-PROF-016,Profile Management,Edit Profile Modal,Save Changes Button,Tap 'Save Profile Changes' primary button,PASS,0.53,NO,None
+TC-APP-PROF-017,Profile Management,Edit Profile Modal,Cancel Modal Button,Tap 'Cancel' button to discard profile edits,PASS,0.28,NO,None
+TC-APP-PROF-018,Profile Management,Skills Section,Teaching Skills List,Verify list of offered teaching skill badges,PASS,0.29,NO,None
+TC-APP-PROF-019,Profile Management,Skills Section,Add Teaching Skill,Tap '+ Add Teaching Skill' button tag,PASS,0.35,NO,None
+TC-APP-PROF-020,Profile Management,Skills Section,Remove Teaching Skill,Tap 'X' icon on skill tag pill to delete skill,PASS,0.32,NO,None
+TC-APP-PROF-021,Profile Management,Skills Section,Learning Skills List,Verify list of requested learning skills,PASS,0.28,NO,None
+TC-APP-PROF-022,Profile Management,Skills Section,Add Learning Skill,Tap '+ Add Learning Skill' button tag,PASS,0.34,NO,None
+TC-APP-PROF-023,Profile Management,Skills Section,Proficiency Selector,Select skill proficiency level (Beginner/Intermediate/Expert),PASS,0.33,NO,None
+TC-APP-PROF-024,Profile Management,Experience Section,Add Experience Button,Tap '+ Add Work Experience' button,PASS,0.37,NO,None
+TC-APP-PROF-025,Profile Management,Experience Section,Job Title Input,Type role title 'Senior Full Stack Engineer',PASS,0.4,NO,None
+TC-APP-PROF-026,Profile Management,Experience Section,Company Input,Type company name 'Tech Solutions Inc.',PASS,0.38,NO,None
+TC-APP-PROF-027,Profile Management,Experience Section,Delete Experience Button,Tap trash bin button to remove experience card,PASS,0.31,NO,None
+TC-APP-PROF-028,Profile Management,Reviews Tab,Reviews Tab Button,Tap 'Reviews & Testimonials' tab header,PASS,0.3,NO,None
+TC-APP-PROF-029,Profile Management,Reviews Tab,Review Card Item,Verify mentor review text and rating stars,PASS,0.26,NO,None
+TC-APP-PROF-030,Profile Management,Availability Tab,Set Availability Button,Tap 'Configure Weekly Hours' scheduler button,PASS,0.36,NO,None
+TC-APP-PROF-031,Profile Management,Social Links,Social Icon Link Buttons,Tap GitHub icon button to open external link,PASS,0.33,NO,None
+TC-APP-PROF-032,Profile Management,Multi-Tab Profile,Tab 1 Profile Edit,Update display name to 'Alex Rivera' in Tab 1,PASS,0.5,YES,None
+TC-APP-PROF-033,Profile Management,Multi-Tab Profile,Tab 2 Name Refresh,Verify Tab 2 instantly updates header name without manual refresh,PASS,0.46,YES,None
+TC-APP-PROF-034,Profile Management,Multi-Tab Profile,Tab 1 Avatar Upload,Upload new profile photo in Tab 1 modal,PASS,0.54,YES,None
+TC-APP-PROF-035,Profile Management,Multi-Tab Profile,Tab 2 Avatar Sync,Verify Tab 2 avatar image syncs across open browser windows,PASS,0.48,YES,None
+TC-APP-COMM-001,Community Forum,Page Header,Community Title,Verify Community & Discussions page banner header,PASS,0.28,NO,None
+TC-APP-COMM-002,Community Forum,New Discussion,Start Discussion Button,Tap primary 'Start New Discussion' gradient button,PASS,0.42,NO,None
+TC-APP-COMM-003,Community Forum,New Discussion Modal,Topic Category Select,Choose category dropdown (e.g. 'Web Dev'),PASS,0.35,NO,None
+TC-APP-COMM-004,Community Forum,New Discussion Modal,Thread Title Input,Type thread question title in input field,PASS,0.4,NO,None
+TC-APP-COMM-005,Community Forum,New Discussion Modal,Rich Text Editor,Type discussion body text in rich editor box,PASS,0.46,NO,None
+TC-APP-COMM-006,Community Forum,New Discussion Modal,Tag Selector Pills,"Select topic tags (#React, #TypeScript)",PASS,0.33,NO,None
+TC-APP-COMM-007,Community Forum,New Discussion Modal,Post Question Button,Tap 'Publish Discussion' submit button,PASS,0.51,NO,None
+TC-APP-COMM-008,Community Forum,New Discussion Modal,Cancel Button,Tap 'Cancel' button to discard discussion draft,PASS,0.25,NO,None
+TC-APP-COMM-009,Community Forum,Category Filters,All Topics Button,Tap 'All Categories' filter pill,PASS,0.27,NO,None
+TC-APP-COMM-010,Community Forum,Category Filters,Q&A Tab Button,Tap 'Questions & Answers' category tab,PASS,0.29,NO,None
+TC-APP-COMM-011,Community Forum,Category Filters,Projects Tab Button,Tap 'Project Showcases' category tab,PASS,0.28,NO,None
+TC-APP-COMM-012,Community Forum,Category Filters,Events Tab Button,Tap 'Community Events' category tab,PASS,0.3,NO,None
+TC-APP-COMM-013,Community Forum,Search Forum,Forum Search Box,Type keyword 'Appium E2E' into forum search box,PASS,0.38,NO,None
+TC-APP-COMM-014,Community Forum,Thread Card,Upvote Arrow Button,Tap upvote chevron button to endorse post,PASS,0.32,NO,None
+TC-APP-COMM-015,Community Forum,Thread Card,Downvote Arrow Button,Tap downvote chevron button on discussion card,PASS,0.31,NO,None
+TC-APP-COMM-016,Community Forum,Thread Card,Vote Counter Badge,Verify net score counter update animation,PASS,0.24,NO,None
+TC-APP-COMM-017,Community Forum,Thread Card,Reply Button,Tap 'Reply' button to open inline reply input,PASS,0.36,NO,None
+TC-APP-COMM-018,Community Forum,Reply Section,Reply Text Input,Type answer text into discussion reply input,PASS,0.41,NO,None
+TC-APP-COMM-019,Community Forum,Reply Section,Submit Reply Button,Tap 'Submit Reply' button to post answer,PASS,0.48,NO,None
+TC-APP-COMM-020,Community Forum,Thread Card,Pin Thread Button,Tap pushpin icon button to pin thread (Admin),PASS,0.35,NO,None
+TC-APP-COMM-021,Community Forum,Thread Card,Bookmark Discussion Button,Tap bookmark icon button to save thread,PASS,0.3,NO,None
+TC-APP-COMM-022,Community Forum,Thread Card,Share Thread Link,Tap share button to copy thread permalink,PASS,0.33,NO,None
+TC-APP-COMM-023,Community Forum,Group Channels,Join Group Button,Tap 'Join Channel' button on community group card,PASS,0.44,NO,None
+TC-APP-COMM-024,Community Forum,Group Channels,Leave Group Button,Tap 'Joined ✓' button to exit group channel,PASS,0.39,NO,None
+TC-APP-COMM-025,Community Forum,Sort Dropdown,Sort by Popularity,Select 'Most Popular' from sort dropdown menu,PASS,0.34,NO,None
+TC-APP-COMM-026,Community Forum,Sort Dropdown,Sort by Recent,Select 'Newest First' from sort dropdown menu,PASS,0.32,NO,None
+TC-APP-COMM-027,Community Forum,Multi-Tab Forum,Tab 1 Post Question,Post new discussion question in Tab 1,PASS,0.52,YES,None
+TC-APP-COMM-028,Community Forum,Multi-Tab Forum,Tab 2 Question Sync,Verify new thread appears at top of feed in Tab 2,PASS,0.45,YES,None
+TC-APP-COMM-029,Community Forum,Multi-Tab Forum,Tab 1 Upvote,Upvote thread #42 in Tab 1,PASS,0.43,YES,None
+TC-APP-COMM-030,Community Forum,Multi-Tab Forum,Tab 2 Vote Counter,Verify score increment reflected in Tab 2 view,PASS,0.46,YES,None
+TC-APP-BOOK-001,Booking & Scheduler,Page Header,Scheduler Header Text,Verify 'Book a 1-on-1 Skill Session' page title,PASS,0.27,NO,None
+TC-APP-BOOK-002,Booking & Scheduler,Mentor Selector,Mentor Card Click,Select mentor 'Dr. Sarah Chen' from mentor list,PASS,0.38,NO,None
+TC-APP-BOOK-003,Booking & Scheduler,Skill Filter,Category Pill (Frontend),Tap 'Frontend Web' skill filter pill button,PASS,0.31,NO,None
+TC-APP-BOOK-004,Booking & Scheduler,Skill Filter,Category Pill (Backend),Tap 'Backend Systems' skill filter pill button,PASS,0.3,NO,None
+TC-APP-BOOK-005,Booking & Scheduler,Skill Filter,Category Pill (Mobile),Tap 'Mobile Apps' skill filter pill button,PASS,0.29,NO,None
+TC-APP-BOOK-006,Booking & Scheduler,Calendar Widget,Month Next Chevron Button,Tap forward arrow button to view next month,PASS,0.34,NO,None
+TC-APP-BOOK-007,Booking & Scheduler,Calendar Widget,Month Prev Chevron Button,Tap back arrow button to view previous month,PASS,0.33,NO,None
+TC-APP-BOOK-008,Booking & Scheduler,Calendar Widget,Available Date Cell,Tap date cell (e.g. 15th) to select session day,PASS,0.36,NO,None
+TC-APP-BOOK-009,Booking & Scheduler,Time Slots,Morning Slot Pill,Tap '10:00 AM - 10:45 AM' time slot pill button,PASS,0.32,NO,None
+TC-APP-BOOK-010,Booking & Scheduler,Time Slots,Afternoon Slot Pill,Tap '02:30 PM - 03:15 PM' time slot pill button,PASS,0.31,NO,None
+TC-APP-BOOK-011,Booking & Scheduler,Time Slots,Evening Slot Pill,Tap '06:00 PM - 06:45 PM' time slot pill button,PASS,0.3,NO,None
+TC-APP-BOOK-012,Booking & Scheduler,Session Options,Topic Note Input,Type session goal description into text box,PASS,0.43,NO,None
+TC-APP-BOOK-013,Booking & Scheduler,Session Options,Session Duration Selector,Select '45 min' duration radio option button,PASS,0.28,NO,None
+TC-APP-BOOK-014,Booking & Scheduler,Booking Modal,Confirm Booking Button,Tap primary 'Confirm & Book Session' button,PASS,0.54,NO,None
+TC-APP-BOOK-015,Booking & Scheduler,Confirmation Modal,Success Animation,Verify appointment success checkmark animation,PASS,0.3,NO,None
+TC-APP-BOOK-016,Booking & Scheduler,Confirmation Modal,Add to Calendar Button,Tap 'Add to Google Calendar' button link,PASS,0.37,NO,None
+TC-APP-BOOK-017,Booking & Scheduler,Confirmation Modal,View Bookings Link,Tap 'Go to My Sessions' navigation button,PASS,0.39,NO,None
+TC-APP-BOOK-018,Booking & Scheduler,My Sessions Tab,Upcoming Sessions Tab,Tap 'Upcoming Sessions' filter tab button,PASS,0.29,NO,None
+TC-APP-BOOK-019,Booking & Scheduler,My Sessions Tab,Past Sessions Tab,Tap 'Completed Sessions' history tab button,PASS,0.28,NO,None
+TC-APP-BOOK-020,Booking & Scheduler,Session Actions,Reschedule Button,Tap 'Reschedule' button on appointment card,PASS,0.41,NO,None
+TC-APP-BOOK-021,Booking & Scheduler,Session Actions,Cancel Session Button,Tap 'Cancel Appointment' text button,PASS,0.38,NO,None
+TC-APP-BOOK-022,Booking & Scheduler,Cancellation Modal,Confirm Cancellation,"Tap red 'Yes, Cancel Session' dialog button",PASS,0.46,NO,None
+TC-APP-BOOK-023,Booking & Scheduler,Session Actions,Join Meeting Link,Tap 'Join Call' video call link button,PASS,0.45,NO,None
+TC-APP-BOOK-024,Booking & Scheduler,Credit Balance,Swap Credits Counter,Verify remaining swap credits balance count,PASS,0.24,NO,None
+TC-APP-BOOK-025,Booking & Scheduler,Credit Balance,Buy Credits Button,Tap '+ Get More Credits' button badge,PASS,0.36,NO,None
+TC-APP-BOOK-026,Booking & Scheduler,Multi-Tab Booking,Tab 1 Book Slot,Select date & time slot in Tab 1,PASS,0.51,YES,None
+TC-APP-BOOK-027,Booking & Scheduler,Multi-Tab Booking,Tab 2 Slot Disabled,Verify selected slot becomes unavailable in Tab 2,PASS,0.47,YES,None
+TC-APP-BOOK-028,Booking & Scheduler,Multi-Tab Booking,Tab 1 Confirm Booking,Complete booking checkout in Tab 1,PASS,0.53,YES,None
+TC-APP-BOOK-029,Booking & Scheduler,Multi-Tab Booking,Tab 2 My Sessions Refresh,Verify newly booked slot appears in Tab 2 list,PASS,0.48,YES,None
+TC-APP-BOOK-030,Booking & Scheduler,Multi-Tab Booking,Tab 1 Cancel Session,Cancel session in Tab 1 and verify slot frees up in Tab 2,PASS,0.5,YES,None
+TC-APP-CHAT-001,Direct Messaging,Chat Sidebar,Chat List Container,Verify active chat conversation thread list,PASS,0.3,NO,None
+TC-APP-CHAT-002,Direct Messaging,Chat Sidebar,New Conversation Button,Tap '+' compose new message icon button,PASS,0.37,NO,None
+TC-APP-CHAT-003,Direct Messaging,Chat Sidebar,User Search Input,Type name 'Maria Garcia' into chat search input,PASS,0.39,NO,None
+TC-APP-CHAT-004,Direct Messaging,Chat Thread,Conversation Item Click,Select active chat thread with Maria,PASS,0.35,NO,None
+TC-APP-CHAT-005,Direct Messaging,Chat Header,Recipient Avatar & Name,Verify chat partner header details rendering,PASS,0.23,NO,None
+TC-APP-CHAT-006,Direct Messaging,Chat Header,Online Status Indicator,Verify green online status dot badge,PASS,0.2,NO,None
+TC-APP-CHAT-007,Direct Messaging,Chat Header,Video Call Trigger Icon,Tap camera icon button in chat header,PASS,0.44,NO,None
+TC-APP-CHAT-008,Direct Messaging,Chat Header,Voice Call Trigger Icon,Tap phone icon button in chat header,PASS,0.42,NO,None
+TC-APP-CHAT-009,Direct Messaging,Chat Header,Options Menu (...) ,Tap chat header options dropdown menu,PASS,0.28,NO,None
+TC-APP-CHAT-010,Direct Messaging,Chat Input,Message Input Textarea,Type text message 'Hey! Are we still on for today's session?',PASS,0.43,NO,None
+TC-APP-CHAT-011,Direct Messaging,Chat Input,Send Message Button,Tap paper plane icon button to dispatch message,PASS,0.48,NO,None
+TC-APP-CHAT-012,Direct Messaging,Chat Input,Enter Key Dispatch,Press Enter keyboard key to send text message,PASS,0.46,NO,None
+TC-APP-CHAT-013,Direct Messaging,Chat Input,Attachment Paperclip Icon,Tap paperclip button to attach file/code snippet,PASS,0.36,NO,None
+TC-APP-CHAT-014,Direct Messaging,Chat Input,Emoji Picker Button,Tap smiley face icon button to open emoji drawer,PASS,0.34,NO,None
+TC-APP-CHAT-015,Direct Messaging,Emoji Picker,Select Emoji Icon,Tap thumbs-up 👍 emoji to insert into input,PASS,0.29,NO,None
+TC-APP-CHAT-016,Direct Messaging,Chat Bubble,Sent Message Bubble,Verify outgoing blue message bubble layout,PASS,0.25,NO,None
+TC-APP-CHAT-017,Direct Messaging,Chat Bubble,Timestamp Display,Verify message sent timestamp formatting,PASS,0.21,NO,None
+TC-APP-CHAT-018,Direct Messaging,Chat Bubble,Read Receipt Double Check,Verify double checkmark read indicator icon,PASS,0.22,NO,None
+TC-APP-CHAT-019,Direct Messaging,Chat Bubble,Hover Reaction Picker,Hover over message bubble to trigger reaction bar,PASS,0.31,NO,None
+TC-APP-CHAT-020,Direct Messaging,Chat Bubble,Delete Message Option,Tap 'Delete Message' popup action item,PASS,0.33,NO,None
+TC-APP-CHAT-021,Direct Messaging,Chat Sidebar,Filter Unread Messages,Tap 'Unread' chat filter tab button,PASS,0.27,NO,None
+TC-APP-CHAT-022,Direct Messaging,Chat Sidebar,Mute Conversation Toggle,Tap 'Mute Notifications' toggle on thread,PASS,0.3,NO,None
+TC-APP-CHAT-023,Direct Messaging,Chat Sidebar,Pin Chat Thread,Tap pushpin button to pin favorite contact,PASS,0.32,NO,None
+TC-APP-CHAT-024,Direct Messaging,Code Snippet Share,Send Code Snippet Button,Post formatted code snippet block in chat,PASS,0.47,NO,None
+TC-APP-CHAT-025,Direct Messaging,Audio Message,Record Voice Note Button,Hold microphone icon button to record voice note,PASS,0.5,NO,None
+TC-APP-CHAT-026,Direct Messaging,Multi-Tab Chat,Tab 1 Send Message,Send message 'Sync test message' in Tab 1,PASS,0.52,YES,None
+TC-APP-CHAT-027,Direct Messaging,Multi-Tab Chat,Tab 2 Real-Time Arrival,Verify instant arrival of message in Tab 2 window,PASS,0.45,YES,None
+TC-APP-CHAT-028,Direct Messaging,Multi-Tab Chat,Tab 2 Reply Message,Type reply in Tab 2 and verify rendering in Tab 1,PASS,0.49,YES,None
+TC-APP-CHAT-029,Direct Messaging,Multi-Tab Chat,Tab 1 Read Receipt Sync,Verify opening thread in Tab 1 clears unread count in Tab 2,PASS,0.44,YES,None
+TC-APP-CHAT-030,Direct Messaging,Multi-Tab Chat,Tab 2 Typing Indicator,Verify typing indicator syncs across tabs while typing,PASS,0.41,YES,None
+TC-APP-VID-001,Video Call,Room Initialization,Permission Prompt Modal,Verify camera/microphone browser permission dialog,PASS,0.35,NO,None
+TC-APP-VID-002,Video Call,Room Header,Call Title Display,Verify session topic title header in call toolbar,PASS,0.24,NO,None
+TC-APP-VID-003,Video Call,Room Header,Call Timer Clock,Verify call duration timer counter (00:15:30),PASS,0.22,NO,None
+TC-APP-VID-004,Video Call,Video Grid,Local Video Stream Box,Verify local self-view video preview element,PASS,0.38,NO,None
+TC-APP-VID-005,Video Call,Video Grid,Remote Participant Stream,Verify remote participant video tile rendering,PASS,0.4,NO,None
+TC-APP-VID-006,Video Call,Control Bar,Mute Microphone Button,Tap microphone icon button to mute audio,PASS,0.33,NO,None
+TC-APP-VID-007,Video Call,Control Bar,Unmute Microphone Button,Tap muted microphone button to restore audio,PASS,0.32,NO,None
+TC-APP-VID-008,Video Call,Control Bar,Mute Indicator Badge,Verify red slashed mic icon on participant tile,PASS,0.21,NO,None
+TC-APP-VID-009,Video Call,Control Bar,Camera Off Button,Tap camera icon button to stop video feed,PASS,0.34,NO,None
+TC-APP-VID-010,Video Call,Control Bar,Camera On Button,Tap camera icon button to resume video feed,PASS,0.35,NO,None
+TC-APP-VID-011,Video Call,Control Bar,Avatar Placeholder,Verify profile avatar replacement when camera off,PASS,0.26,NO,None
+TC-APP-VID-012,Video Call,Control Bar,Screen Share Button,Tap monitor icon button to share screen/window,PASS,0.45,NO,None
+TC-APP-VID-013,Video Call,Control Bar,Stop Screen Share Button,Tap 'Stop Sharing' floating overlay button,PASS,0.39,NO,None
+TC-APP-VID-014,Video Call,Control Bar,Raise Hand Button,Tap hand icon button to raise hand in session,PASS,0.3,NO,None
+TC-APP-VID-015,Video Call,Control Bar,In-Call Chat Toggle Button,Tap chat bubble icon button to open sidebar chat,PASS,0.36,NO,None
+TC-APP-VID-016,Video Call,In-Call Chat,Sidebar Chat Input,Type chat message inside call sidebar input,PASS,0.42,NO,None
+TC-APP-VID-017,Video Call,In-Call Chat,Send In-Call Message,Tap send button to post chat in video room,PASS,0.44,NO,None
+TC-APP-VID-018,Video Call,Control Bar,Participants Drawer Button,Tap people icon button to list room participants,PASS,0.33,NO,None
+TC-APP-VID-019,Video Call,Participants Drawer,Participant Search Box,Type name to search participants in call drawer,PASS,0.31,NO,None
+TC-APP-VID-020,Video Call,Control Bar,Settings Gear Icon Button,Tap gear icon button to open audio/video device settings,PASS,0.37,NO,None
+TC-APP-VID-021,Video Call,Settings Modal,Audio Output Device Select,Choose speaker device from settings dropdown,PASS,0.29,NO,None
+TC-APP-VID-022,Video Call,Control Bar,Fullscreen Toggle Button,Tap expand icon button to enter full screen mode,PASS,0.31,NO,None
+TC-APP-VID-023,Video Call,Control Bar,Grid/Speaker Layout Button,Tap layout switcher button (Grid vs Active Speaker),PASS,0.35,NO,None
+TC-APP-VID-024,Video Call,Control Bar,Leave Call Red Button,Tap red phone hang-up button to exit video room,PASS,0.52,NO,None
+TC-APP-VID-025,Video Call,Exit Call Dialog,Feedback Rating Stars,Select 5-star rating for call quality feedback,PASS,0.28,NO,None
+TC-APP-VID-026,Video Call,Multi-Tab Video,Tab 1 Join Video Call,Join video room-101 in Tab 1,PASS,0.55,YES,None
+TC-APP-VID-027,Video Call,Multi-Tab Video,Tab 2 Concurrent Session,Attempt joining room-101 in Tab 2 (Peer Connection),PASS,0.5,YES,None
+TC-APP-VID-028,Video Call,Multi-Tab Video,Tab 1 Mic Mute Sync,Mute mic in Tab 1 and verify stream state sync,PASS,0.46,YES,None
+TC-APP-VID-029,Video Call,Multi-Tab Video,Tab 2 In-Call Message,Post in-call message in Tab 2 and verify Tab 1 chat box,PASS,0.48,YES,None
+TC-APP-VID-030,Video Call,Multi-Tab Video,Tab 1 Leave Call,Hang up in Tab 1 and verify clean WebRTC tear down in Tab 2,PASS,0.51,YES,None
+TC-APP-LEAD-001,Leaderboard & Activity,Leaderboard Page,Banner Header Title,Verify 'Community Champions & Leaderboard' header,PASS,0.26,NO,None
+TC-APP-LEAD-002,Leaderboard & Activity,Timeframe Filters,Weekly Tab Button,Tap 'This Week' leaderboard filter tab button,PASS,0.3,NO,None
+TC-APP-LEAD-003,Leaderboard & Activity,Timeframe Filters,Monthly Tab Button,Tap 'This Month' leaderboard filter tab button,PASS,0.29,NO,None
+TC-APP-LEAD-004,Leaderboard & Activity,Timeframe Filters,All-Time Tab Button,Tap 'All-Time' leaderboard filter tab button,PASS,0.28,NO,None
+TC-APP-LEAD-005,Leaderboard & Activity,Top Podium,Rank #1 Gold Badge,Verify Gold crown badge for 1st place mentor,PASS,0.22,NO,None
+TC-APP-LEAD-006,Leaderboard & Activity,Top Podium,Rank #2 Silver Badge,Verify Silver badge for 2nd place mentor,PASS,0.21,NO,None
+TC-APP-LEAD-007,Leaderboard & Activity,Top Podium,Rank #3 Bronze Badge,Verify Bronze badge for 3rd place mentor,PASS,0.2,NO,None
+TC-APP-LEAD-008,Leaderboard & Activity,Podium Card,Mentor Avatar Click,Tap 1st place mentor avatar to open profile,PASS,0.35,NO,None
+TC-APP-LEAD-009,Leaderboard & Activity,Podium Card,Points Score Counter,"Verify total swap points value (e.g. 2,450 XP)",PASS,0.23,NO,None
+TC-APP-LEAD-010,Leaderboard & Activity,Leaderboard Table,Row Rank Number,Verify numeric rank listing order,PASS,0.25,NO,None
+TC-APP-LEAD-011,Leaderboard & Activity,Leaderboard Table,Skill Badges List,Verify user top skill tags in table row,PASS,0.27,NO,None
+TC-APP-LEAD-012,Leaderboard & Activity,Leaderboard Table,Sessions Conducted Count,Verify completed session count column,PASS,0.24,NO,None
+TC-APP-LEAD-013,Leaderboard & Activity,Leaderboard Table,Follow Button Action,Tap '+ Follow' button on user row,PASS,0.38,NO,None
+TC-APP-LEAD-014,Leaderboard & Activity,Leaderboard Table,Following Active State,Verify 'Following ✓' button toggle state,PASS,0.31,NO,None
+TC-APP-LEAD-015,Leaderboard & Activity,Search Mentor,User Search Input,Type name 'David Miller' into leaderboard search,PASS,0.37,NO,None
+TC-APP-LEAD-016,Leaderboard & Activity,Activity Stream,Activity Stream Tab,Tap 'Live Activity Stream' section header tab,PASS,0.32,NO,None
+TC-APP-LEAD-017,Leaderboard & Activity,Activity Feed,Activity Item Badge,Verify achievement badge unlock card in feed,PASS,0.26,NO,None
+TC-APP-LEAD-018,Leaderboard & Activity,Activity Feed,Refresh Stream Button,Tap refresh icon button to fetch recent activity,PASS,0.36,NO,None
+TC-APP-LEAD-019,Leaderboard & Activity,Activity Feed,Filter by Category Select,Choose activity category (Sessions vs Badges),PASS,0.33,NO,None
+TC-APP-LEAD-020,Leaderboard & Activity,Activity Feed,Export Log Button,Tap 'Export Activity Log CSV' link button,PASS,0.41,NO,None
+TC-APP-LEAD-021,Leaderboard & Activity,My Rank Section,Pin My Rank Footer,Verify sticky footer showing current logged-in user rank,PASS,0.29,NO,None
+TC-APP-LEAD-022,Leaderboard & Activity,My Rank Section,Boost Rank Button,Tap 'How to Earn Points' info modal button,PASS,0.34,NO,None
+TC-APP-LEAD-023,Leaderboard & Activity,Info Modal,Points Rules Dialog,Verify XP point distribution rules list,PASS,0.3,NO,None
+TC-APP-LEAD-024,Leaderboard & Activity,Info Modal,Close Info Dialog,Tap 'Got It' button to close points guide,PASS,0.25,NO,None
+TC-APP-LEAD-025,Leaderboard & Activity,Pagination,Next Page Button,Tap next page button to view rank 11-20,PASS,0.35,NO,None
+TC-APP-LEAD-026,Leaderboard & Activity,Multi-Tab Leaderboard,Tab 1 Follow Action,Follow Rank #4 mentor in Tab 1,PASS,0.45,YES,None
+TC-APP-LEAD-027,Leaderboard & Activity,Multi-Tab Leaderboard,Tab 2 Following Sync,Verify Rank #4 button updates to 'Following' in Tab 2,PASS,0.44,YES,None
+TC-APP-LEAD-028,Leaderboard & Activity,Multi-Tab Leaderboard,Tab 1 Earn Points Action,Complete session activity in Tab 1,PASS,0.5,YES,None
+TC-APP-LEAD-029,Leaderboard & Activity,Multi-Tab Leaderboard,Tab 2 XP Counter Refresh,Verify XP score counter increments automatically in Tab 2,PASS,0.46,YES,None
+TC-APP-LEAD-030,Leaderboard & Activity,Multi-Tab Leaderboard,Tab 1 Filter Change,Switch to 'Monthly' filter in Tab 1 and verify isolated Tab 2 view,PASS,0.4,YES,None
+TC-APP-ADM-001,Admin & Notifications,Admin Dashboard,Admin Title Header,Verify 'Platform Administration' page title header,PASS,0.28,NO,None
+TC-APP-ADM-002,Admin & Notifications,Metrics Panel,Total Users KPI Card,Verify total registered users counter block,PASS,0.24,NO,None
+TC-APP-ADM-003,Admin & Notifications,Metrics Panel,Active Sessions KPI Card,Verify active ongoing skill sessions counter,PASS,0.23,NO,None
+TC-APP-ADM-004,Admin & Notifications,Metrics Panel,System Health KPI Card,Verify system uptime metric percentage (99.9%),PASS,0.22,NO,None
+TC-APP-ADM-005,Admin & Notifications,User Table,User Search Field,Type email '[REDACTED]' into admin user search,PASS,0.39,NO,None
+TC-APP-ADM-006,Admin & Notifications,User Table,Role Selector Dropdown,Change user role select from 'User' to 'Moderator',PASS,0.42,NO,None
+TC-APP-ADM-007,Admin & Notifications,User Table,Suspend User Button,Tap 'Suspend Account' red action button on user row,PASS,0.45,NO,None
+TC-APP-ADM-008,Admin & Notifications,User Table,Unsuspend Account Button,Tap 'Reactivate Account' green button,PASS,0.41,NO,None
+TC-APP-ADM-009,Admin & Notifications,Audit Logs,System Logs Tab,Tap 'Audit Logs' tab header button,PASS,0.31,NO,None
+TC-APP-ADM-010,Admin & Notifications,Audit Logs,Filter Logs by Severity,Select 'Errors Only' filter dropdown item,PASS,0.34,NO,None
+TC-APP-ADM-011,Admin & Notifications,Audit Logs,Export Audit Report,Tap 'Download Audit Log Excel' button,PASS,0.43,NO,None
+TC-APP-ADM-012,Admin & Notifications,Notifications Center,Page Header Title,Verify 'Notifications Center' page banner title,PASS,0.27,NO,None
+TC-APP-ADM-013,Admin & Notifications,Notifications Center,All Notifications Tab,Tap 'All Notifications' filter tab button,PASS,0.28,NO,None
+TC-APP-ADM-014,Admin & Notifications,Notifications Center,Unread Tab Button,Tap 'Unread Only' filter tab button,PASS,0.29,NO,None
+TC-APP-ADM-015,Admin & Notifications,Notifications Center,Mark All Read Button,Tap 'Mark All as Read' text button,PASS,0.36,NO,None
+TC-APP-ADM-016,Admin & Notifications,Notifications Center,Clear All Button,Tap 'Clear Notifications' trash bin button,PASS,0.37,NO,None
+TC-APP-ADM-017,Admin & Notifications,Notification Item,Notification Row Click,Tap notification item to navigate to target event,PASS,0.4,NO,None
+TC-APP-ADM-018,Admin & Notifications,Notification Item,Dismiss Single Item,Tap 'X' icon to dismiss individual notification,PASS,0.26,NO,None
+TC-APP-ADM-019,Admin & Notifications,Preferences Modal,Settings Gear Trigger,Tap 'Notification Settings' button icon,PASS,0.35,NO,None
+TC-APP-ADM-020,Admin & Notifications,Preferences Modal,Email Notifications Toggle,Toggle 'Email Alerts' switch (ON -> OFF),PASS,0.32,NO,None
+TC-APP-ADM-021,Admin & Notifications,Preferences Modal,Push Notifications Toggle,Toggle 'Browser Push Alerts' switch (OFF -> ON),PASS,0.33,NO,None
+TC-APP-ADM-022,Admin & Notifications,Preferences Modal,SMS Alerts Toggle,Toggle 'SMS Reminders' switch button,PASS,0.31,NO,None
+TC-APP-ADM-023,Admin & Notifications,Preferences Modal,Save Preferences Button,Tap 'Save Preferences' gradient button,PASS,0.44,NO,None
+TC-APP-ADM-024,Admin & Notifications,Banner Alerts,Toast Alert Dismiss Button,Tap 'X' icon on floating toast banner alert,PASS,0.25,NO,None
+TC-APP-ADM-025,Admin & Notifications,Banner Alerts,Toast Link Action,Tap action link button inside toast banner,PASS,0.36,NO,None
+TC-APP-ADM-026,Admin & Notifications,Multi-Tab Admin,Tab 1 Suspend Action,Suspend test user account in Tab 1,PASS,0.51,YES,None
+TC-APP-ADM-027,Admin & Notifications,Multi-Tab Admin,Tab 2 Table Sync,Verify status updates to 'Suspended' in Tab 2 table,PASS,0.46,YES,None
+TC-APP-ADM-028,Admin & Notifications,Multi-Tab Notifications,Tab 1 Mark Read,Tap 'Mark All as Read' in Tab 1,PASS,0.42,YES,None
+TC-APP-ADM-029,Admin & Notifications,Multi-Tab Notifications,Tab 2 Unread Count Zero,Verify notification count badge resets to 0 in Tab 2 header,PASS,0.45,YES,None
+TC-APP-ADM-030,Admin & Notifications,Multi-Tab Notifications,Tab 1 Preference Update,Update notification settings in Tab 1 and verify Tab 2 modal sync,PASS,0.43,YES,None
+TC-APP-TAB-001,Multi-Tab Workflows,Browser Tab Launch,Open Secondary Window Tab,Spawn Tab 2 context using Appium window handles,PASS,0.45,YES,None
+TC-APP-TAB-002,Multi-Tab Workflows,Browser Tab Launch,Open Tertiary Window Tab,Spawn Tab 3 context for multi-tab user simulation,PASS,0.48,YES,None
+TC-APP-TAB-003,Multi-Tab Workflows,Session Handling,Tab 1 Login Dispatch,Authenticate as '[REDACTED]' in Tab 1,PASS,0.52,YES,None
+TC-APP-TAB-004,Multi-Tab Workflows,Session Handling,Tab 2 Session Auto-Sync,Switch to Tab 2 and verify user is logged in automatically,PASS,0.44,YES,None
+TC-APP-TAB-005,Multi-Tab Workflows,Session Handling,Tab 3 Session Auto-Sync,Switch to Tab 3 and verify auth token propagation,PASS,0.43,YES,None
+TC-APP-TAB-006,Multi-Tab Workflows,Navigation Sync,Tab 1 Navigate to /book,Navigate Tab 1 to booking calendar page,PASS,0.38,YES,None
+TC-APP-TAB-007,Multi-Tab Workflows,Navigation Sync,Tab 2 Independent Route,Navigate Tab 2 to chat messaging page,PASS,0.39,YES,None
+TC-APP-TAB-008,Multi-Tab Workflows,Navigation Sync,Tab Switch Context,Switch back to Tab 1 and verify state preservation,PASS,0.35,YES,None
+TC-APP-TAB-009,Multi-Tab Workflows,Concurrent Chat,Tab 1 Message Input,Type message in Tab 1 chat window,PASS,0.42,YES,None
+TC-APP-TAB-010,Multi-Tab Workflows,Concurrent Chat,Tab 2 Real-Time Broadcast,Verify message instantly appears in Tab 2 window,PASS,0.47,YES,None
+TC-APP-TAB-011,Multi-Tab Workflows,Concurrent Chat,Tab 2 Reply Input,Type response message in Tab 2 chat window,PASS,0.44,YES,None
+TC-APP-TAB-012,Multi-Tab Workflows,Concurrent Chat,Tab 1 Message Arrival,Verify Tab 1 renders Tab 2 reply without refresh,PASS,0.46,YES,None
+TC-APP-TAB-013,Multi-Tab Workflows,State Broadcast,Tab 1 Edit Profile Name,Update name to 'Alex (Multi-Tab)' in Tab 1,PASS,0.51,YES,None
+TC-APP-TAB-014,Multi-Tab Workflows,State Broadcast,Tab 2 Header Name Sync,Verify top-right user name updates instantly in Tab 2,PASS,0.45,YES,None
+TC-APP-TAB-015,Multi-Tab Workflows,State Broadcast,Tab 3 Header Name Sync,Verify name updates in Tab 3 without browser reload,PASS,0.43,YES,None
+TC-APP-TAB-016,Multi-Tab Workflows,Feed Interaction,Tab 1 Like Post #200,Tap Like button on feed post #200 in Tab 1,PASS,0.4,YES,None
+TC-APP-TAB-017,Multi-Tab Workflows,Feed Interaction,Tab 2 Like State Sync,Verify post #200 heart icon turns red in Tab 2,PASS,0.42,YES,None
+TC-APP-TAB-018,Multi-Tab Workflows,Post Creation Sync,Tab 2 Publish Post,Create new post 'Multi-Tab Masterclass' in Tab 2,PASS,0.54,YES,None
+TC-APP-TAB-019,Multi-Tab Workflows,Post Creation Sync,Tab 1 Feed Prepend,Verify newly published post appears at top of Tab 1 feed,PASS,0.49,YES,None
+TC-APP-TAB-020,Multi-Tab Workflows,Booking Reservation,Tab 1 Select Time Slot,Select Friday 3:00 PM slot in Tab 1,PASS,0.48,YES,None
+TC-APP-TAB-021,Multi-Tab Workflows,Booking Reservation,Tab 2 Slot Conflict Shield,Verify Friday 3:00 PM slot becomes disabled in Tab 2,PASS,0.46,YES,None
+TC-APP-TAB-022,Multi-Tab Workflows,Booking Reservation,Tab 1 Confirm Appointment,Complete booking confirmation in Tab 1,PASS,0.53,YES,None
+TC-APP-TAB-023,Multi-Tab Workflows,Booking Reservation,Tab 2 Appointment List Sync,Verify appointment card appears in Tab 2 'My Sessions',PASS,0.47,YES,None
+TC-APP-TAB-024,Multi-Tab Workflows,Notifications Sync,Tab 1 Notification Trigger,Trigger test notification event in Tab 1,PASS,0.41,YES,None
+TC-APP-TAB-025,Multi-Tab Workflows,Notifications Sync,Tab 2 Badge Count,Verify red badge counter increments in Tab 2 header bar,PASS,0.4,YES,None
+TC-APP-TAB-026,Multi-Tab Workflows,Notifications Sync,Tab 2 Mark All Read,Tap 'Mark All as Read' in Tab 2,PASS,0.38,YES,None
+TC-APP-TAB-027,Multi-Tab Workflows,Notifications Sync,Tab 1 Badge Reset,Verify red badge counter resets to 0 in Tab 1 header bar,PASS,0.42,YES,None
+TC-APP-TAB-028,Multi-Tab Workflows,Theme Preference,Tab 1 Toggle Dark Mode,Switch app theme to Dark Mode in Tab 1,PASS,0.37,YES,None
+TC-APP-TAB-029,Multi-Tab Workflows,Theme Preference,Tab 2 Theme Class Sync,Verify <html> element dark class applied to Tab 2 DOM,PASS,0.36,YES,None
+TC-APP-TAB-030,Multi-Tab Workflows,Logout Broadcast,Tab 1 Logout Action,Trigger session logout from user avatar dropdown menu in Tab 1,PASS,0.45,YES,None
+TC-APP-TAB-031,Multi-Tab Workflows,Logout Broadcast,Tab 2 Auto Redirect,Verify Tab 2 automatically redirects to /login page,PASS,0.48,YES,None
+TC-APP-TAB-032,Multi-Tab Workflows,Logout Broadcast,Tab 3 Auto Redirect,Verify Tab 3 automatically redirects to /login page,PASS,0.46,YES,None
+TC-APP-TAB-033,Multi-Tab Workflows,Tab Closure,Close Tab 3 Window,Close Tab 3 context and restore active focus to Tab 1,PASS,0.35,YES,None
+TC-APP-TAB-034,Multi-Tab Workflows,Tab Closure,Close Tab 2 Window,Close Tab 2 context and return to single-tab state,PASS,0.34,YES,None
+TC-APP-TAB-035,Multi-Tab Workflows,Session Clean Up,Verify LocalStorage Clear,Verify complete session cleanup on multi-tab test completion,PASS,0.32,YES,None

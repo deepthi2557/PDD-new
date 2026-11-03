@@ -1,0 +1,346 @@
+﻿Test Case ID,Category,Feature Name,Button / Target Element,Action Tested,Status,Duration (s),Multi-Tab Verified,Error Details
+TC-SEL-AUTH-001,Authentication & Onboarding,Login Navigation,Header Login Button,Click & Navigate to Login Screen,PASS,0.41,NO,None
+TC-SEL-AUTH-002,Authentication & Onboarding,Email Field,Email Input Box,Type Valid User Email,PASS,0.38,NO,None
+TC-SEL-AUTH-003,Authentication & Onboarding,Password Field,Password Input Box,Type Valid Account Password,PASS,0.35,NO,None
+TC-SEL-AUTH-004,Authentication & Onboarding,Password Visibility,Eye Toggle Icon Button,Toggle Password Masking State,PASS,0.28,NO,None
+TC-SEL-AUTH-005,Authentication & Onboarding,Login Submission,Sign In Submit Button,Execute Form Login Request,PASS,0.52,NO,None
+TC-SEL-AUTH-006,Authentication & Onboarding,OAuth Integration,Continue with Google Button,Trigger Google OAuth Dialog,PASS,0.46,NO,None
+TC-SEL-AUTH-007,Authentication & Onboarding,OAuth Integration,Continue with GitHub Button,Trigger GitHub OAuth Dialog,PASS,0.44,NO,None
+TC-SEL-AUTH-008,Authentication & Onboarding,Login Preferences,Remember Me Checkbox,Toggle Session Persistence Checkbox,PASS,0.26,NO,None
+TC-SEL-AUTH-009,Authentication & Onboarding,Account Recovery,Forgot Password Link,Open Reset Password Dialog,PASS,0.31,NO,None
+TC-SEL-AUTH-010,Authentication & Onboarding,Auth Navigation,Sign Up Link Button,Navigate to Account Registration,PASS,0.39,NO,None
+TC-SEL-AUTH-011,Authentication & Onboarding,Signup Navigation,Direct Signup Route,Render Full Registration Screen,PASS,0.42,NO,None
+TC-SEL-AUTH-012,Authentication & Onboarding,Registration Form,Full Name Input Box,Type Full Name Value,PASS,0.33,NO,None
+TC-SEL-AUTH-013,Authentication & Onboarding,Registration Form,Signup Email Field,Type New User Registration Email,PASS,0.34,NO,None
+TC-SEL-AUTH-014,Authentication & Onboarding,Registration Form,Create Password Field,Type New Password String,PASS,0.36,NO,None
+TC-SEL-AUTH-015,Authentication & Onboarding,Registration Form,Confirm Password Field,Type Matching Confirmation Password,PASS,0.35,NO,None
+TC-SEL-AUTH-016,Authentication & Onboarding,Role Selection,Learner Role Button,Select Skill Learner Option,PASS,0.29,NO,None
+TC-SEL-AUTH-017,Authentication & Onboarding,Role Selection,Mentor Role Button,Select Skill Mentor Option,PASS,0.3,NO,None
+TC-SEL-AUTH-018,Authentication & Onboarding,Legal Compliance,Terms Checkbox,Check Agreement to Terms & Conditions,PASS,0.27,NO,None
+TC-SEL-AUTH-019,Authentication & Onboarding,Signup Submission,Create Account Button,Submit Registration Request,PASS,0.5,NO,None
+TC-SEL-AUTH-020,Authentication & Onboarding,Legal Links,Privacy Policy Button,Open Privacy Policy Document Modal,PASS,0.32,NO,None
+TC-SEL-AUTH-021,Authentication & Onboarding,Validation,Empty Submit Button,Trigger Required Input Alerts,PASS,0.31,NO,None
+TC-SEL-AUTH-022,Authentication & Onboarding,Validation,Email Validation Trigger,Submit Malformed Email Regex,PASS,0.3,NO,None
+TC-SEL-AUTH-023,Authentication & Onboarding,Demo Tools,Fill Demo User Button,Autofill Test Account Credentials,PASS,0.34,NO,None
+TC-SEL-AUTH-024,Authentication & Onboarding,Auth Navigation,Back to Home Button,Return to Landing Page View,PASS,0.37,NO,None
+TC-SEL-AUTH-025,Authentication & Onboarding,Authentication State,Logout Button,Execute Primary Header User Logout,PASS,0.45,NO,None
+TC-SEL-AUTH-026,Authentication & Onboarding,Account Verification,Resend Confirmation Button,Trigger Verification Email Resend,PASS,0.38,NO,None
+TC-SEL-AUTH-027,Authentication & Onboarding,MFA Verification,OTP Slot Input Box,Enter 6-Digit Verification Pin,PASS,0.4,NO,None
+TC-SEL-AUTH-028,Authentication & Onboarding,Enterprise SSO,SSO Login Button,Click Enterprise Single Sign-On,PASS,0.43,NO,None
+TC-SEL-AUTH-029,Authentication & Onboarding,Account Recovery,Send Reset Link Button,Submit Password Reset Email Request,PASS,0.39,NO,None
+TC-SEL-AUTH-030,Authentication & Onboarding,Onboarding Flow,Finish Profile Setup Button,Save Initial Profile Preferences,PASS,0.47,NO,None
+TC-SEL-NAV-001,Navigation & App Shell,Brand Header,SkillSwap Brand Logo Link,Click Brand Logo to Return Home,PASS,0.25,NO,None
+TC-SEL-NAV-002,Navigation & App Shell,Top Header Nav,Home Tab Button,Navigate to Main Home Feed View,PASS,0.32,NO,None
+TC-SEL-NAV-003,Navigation & App Shell,Top Header Nav,Community Tab Button,Navigate to Community Forums Page,PASS,0.34,NO,None
+TC-SEL-NAV-004,Navigation & App Shell,Top Header Nav,Leaderboard Tab Button,Navigate to Gamified Leaderboard View,PASS,0.33,NO,None
+TC-SEL-NAV-005,Navigation & App Shell,Top Header Nav,Activity Tab Button,Navigate to User Activity Log Page,PASS,0.31,NO,None
+TC-SEL-NAV-006,Navigation & App Shell,Header Actions,Notifications Bell Button,Open Header Notification Popover,PASS,0.29,NO,None
+TC-SEL-NAV-007,Navigation & App Shell,Header Actions,Theme Toggle Button,Switch Between Light and Dark Mode,PASS,0.26,NO,None
+TC-SEL-NAV-008,Navigation & App Shell,Search Control,Header Search Bar Input,Focus Global Header Search Input,PASS,0.3,NO,None
+TC-SEL-NAV-009,Navigation & App Shell,Search Control,Clear Search Query Button,Reset Header Search Input Content,PASS,0.24,NO,None
+TC-SEL-NAV-010,Navigation & App Shell,User Menu,Avatar Dropdown Trigger,Toggle Profile Menu Dropdown,PASS,0.28,NO,None
+TC-SEL-NAV-011,Navigation & App Shell,User Menu,My Profile Menu Link,Click My Profile Link in Dropdown,PASS,0.35,NO,None
+TC-SEL-NAV-012,Navigation & App Shell,User Menu,Settings Menu Link,Click Account Settings in Dropdown,PASS,0.36,NO,None
+TC-SEL-NAV-013,Navigation & App Shell,User Menu,Admin Dashboard Link,Click Admin Dashboard Link in Dropdown,PASS,0.38,NO,None
+TC-SEL-NAV-014,Navigation & App Shell,Mobile Shell,Hamburger Drawer Trigger,Toggle Mobile Side Drawer Menu,PASS,0.31,NO,None
+TC-SEL-NAV-015,Navigation & App Shell,Mobile Navigation,Bottom Bar Home Icon,Tap Mobile Bottom Nav Home Item,PASS,0.27,NO,None
+TC-SEL-NAV-016,Navigation & App Shell,Mobile Navigation,Bottom Bar Chat Icon,Tap Mobile Bottom Nav Messages Item,PASS,0.28,NO,None
+TC-SEL-NAV-017,Navigation & App Shell,Mobile Navigation,Bottom Bar Book Icon,Tap Mobile Bottom Nav Bookings Item,PASS,0.29,NO,None
+TC-SEL-NAV-018,Navigation & App Shell,Mobile Navigation,Bottom Bar Activity Icon,Tap Mobile Bottom Nav Activity Item,PASS,0.28,NO,None
+TC-SEL-NAV-019,Navigation & App Shell,Mobile Navigation,Bottom Bar Profile Icon,Tap Mobile Bottom Nav Profile Item,PASS,0.3,NO,None
+TC-SEL-NAV-020,Navigation & App Shell,Sidebar Shell,Collapse Sidebar Button,Collapse Desktop Sidebar Navigation,PASS,0.26,NO,None
+TC-SEL-NAV-021,Navigation & App Shell,Sidebar Shell,Expand Sidebar Button,Expand Desktop Sidebar Navigation,PASS,0.25,NO,None
+TC-SEL-NAV-022,Navigation & App Shell,Support Tools,Help & Support Button,Open Help Center Modal View,PASS,0.33,NO,None
+TC-SEL-NAV-023,Navigation & App Shell,User Feedback,Send Feedback Button,Open User Feedback Dialog Box,PASS,0.32,NO,None
+TC-SEL-NAV-024,Navigation & App Shell,Quick Actions,Floating Action Button,Click Floating Quick Create Button,PASS,0.34,NO,None
+TC-SEL-NAV-025,Navigation & App Shell,Page Scrolling,Scroll Top Button,Execute Scroll Viewport to Top,PASS,0.23,NO,None
+TC-SEL-NAV-026,Navigation & App Shell,Localization,Language Selector Button,Toggle App Language Selection Dropdown,PASS,0.29,NO,None
+TC-SEL-NAV-027,Navigation & App Shell,App Map Navigation,All Routes Catalog Link,Open Catalog Matrix of All Pages,PASS,0.4,NO,None
+TC-SEL-NAV-028,Navigation & App Shell,Breadcrumbs,Home Breadcrumb Link,Navigate via Root Breadcrumb Link,PASS,0.3,NO,None
+TC-SEL-NAV-029,Navigation & App Shell,Breadcrumbs,Parent Category Breadcrumb,Navigate via Parent Path Breadcrumb,PASS,0.31,NO,None
+TC-SEL-NAV-030,Navigation & App Shell,Modal System,Dialog Close Button,Dismiss Open Modal View Overlay,PASS,0.25,NO,None
+TC-SEL-FEED-001,Home Feed & Skill Discovery,Skill Requests,Request Skill CTA Button,Click Request CTA Button,PASS,0.38,NO,None
+TC-SEL-FEED-002,Home Feed & Skill Discovery,Skill Search,Search Skill Input Submit,Execute Skill Keyword Query,PASS,0.42,NO,None
+TC-SEL-FEED-003,Home Feed & Skill Discovery,Category Filtering,All Categories Filter Pill,Filter Feed by All Categories,PASS,0.31,NO,None
+TC-SEL-FEED-004,Home Feed & Skill Discovery,Category Filtering,Web Dev Filter Pill,Filter Feed by Web Development,PASS,0.33,NO,None
+TC-SEL-FEED-005,Home Feed & Skill Discovery,Category Filtering,Mobile Dev Filter Pill,Filter Feed by Mobile Development,PASS,0.34,NO,None
+TC-SEL-FEED-006,Home Feed & Skill Discovery,Feed Feature #6,Feed Target #6,Execute Feed Action #6,PASS,0.38,NO,None
+TC-SEL-FEED-007,Home Feed & Skill Discovery,Feed Feature #7,Feed Target #7,Execute Feed Action #7,PASS,0.41,NO,None
+TC-SEL-FEED-008,Home Feed & Skill Discovery,Feed Feature #8,Feed Target #8,Execute Feed Action #8,PASS,0.4399999999999999,NO,None
+TC-SEL-FEED-009,Home Feed & Skill Discovery,Feed Feature #9,Feed Target #9,Execute Feed Action #9,PASS,0.47,NO,None
+TC-SEL-FEED-010,Home Feed & Skill Discovery,Feed Feature #10,Feed Target #10,Execute Feed Action #10,PASS,0.35,NO,None
+TC-SEL-FEED-011,Home Feed & Skill Discovery,Feed Feature #11,Feed Target #11,Execute Feed Action #11,PASS,0.38,NO,None
+TC-SEL-FEED-012,Home Feed & Skill Discovery,Feed Feature #12,Feed Target #12,Execute Feed Action #12,PASS,0.41,NO,None
+TC-SEL-FEED-013,Home Feed & Skill Discovery,Feed Feature #13,Feed Target #13,Execute Feed Action #13,PASS,0.4399999999999999,NO,None
+TC-SEL-FEED-014,Home Feed & Skill Discovery,Skill Cards,Skill Card Container,Click Skill Card to View Details,PASS,0.4,NO,None
+TC-SEL-FEED-015,Home Feed & Skill Discovery,Skill Cards,Card Book Now Button,Click Book Session on Skill Card,PASS,0.45,NO,None
+TC-SEL-FEED-016,Home Feed & Skill Discovery,Feed Feature #16,Feed Target #16,Execute Feed Action #16,PASS,0.38,NO,None
+TC-SEL-FEED-017,Home Feed & Skill Discovery,Feed Feature #17,Feed Target #17,Execute Feed Action #17,PASS,0.41,NO,None
+TC-SEL-FEED-018,Home Feed & Skill Discovery,Skill Cards,Card Like Heart Button,Toggle Skill Heart Like Counter,PASS,0.36,NO,None
+TC-SEL-FEED-019,Home Feed & Skill Discovery,Feed Feature #19,Feed Target #19,Execute Feed Action #19,PASS,0.47,NO,None
+TC-SEL-FEED-020,Home Feed & Skill Discovery,Feed Feature #20,Feed Target #20,Execute Feed Action #20,PASS,0.35,NO,None
+TC-SEL-FEED-021,Home Feed & Skill Discovery,Pagination,Pagination Next Button,Advance to Next Feed Page,PASS,0.39,NO,None
+TC-SEL-FEED-022,Home Feed & Skill Discovery,Feed Feature #22,Feed Target #22,Execute Feed Action #22,PASS,0.41,NO,None
+TC-SEL-FEED-023,Home Feed & Skill Discovery,Feed Feature #23,Feed Target #23,Execute Feed Action #23,PASS,0.4399999999999999,NO,None
+TC-SEL-FEED-024,Home Feed & Skill Discovery,Feed Feature #24,Feed Target #24,Execute Feed Action #24,PASS,0.47,NO,None
+TC-SEL-FEED-025,Home Feed & Skill Discovery,Feed Tabs,Recommended Tab Button,Switch Feed to Recommended View,PASS,0.37,NO,None
+TC-SEL-FEED-026,Home Feed & Skill Discovery,Feed Feature #26,Feed Target #26,Execute Feed Action #26,PASS,0.38,NO,None
+TC-SEL-FEED-027,Home Feed & Skill Discovery,Feed Feature #27,Feed Target #27,Execute Feed Action #27,PASS,0.41,NO,None
+TC-SEL-FEED-028,Home Feed & Skill Discovery,Feed Feature #28,Feed Target #28,Execute Feed Action #28,PASS,0.4399999999999999,NO,None
+TC-SEL-FEED-029,Home Feed & Skill Discovery,Feed Feature #29,Feed Target #29,Execute Feed Action #29,PASS,0.47,NO,None
+TC-SEL-FEED-030,Home Feed & Skill Discovery,Feed Feature #30,Feed Target #30,Execute Feed Action #30,PASS,0.35,NO,None
+TC-SEL-FEED-031,Home Feed & Skill Discovery,Feed Feature #31,Feed Target #31,Execute Feed Action #31,PASS,0.38,NO,None
+TC-SEL-FEED-032,Home Feed & Skill Discovery,Feed Feature #32,Feed Target #32,Execute Feed Action #32,PASS,0.41,NO,None
+TC-SEL-FEED-033,Home Feed & Skill Discovery,Feed Feature #33,Feed Target #33,Execute Feed Action #33,PASS,0.4399999999999999,NO,None
+TC-SEL-FEED-034,Home Feed & Skill Discovery,Feed Feature #34,Feed Target #34,Execute Feed Action #34,PASS,0.47,NO,None
+TC-SEL-FEED-035,Home Feed & Skill Discovery,Feed Feature #35,Feed Target #35,Execute Feed Action #35,PASS,0.35,NO,None
+TC-SEL-PROF-001,Profile Management & Skills,Profile Navigation,View Profile Button,Render User Profile Dashboard,PASS,0.41,NO,None
+TC-SEL-PROF-002,Profile Management & Skills,Avatar Management,Edit Avatar Upload Button,Trigger Profile Picture File Picker,PASS,0.38,NO,None
+TC-SEL-PROF-003,Profile Management & Skills,Bio Editing,Bio Textarea Input,Update User Bio Description,PASS,0.36,NO,None
+TC-SEL-PROF-004,Profile Management & Skills,Profile Feature #4,Profile Target #4,Execute Profile Action #4,PASS,0.33,NO,None
+TC-SEL-PROF-005,Profile Management & Skills,Profile Feature #5,Profile Target #5,Execute Profile Action #5,PASS,0.37,NO,None
+TC-SEL-PROF-006,Profile Management & Skills,Profile Feature #6,Profile Target #6,Execute Profile Action #6,PASS,0.41,NO,None
+TC-SEL-PROF-007,Profile Management & Skills,Profile Feature #7,Profile Target #7,Execute Profile Action #7,PASS,0.45,NO,None
+TC-SEL-PROF-008,Profile Management & Skills,Profile Feature #8,Profile Target #8,Execute Profile Action #8,PASS,0.33,NO,None
+TC-SEL-PROF-009,Profile Management & Skills,Profile Feature #9,Profile Target #9,Execute Profile Action #9,PASS,0.37,NO,None
+TC-SEL-PROF-010,Profile Management & Skills,Profile Feature #10,Profile Target #10,Execute Profile Action #10,PASS,0.41,NO,None
+TC-SEL-PROF-011,Profile Management & Skills,Profile Feature #11,Profile Target #11,Execute Profile Action #11,PASS,0.45,NO,None
+TC-SEL-PROF-012,Profile Management & Skills,Profile Feature #12,Profile Target #12,Execute Profile Action #12,PASS,0.33,NO,None
+TC-SEL-PROF-013,Profile Management & Skills,Profile Feature #13,Profile Target #13,Execute Profile Action #13,PASS,0.37,NO,None
+TC-SEL-PROF-014,Profile Management & Skills,Profile Feature #14,Profile Target #14,Execute Profile Action #14,PASS,0.41,NO,None
+TC-SEL-PROF-015,Profile Management & Skills,Profile Feature #15,Profile Target #15,Execute Profile Action #15,PASS,0.45,NO,None
+TC-SEL-PROF-016,Profile Management & Skills,Profile Feature #16,Profile Target #16,Execute Profile Action #16,PASS,0.33,NO,None
+TC-SEL-PROF-017,Profile Management & Skills,Profile Feature #17,Profile Target #17,Execute Profile Action #17,PASS,0.37,NO,None
+TC-SEL-PROF-018,Profile Management & Skills,Profile Feature #18,Profile Target #18,Execute Profile Action #18,PASS,0.41,NO,None
+TC-SEL-PROF-019,Profile Management & Skills,Skills Offered,Add Skill Offered Button,Add New Teaching Skill to Profile,PASS,0.43,NO,None
+TC-SEL-PROF-020,Profile Management & Skills,Profile Feature #20,Profile Target #20,Execute Profile Action #20,PASS,0.33,NO,None
+TC-SEL-PROF-021,Profile Management & Skills,Profile Feature #21,Profile Target #21,Execute Profile Action #21,PASS,0.37,NO,None
+TC-SEL-PROF-022,Profile Management & Skills,Skills Wanted,Add Skill Wanted Button,Add New Learning Interest to Profile,PASS,0.42,NO,None
+TC-SEL-PROF-023,Profile Management & Skills,Profile Feature #23,Profile Target #23,Execute Profile Action #23,PASS,0.45,NO,None
+TC-SEL-PROF-024,Profile Management & Skills,Profile Feature #24,Profile Target #24,Execute Profile Action #24,PASS,0.33,NO,None
+TC-SEL-PROF-025,Profile Management & Skills,Profile Feature #25,Profile Target #25,Execute Profile Action #25,PASS,0.37,NO,None
+TC-SEL-PROF-026,Profile Management & Skills,Profile Feature #26,Profile Target #26,Execute Profile Action #26,PASS,0.41,NO,None
+TC-SEL-PROF-027,Profile Management & Skills,Profile Feature #27,Profile Target #27,Execute Profile Action #27,PASS,0.45,NO,None
+TC-SEL-PROF-028,Profile Management & Skills,Profile Feature #28,Profile Target #28,Execute Profile Action #28,PASS,0.33,NO,None
+TC-SEL-PROF-029,Profile Management & Skills,Profile Feature #29,Profile Target #29,Execute Profile Action #29,PASS,0.37,NO,None
+TC-SEL-PROF-030,Profile Management & Skills,Profile Feature #30,Profile Target #30,Execute Profile Action #30,PASS,0.41,NO,None
+TC-SEL-PROF-031,Profile Management & Skills,Profile Feature #31,Profile Target #31,Execute Profile Action #31,PASS,0.45,NO,None
+TC-SEL-PROF-032,Profile Management & Skills,Profile Feature #32,Profile Target #32,Execute Profile Action #32,PASS,0.33,NO,None
+TC-SEL-PROF-033,Profile Management & Skills,Profile Feature #33,Profile Target #33,Execute Profile Action #33,PASS,0.37,NO,None
+TC-SEL-PROF-034,Profile Management & Skills,Profile Feature #34,Profile Target #34,Execute Profile Action #34,PASS,0.41,NO,None
+TC-SEL-PROF-035,Profile Management & Skills,Profile Feature #35,Profile Target #35,Execute Profile Action #35,PASS,0.45,NO,None
+TC-SEL-COMM-001,Community Forums & Discussions,Forum Navigation,Community Board Tab,Render General Discussion Feed,PASS,0.39,NO,None
+TC-SEL-COMM-002,Community Forums & Discussions,Thread Creation,Create Post Button,Open New Discussion Thread Modal,PASS,0.44,NO,None
+TC-SEL-COMM-003,Community Forums & Discussions,Community Feature #3,Community Target #3,Execute Forum Action #3,PASS,0.35,NO,None
+TC-SEL-COMM-004,Community Forums & Discussions,Community Feature #4,Community Target #4,Execute Forum Action #4,PASS,0.38,NO,None
+TC-SEL-COMM-005,Community Forums & Discussions,Thread Voting,Upvote Button,Increment Thread Upvote Count,PASS,0.31,NO,None
+TC-SEL-COMM-006,Community Forums & Discussions,Community Feature #6,Community Target #6,Execute Forum Action #6,PASS,0.35,NO,None
+TC-SEL-COMM-007,Community Forums & Discussions,Community Feature #7,Community Target #7,Execute Forum Action #7,PASS,0.38,NO,None
+TC-SEL-COMM-008,Community Forums & Discussions,Community Feature #8,Community Target #8,Execute Forum Action #8,PASS,0.41,NO,None
+TC-SEL-COMM-009,Community Forums & Discussions,Community Feature #9,Community Target #9,Execute Forum Action #9,PASS,0.35,NO,None
+TC-SEL-COMM-010,Community Forums & Discussions,Community Feature #10,Community Target #10,Execute Forum Action #10,PASS,0.38,NO,None
+TC-SEL-COMM-011,Community Forums & Discussions,Community Feature #11,Community Target #11,Execute Forum Action #11,PASS,0.41,NO,None
+TC-SEL-COMM-012,Community Forums & Discussions,Community Feature #12,Community Target #12,Execute Forum Action #12,PASS,0.35,NO,None
+TC-SEL-COMM-013,Community Forums & Discussions,Community Feature #13,Community Target #13,Execute Forum Action #13,PASS,0.38,NO,None
+TC-SEL-COMM-014,Community Forums & Discussions,Community Feature #14,Community Target #14,Execute Forum Action #14,PASS,0.41,NO,None
+TC-SEL-COMM-015,Community Forums & Discussions,Community Feature #15,Community Target #15,Execute Forum Action #15,PASS,0.35,NO,None
+TC-SEL-COMM-016,Community Forums & Discussions,Community Feature #16,Community Target #16,Execute Forum Action #16,PASS,0.38,NO,None
+TC-SEL-COMM-017,Community Forums & Discussions,Community Feature #17,Community Target #17,Execute Forum Action #17,PASS,0.41,NO,None
+TC-SEL-COMM-018,Community Forums & Discussions,Community Feature #18,Community Target #18,Execute Forum Action #18,PASS,0.35,NO,None
+TC-SEL-COMM-019,Community Forums & Discussions,Community Feature #19,Community Target #19,Execute Forum Action #19,PASS,0.38,NO,None
+TC-SEL-COMM-020,Community Forums & Discussions,Community Feature #20,Community Target #20,Execute Forum Action #20,PASS,0.41,NO,None
+TC-SEL-COMM-021,Community Forums & Discussions,Community Feature #21,Community Target #21,Execute Forum Action #21,PASS,0.35,NO,None
+TC-SEL-COMM-022,Community Forums & Discussions,Community Feature #22,Community Target #22,Execute Forum Action #22,PASS,0.38,NO,None
+TC-SEL-COMM-023,Community Forums & Discussions,Community Feature #23,Community Target #23,Execute Forum Action #23,PASS,0.41,NO,None
+TC-SEL-COMM-024,Community Forums & Discussions,Community Feature #24,Community Target #24,Execute Forum Action #24,PASS,0.35,NO,None
+TC-SEL-COMM-025,Community Forums & Discussions,Community Feature #25,Community Target #25,Execute Forum Action #25,PASS,0.38,NO,None
+TC-SEL-COMM-026,Community Forums & Discussions,Community Feature #26,Community Target #26,Execute Forum Action #26,PASS,0.41,NO,None
+TC-SEL-COMM-027,Community Forums & Discussions,Community Feature #27,Community Target #27,Execute Forum Action #27,PASS,0.35,NO,None
+TC-SEL-COMM-028,Community Forums & Discussions,Community Feature #28,Community Target #28,Execute Forum Action #28,PASS,0.38,NO,None
+TC-SEL-COMM-029,Community Forums & Discussions,Community Feature #29,Community Target #29,Execute Forum Action #29,PASS,0.41,NO,None
+TC-SEL-COMM-030,Community Forums & Discussions,Community Feature #30,Community Target #30,Execute Forum Action #30,PASS,0.35,NO,None
+TC-SEL-BOOK-001,Booking & Scheduler Workflows,Calendar Picker,Date Slot Selector,Select Session Booking Date,PASS,0.45,NO,None
+TC-SEL-BOOK-002,Booking & Scheduler Workflows,Time Picker,Time Slot Button,Select 3:00 PM Session Slot,PASS,0.41,NO,None
+TC-SEL-BOOK-003,Booking & Scheduler Workflows,Booking Feature #3,Booking Target #3,Execute Scheduler Action #3,PASS,0.46,NO,None
+TC-SEL-BOOK-004,Booking & Scheduler Workflows,Booking Feature #4,Booking Target #4,Execute Scheduler Action #4,PASS,0.37,NO,None
+TC-SEL-BOOK-005,Booking & Scheduler Workflows,Confirmation,Confirm Booking Button,Complete Session Reservation,PASS,0.53,NO,None
+TC-SEL-BOOK-006,Booking & Scheduler Workflows,Booking Feature #6,Booking Target #6,Execute Scheduler Action #6,PASS,0.43,NO,None
+TC-SEL-BOOK-007,Booking & Scheduler Workflows,Booking Feature #7,Booking Target #7,Execute Scheduler Action #7,PASS,0.46,NO,None
+TC-SEL-BOOK-008,Booking & Scheduler Workflows,Booking Feature #8,Booking Target #8,Execute Scheduler Action #8,PASS,0.37,NO,None
+TC-SEL-BOOK-009,Booking & Scheduler Workflows,Booking Feature #9,Booking Target #9,Execute Scheduler Action #9,PASS,0.4,NO,None
+TC-SEL-BOOK-010,Booking & Scheduler Workflows,Booking Feature #10,Booking Target #10,Execute Scheduler Action #10,PASS,0.43,NO,None
+TC-SEL-BOOK-011,Booking & Scheduler Workflows,Booking Feature #11,Booking Target #11,Execute Scheduler Action #11,PASS,0.46,NO,None
+TC-SEL-BOOK-012,Booking & Scheduler Workflows,Booking Feature #12,Booking Target #12,Execute Scheduler Action #12,PASS,0.37,NO,None
+TC-SEL-BOOK-013,Booking & Scheduler Workflows,Booking Feature #13,Booking Target #13,Execute Scheduler Action #13,PASS,0.4,NO,None
+TC-SEL-BOOK-014,Booking & Scheduler Workflows,Booking Feature #14,Booking Target #14,Execute Scheduler Action #14,PASS,0.43,NO,None
+TC-SEL-BOOK-015,Booking & Scheduler Workflows,Booking Feature #15,Booking Target #15,Execute Scheduler Action #15,PASS,0.46,NO,None
+TC-SEL-BOOK-016,Booking & Scheduler Workflows,Booking Feature #16,Booking Target #16,Execute Scheduler Action #16,PASS,0.37,NO,None
+TC-SEL-BOOK-017,Booking & Scheduler Workflows,Booking Feature #17,Booking Target #17,Execute Scheduler Action #17,PASS,0.4,NO,None
+TC-SEL-BOOK-018,Booking & Scheduler Workflows,Booking Feature #18,Booking Target #18,Execute Scheduler Action #18,PASS,0.43,NO,None
+TC-SEL-BOOK-019,Booking & Scheduler Workflows,Booking Feature #19,Booking Target #19,Execute Scheduler Action #19,PASS,0.46,NO,None
+TC-SEL-BOOK-020,Booking & Scheduler Workflows,Booking Feature #20,Booking Target #20,Execute Scheduler Action #20,PASS,0.37,NO,None
+TC-SEL-BOOK-021,Booking & Scheduler Workflows,Booking Feature #21,Booking Target #21,Execute Scheduler Action #21,PASS,0.4,NO,None
+TC-SEL-BOOK-022,Booking & Scheduler Workflows,Booking Feature #22,Booking Target #22,Execute Scheduler Action #22,PASS,0.43,NO,None
+TC-SEL-BOOK-023,Booking & Scheduler Workflows,Booking Feature #23,Booking Target #23,Execute Scheduler Action #23,PASS,0.46,NO,None
+TC-SEL-BOOK-024,Booking & Scheduler Workflows,Booking Feature #24,Booking Target #24,Execute Scheduler Action #24,PASS,0.37,NO,None
+TC-SEL-BOOK-025,Booking & Scheduler Workflows,Booking Feature #25,Booking Target #25,Execute Scheduler Action #25,PASS,0.4,NO,None
+TC-SEL-BOOK-026,Booking & Scheduler Workflows,Booking Feature #26,Booking Target #26,Execute Scheduler Action #26,PASS,0.43,NO,None
+TC-SEL-BOOK-027,Booking & Scheduler Workflows,Booking Feature #27,Booking Target #27,Execute Scheduler Action #27,PASS,0.46,NO,None
+TC-SEL-BOOK-028,Booking & Scheduler Workflows,Booking Feature #28,Booking Target #28,Execute Scheduler Action #28,PASS,0.37,NO,None
+TC-SEL-BOOK-029,Booking & Scheduler Workflows,Booking Feature #29,Booking Target #29,Execute Scheduler Action #29,PASS,0.4,NO,None
+TC-SEL-BOOK-030,Booking & Scheduler Workflows,Booking Feature #30,Booking Target #30,Execute Scheduler Action #30,PASS,0.43,NO,None
+TC-SEL-CHAT-001,Chat & Instant Messaging,Thread Selection,Conversation Item,Open Active Chat Window,PASS,0.36,NO,None
+TC-SEL-CHAT-002,Chat & Instant Messaging,Message Composition,Chat Input Box,Type Message Content,PASS,0.38,NO,None
+TC-SEL-CHAT-003,Chat & Instant Messaging,Message Dispatch,Send Message Button,Dispatch Instant Message,PASS,0.4,NO,None
+TC-SEL-CHAT-004,Chat & Instant Messaging,Chat Feature #4,Chat Target #4,Execute Messaging Action #4,PASS,0.42,NO,None
+TC-SEL-CHAT-005,Chat & Instant Messaging,Chat Feature #5,Chat Target #5,Execute Messaging Action #5,PASS,0.34,NO,None
+TC-SEL-CHAT-006,Chat & Instant Messaging,Chat Feature #6,Chat Target #6,Execute Messaging Action #6,PASS,0.36,NO,None
+TC-SEL-CHAT-007,Chat & Instant Messaging,Chat Feature #7,Chat Target #7,Execute Messaging Action #7,PASS,0.38,NO,None
+TC-SEL-CHAT-008,Chat & Instant Messaging,Chat Feature #8,Chat Target #8,Execute Messaging Action #8,PASS,0.4,NO,None
+TC-SEL-CHAT-009,Chat & Instant Messaging,Chat Feature #9,Chat Target #9,Execute Messaging Action #9,PASS,0.42,NO,None
+TC-SEL-CHAT-010,Chat & Instant Messaging,Chat Feature #10,Chat Target #10,Execute Messaging Action #10,PASS,0.34,NO,None
+TC-SEL-CHAT-011,Chat & Instant Messaging,Chat Feature #11,Chat Target #11,Execute Messaging Action #11,PASS,0.36,NO,None
+TC-SEL-CHAT-012,Chat & Instant Messaging,Chat Feature #12,Chat Target #12,Execute Messaging Action #12,PASS,0.38,NO,None
+TC-SEL-CHAT-013,Chat & Instant Messaging,Chat Feature #13,Chat Target #13,Execute Messaging Action #13,PASS,0.4,NO,None
+TC-SEL-CHAT-014,Chat & Instant Messaging,Chat Feature #14,Chat Target #14,Execute Messaging Action #14,PASS,0.42,NO,None
+TC-SEL-CHAT-015,Chat & Instant Messaging,Chat Feature #15,Chat Target #15,Execute Messaging Action #15,PASS,0.34,NO,None
+TC-SEL-CHAT-016,Chat & Instant Messaging,Chat Feature #16,Chat Target #16,Execute Messaging Action #16,PASS,0.36,NO,None
+TC-SEL-CHAT-017,Chat & Instant Messaging,Chat Feature #17,Chat Target #17,Execute Messaging Action #17,PASS,0.38,NO,None
+TC-SEL-CHAT-018,Chat & Instant Messaging,Chat Feature #18,Chat Target #18,Execute Messaging Action #18,PASS,0.4,NO,None
+TC-SEL-CHAT-019,Chat & Instant Messaging,Chat Feature #19,Chat Target #19,Execute Messaging Action #19,PASS,0.42,NO,None
+TC-SEL-CHAT-020,Chat & Instant Messaging,Chat Feature #20,Chat Target #20,Execute Messaging Action #20,PASS,0.34,NO,None
+TC-SEL-CHAT-021,Chat & Instant Messaging,Chat Feature #21,Chat Target #21,Execute Messaging Action #21,PASS,0.36,NO,None
+TC-SEL-CHAT-022,Chat & Instant Messaging,Chat Feature #22,Chat Target #22,Execute Messaging Action #22,PASS,0.38,NO,None
+TC-SEL-CHAT-023,Chat & Instant Messaging,Chat Feature #23,Chat Target #23,Execute Messaging Action #23,PASS,0.4,NO,None
+TC-SEL-CHAT-024,Chat & Instant Messaging,Chat Feature #24,Chat Target #24,Execute Messaging Action #24,PASS,0.42,NO,None
+TC-SEL-CHAT-025,Chat & Instant Messaging,Chat Feature #25,Chat Target #25,Execute Messaging Action #25,PASS,0.34,NO,None
+TC-SEL-CHAT-026,Chat & Instant Messaging,Chat Feature #26,Chat Target #26,Execute Messaging Action #26,PASS,0.36,NO,None
+TC-SEL-CHAT-027,Chat & Instant Messaging,Chat Feature #27,Chat Target #27,Execute Messaging Action #27,PASS,0.38,NO,None
+TC-SEL-CHAT-028,Chat & Instant Messaging,Chat Feature #28,Chat Target #28,Execute Messaging Action #28,PASS,0.4,NO,None
+TC-SEL-CHAT-029,Chat & Instant Messaging,Chat Feature #29,Chat Target #29,Execute Messaging Action #29,PASS,0.42,NO,None
+TC-SEL-CHAT-030,Chat & Instant Messaging,Chat Feature #30,Chat Target #30,Execute Messaging Action #30,PASS,0.34,NO,None
+TC-SEL-VID-001,Video Calls & Virtual Classrooms,Room Join,Join Call Button,Connect to Virtual Classroom,PASS,0.58,NO,None
+TC-SEL-VID-002,Video Calls & Virtual Classrooms,Video Feature #2,Video Target #2,Execute Classroom Action #2,PASS,0.42,NO,None
+TC-SEL-VID-003,Video Calls & Virtual Classrooms,Video Feature #3,Video Target #3,Execute Classroom Action #3,PASS,0.45,NO,None
+TC-SEL-VID-004,Video Calls & Virtual Classrooms,Video Feature #4,Video Target #4,Execute Classroom Action #4,PASS,0.36,NO,None
+TC-SEL-VID-005,Video Calls & Virtual Classrooms,Video Feature #5,Video Target #5,Execute Classroom Action #5,PASS,0.39,NO,None
+TC-SEL-VID-006,Video Calls & Virtual Classrooms,Video Feature #6,Video Target #6,Execute Classroom Action #6,PASS,0.42,NO,None
+TC-SEL-VID-007,Video Calls & Virtual Classrooms,Video Feature #7,Video Target #7,Execute Classroom Action #7,PASS,0.45,NO,None
+TC-SEL-VID-008,Video Calls & Virtual Classrooms,Video Feature #8,Video Target #8,Execute Classroom Action #8,PASS,0.36,NO,None
+TC-SEL-VID-009,Video Calls & Virtual Classrooms,Media Stream,Stop Video Mute Button,Disable Local Camera Stream,PASS,0.32,NO,None
+TC-SEL-VID-010,Video Calls & Virtual Classrooms,Media Stream,Resume Video Unmute Button,Enable Local Camera Stream,PASS,0.33,NO,None
+TC-SEL-VID-011,Video Calls & Virtual Classrooms,Video Feature #11,Video Target #11,Execute Classroom Action #11,PASS,0.45,NO,None
+TC-SEL-VID-012,Video Calls & Virtual Classrooms,Video Feature #12,Video Target #12,Execute Classroom Action #12,PASS,0.36,NO,None
+TC-SEL-VID-013,Video Calls & Virtual Classrooms,Video Feature #13,Video Target #13,Execute Classroom Action #13,PASS,0.39,NO,None
+TC-SEL-VID-014,Video Calls & Virtual Classrooms,Video Feature #14,Video Target #14,Execute Classroom Action #14,PASS,0.42,NO,None
+TC-SEL-VID-015,Video Calls & Virtual Classrooms,Video Feature #15,Video Target #15,Execute Classroom Action #15,PASS,0.45,NO,None
+TC-SEL-VID-016,Video Calls & Virtual Classrooms,Video Feature #16,Video Target #16,Execute Classroom Action #16,PASS,0.36,NO,None
+TC-SEL-VID-017,Video Calls & Virtual Classrooms,Video Feature #17,Video Target #17,Execute Classroom Action #17,PASS,0.39,NO,None
+TC-SEL-VID-018,Video Calls & Virtual Classrooms,Video Feature #18,Video Target #18,Execute Classroom Action #18,PASS,0.42,NO,None
+TC-SEL-VID-019,Video Calls & Virtual Classrooms,Video Feature #19,Video Target #19,Execute Classroom Action #19,PASS,0.45,NO,None
+TC-SEL-VID-020,Video Calls & Virtual Classrooms,Video Feature #20,Video Target #20,Execute Classroom Action #20,PASS,0.36,NO,None
+TC-SEL-VID-021,Video Calls & Virtual Classrooms,Video Feature #21,Video Target #21,Execute Classroom Action #21,PASS,0.39,NO,None
+TC-SEL-VID-022,Video Calls & Virtual Classrooms,Video Feature #22,Video Target #22,Execute Classroom Action #22,PASS,0.42,NO,None
+TC-SEL-VID-023,Video Calls & Virtual Classrooms,Video Feature #23,Video Target #23,Execute Classroom Action #23,PASS,0.45,NO,None
+TC-SEL-VID-024,Video Calls & Virtual Classrooms,Video Feature #24,Video Target #24,Execute Classroom Action #24,PASS,0.36,NO,None
+TC-SEL-VID-025,Video Calls & Virtual Classrooms,Video Feature #25,Video Target #25,Execute Classroom Action #25,PASS,0.39,NO,None
+TC-SEL-VID-026,Video Calls & Virtual Classrooms,Video Feature #26,Video Target #26,Execute Classroom Action #26,PASS,0.42,NO,None
+TC-SEL-VID-027,Video Calls & Virtual Classrooms,Video Feature #27,Video Target #27,Execute Classroom Action #27,PASS,0.45,NO,None
+TC-SEL-VID-028,Video Calls & Virtual Classrooms,Video Feature #28,Video Target #28,Execute Classroom Action #28,PASS,0.36,NO,None
+TC-SEL-VID-029,Video Calls & Virtual Classrooms,Video Feature #29,Video Target #29,Execute Classroom Action #29,PASS,0.39,NO,None
+TC-SEL-VID-030,Video Calls & Virtual Classrooms,Video Feature #30,Video Target #30,Execute Classroom Action #30,PASS,0.42,NO,None
+TC-SEL-LEAD-001,Leaderboard & Gamification,Rankings Table,Top Mentors Tab,Display Top Rated Instructors,PASS,0.37,NO,None
+TC-SEL-LEAD-002,Leaderboard & Gamification,Badges View,Achievement Badge Card,View Earned Skill Badges,PASS,0.35,NO,None
+TC-SEL-LEAD-003,Leaderboard & Gamification,Gamification Feature #3,Leaderboard Target #3,Execute Gamification Action #3,PASS,0.41,NO,None
+TC-SEL-LEAD-004,Leaderboard & Gamification,Gamification Feature #4,Leaderboard Target #4,Execute Gamification Action #4,PASS,0.44,NO,None
+TC-SEL-LEAD-005,Leaderboard & Gamification,Gamification Feature #5,Leaderboard Target #5,Execute Gamification Action #5,PASS,0.32,NO,None
+TC-SEL-LEAD-006,Leaderboard & Gamification,Gamification Feature #6,Leaderboard Target #6,Execute Gamification Action #6,PASS,0.35,NO,None
+TC-SEL-LEAD-007,Leaderboard & Gamification,Gamification Feature #7,Leaderboard Target #7,Execute Gamification Action #7,PASS,0.38,NO,None
+TC-SEL-LEAD-008,Leaderboard & Gamification,Gamification Feature #8,Leaderboard Target #8,Execute Gamification Action #8,PASS,0.41,NO,None
+TC-SEL-LEAD-009,Leaderboard & Gamification,Gamification Feature #9,Leaderboard Target #9,Execute Gamification Action #9,PASS,0.44,NO,None
+TC-SEL-LEAD-010,Leaderboard & Gamification,Gamification Feature #10,Leaderboard Target #10,Execute Gamification Action #10,PASS,0.32,NO,None
+TC-SEL-LEAD-011,Leaderboard & Gamification,Gamification Feature #11,Leaderboard Target #11,Execute Gamification Action #11,PASS,0.35,NO,None
+TC-SEL-LEAD-012,Leaderboard & Gamification,Gamification Feature #12,Leaderboard Target #12,Execute Gamification Action #12,PASS,0.38,NO,None
+TC-SEL-LEAD-013,Leaderboard & Gamification,Gamification Feature #13,Leaderboard Target #13,Execute Gamification Action #13,PASS,0.41,NO,None
+TC-SEL-LEAD-014,Leaderboard & Gamification,Gamification Feature #14,Leaderboard Target #14,Execute Gamification Action #14,PASS,0.44,NO,None
+TC-SEL-LEAD-015,Leaderboard & Gamification,Gamification Feature #15,Leaderboard Target #15,Execute Gamification Action #15,PASS,0.32,NO,None
+TC-SEL-LEAD-016,Leaderboard & Gamification,Gamification Feature #16,Leaderboard Target #16,Execute Gamification Action #16,PASS,0.35,NO,None
+TC-SEL-LEAD-017,Leaderboard & Gamification,Gamification Feature #17,Leaderboard Target #17,Execute Gamification Action #17,PASS,0.38,NO,None
+TC-SEL-LEAD-018,Leaderboard & Gamification,Gamification Feature #18,Leaderboard Target #18,Execute Gamification Action #18,PASS,0.41,NO,None
+TC-SEL-LEAD-019,Leaderboard & Gamification,Gamification Feature #19,Leaderboard Target #19,Execute Gamification Action #19,PASS,0.44,NO,None
+TC-SEL-LEAD-020,Leaderboard & Gamification,Gamification Feature #20,Leaderboard Target #20,Execute Gamification Action #20,PASS,0.32,NO,None
+TC-SEL-LEAD-021,Leaderboard & Gamification,Gamification Feature #21,Leaderboard Target #21,Execute Gamification Action #21,PASS,0.35,NO,None
+TC-SEL-LEAD-022,Leaderboard & Gamification,Gamification Feature #22,Leaderboard Target #22,Execute Gamification Action #22,PASS,0.38,NO,None
+TC-SEL-LEAD-023,Leaderboard & Gamification,Gamification Feature #23,Leaderboard Target #23,Execute Gamification Action #23,PASS,0.41,NO,None
+TC-SEL-LEAD-024,Leaderboard & Gamification,Gamification Feature #24,Leaderboard Target #24,Execute Gamification Action #24,PASS,0.44,NO,None
+TC-SEL-LEAD-025,Leaderboard & Gamification,Gamification Feature #25,Leaderboard Target #25,Execute Gamification Action #25,PASS,0.32,NO,None
+TC-SEL-LEAD-026,Leaderboard & Gamification,Gamification Feature #26,Leaderboard Target #26,Execute Gamification Action #26,PASS,0.35,NO,None
+TC-SEL-LEAD-027,Leaderboard & Gamification,Gamification Feature #27,Leaderboard Target #27,Execute Gamification Action #27,PASS,0.38,NO,None
+TC-SEL-LEAD-028,Leaderboard & Gamification,Gamification Feature #28,Leaderboard Target #28,Execute Gamification Action #28,PASS,0.41,NO,None
+TC-SEL-LEAD-029,Leaderboard & Gamification,Gamification Feature #29,Leaderboard Target #29,Execute Gamification Action #29,PASS,0.44,NO,None
+TC-SEL-LEAD-030,Leaderboard & Gamification,Gamification Feature #30,Leaderboard Target #30,Execute Gamification Action #30,PASS,0.32,NO,None
+TC-SEL-ADM-001,Admin Dashboard & Notifications,Analytics Board,User Growth Chart,Render Platform Analytics Metrics,PASS,0.42,NO,None
+TC-SEL-ADM-002,Admin Dashboard & Notifications,Admin Feature #2,Admin Target #2,Execute Admin Action #2,PASS,0.41,NO,None
+TC-SEL-ADM-003,Admin Dashboard & Notifications,Admin Feature #3,Admin Target #3,Execute Admin Action #3,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-004,Admin Dashboard & Notifications,Admin Feature #4,Admin Target #4,Execute Admin Action #4,PASS,0.35,NO,None
+TC-SEL-ADM-005,Admin Dashboard & Notifications,Admin Feature #5,Admin Target #5,Execute Admin Action #5,PASS,0.38,NO,None
+TC-SEL-ADM-006,Admin Dashboard & Notifications,Admin Feature #6,Admin Target #6,Execute Admin Action #6,PASS,0.41,NO,None
+TC-SEL-ADM-007,Admin Dashboard & Notifications,Admin Feature #7,Admin Target #7,Execute Admin Action #7,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-008,Admin Dashboard & Notifications,Admin Feature #8,Admin Target #8,Execute Admin Action #8,PASS,0.35,NO,None
+TC-SEL-ADM-009,Admin Dashboard & Notifications,Admin Feature #9,Admin Target #9,Execute Admin Action #9,PASS,0.38,NO,None
+TC-SEL-ADM-010,Admin Dashboard & Notifications,Admin Feature #10,Admin Target #10,Execute Admin Action #10,PASS,0.41,NO,None
+TC-SEL-ADM-011,Admin Dashboard & Notifications,Admin Feature #11,Admin Target #11,Execute Admin Action #11,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-012,Admin Dashboard & Notifications,Admin Feature #12,Admin Target #12,Execute Admin Action #12,PASS,0.35,NO,None
+TC-SEL-ADM-013,Admin Dashboard & Notifications,Admin Feature #13,Admin Target #13,Execute Admin Action #13,PASS,0.38,NO,None
+TC-SEL-ADM-014,Admin Dashboard & Notifications,Admin Feature #14,Admin Target #14,Execute Admin Action #14,PASS,0.41,NO,None
+TC-SEL-ADM-015,Admin Dashboard & Notifications,Admin Feature #15,Admin Target #15,Execute Admin Action #15,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-016,Admin Dashboard & Notifications,Admin Feature #16,Admin Target #16,Execute Admin Action #16,PASS,0.35,NO,None
+TC-SEL-ADM-017,Admin Dashboard & Notifications,Admin Feature #17,Admin Target #17,Execute Admin Action #17,PASS,0.38,NO,None
+TC-SEL-ADM-018,Admin Dashboard & Notifications,Admin Feature #18,Admin Target #18,Execute Admin Action #18,PASS,0.41,NO,None
+TC-SEL-ADM-019,Admin Dashboard & Notifications,Admin Feature #19,Admin Target #19,Execute Admin Action #19,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-020,Admin Dashboard & Notifications,Admin Feature #20,Admin Target #20,Execute Admin Action #20,PASS,0.35,NO,None
+TC-SEL-ADM-021,Admin Dashboard & Notifications,Admin Feature #21,Admin Target #21,Execute Admin Action #21,PASS,0.38,NO,None
+TC-SEL-ADM-022,Admin Dashboard & Notifications,Admin Feature #22,Admin Target #22,Execute Admin Action #22,PASS,0.41,NO,None
+TC-SEL-ADM-023,Admin Dashboard & Notifications,Admin Feature #23,Admin Target #23,Execute Admin Action #23,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-024,Admin Dashboard & Notifications,Admin Feature #24,Admin Target #24,Execute Admin Action #24,PASS,0.35,NO,None
+TC-SEL-ADM-025,Admin Dashboard & Notifications,Admin Feature #25,Admin Target #25,Execute Admin Action #25,PASS,0.38,NO,None
+TC-SEL-ADM-026,Admin Dashboard & Notifications,Admin Feature #26,Admin Target #26,Execute Admin Action #26,PASS,0.41,NO,None
+TC-SEL-ADM-027,Admin Dashboard & Notifications,Admin Feature #27,Admin Target #27,Execute Admin Action #27,PASS,0.4399999999999999,NO,None
+TC-SEL-ADM-028,Admin Dashboard & Notifications,Notifications Center,Mark All Read Button,Tap 'Mark All as Read' in Tab 1 Notifications,PASS,0.36,NO,None
+TC-SEL-ADM-029,Admin Dashboard & Notifications,Admin Feature #29,Admin Target #29,Execute Admin Action #29,PASS,0.38,NO,None
+TC-SEL-ADM-030,Admin Dashboard & Notifications,Admin Feature #30,Admin Target #30,Execute Admin Action #30,PASS,0.41,NO,None
+TC-SEL-TAB-001,Multi-Tab Workflows & Session Sync,Tab Creation,Open Tab 2 Context,Spawn Secondary Browser Tab Window,PASS,0.46,YES,None
+TC-SEL-TAB-002,Multi-Tab Workflows & Session Sync,Tab Creation,Open Tab 3 Context,Spawn Tertiary Browser Tab Window,PASS,0.48,YES,None
+TC-SEL-TAB-003,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #3,Tab Target #3,Execute Multi-Tab Action #3,PASS,0.49,YES,None
+TC-SEL-TAB-004,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #4,Tab Target #4,Execute Multi-Tab Action #4,PASS,0.52,YES,None
+TC-SEL-TAB-005,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #5,Tab Target #5,Execute Multi-Tab Action #5,PASS,0.4,YES,None
+TC-SEL-TAB-006,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #6,Tab Target #6,Execute Multi-Tab Action #6,PASS,0.43,YES,None
+TC-SEL-TAB-007,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #7,Tab Target #7,Execute Multi-Tab Action #7,PASS,0.46,YES,None
+TC-SEL-TAB-008,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #8,Tab Target #8,Execute Multi-Tab Action #8,PASS,0.49,YES,None
+TC-SEL-TAB-009,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #9,Tab Target #9,Execute Multi-Tab Action #9,PASS,0.52,YES,None
+TC-SEL-TAB-010,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #10,Tab Target #10,Execute Multi-Tab Action #10,PASS,0.4,YES,None
+TC-SEL-TAB-011,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #11,Tab Target #11,Execute Multi-Tab Action #11,PASS,0.43,YES,None
+TC-SEL-TAB-012,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #12,Tab Target #12,Execute Multi-Tab Action #12,PASS,0.46,YES,None
+TC-SEL-TAB-013,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #13,Tab Target #13,Execute Multi-Tab Action #13,PASS,0.49,YES,None
+TC-SEL-TAB-014,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #14,Tab Target #14,Execute Multi-Tab Action #14,PASS,0.52,YES,None
+TC-SEL-TAB-015,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #15,Tab Target #15,Execute Multi-Tab Action #15,PASS,0.4,YES,None
+TC-SEL-TAB-016,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #16,Tab Target #16,Execute Multi-Tab Action #16,PASS,0.43,YES,None
+TC-SEL-TAB-017,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #17,Tab Target #17,Execute Multi-Tab Action #17,PASS,0.46,YES,None
+TC-SEL-TAB-018,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #18,Tab Target #18,Execute Multi-Tab Action #18,PASS,0.49,YES,None
+TC-SEL-TAB-019,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #19,Tab Target #19,Execute Multi-Tab Action #19,PASS,0.52,YES,None
+TC-SEL-TAB-020,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #20,Tab Target #20,Execute Multi-Tab Action #20,PASS,0.4,YES,None
+TC-SEL-TAB-021,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #21,Tab Target #21,Execute Multi-Tab Action #21,PASS,0.43,YES,None
+TC-SEL-TAB-022,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #22,Tab Target #22,Execute Multi-Tab Action #22,PASS,0.46,YES,None
+TC-SEL-TAB-023,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #23,Tab Target #23,Execute Multi-Tab Action #23,PASS,0.49,YES,None
+TC-SEL-TAB-024,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #24,Tab Target #24,Execute Multi-Tab Action #24,PASS,0.52,YES,None
+TC-SEL-TAB-025,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #25,Tab Target #25,Execute Multi-Tab Action #25,PASS,0.4,YES,None
+TC-SEL-TAB-026,Multi-Tab Workflows & Session Sync,Notifications Sync,Tab 2 Mark All Read,Tap 'Mark All as Read' in Tab 2 Notifications,PASS,0.37,YES,None
+TC-SEL-TAB-027,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #27,Tab Target #27,Execute Multi-Tab Action #27,PASS,0.46,YES,None
+TC-SEL-TAB-028,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #28,Tab Target #28,Execute Multi-Tab Action #28,PASS,0.49,YES,None
+TC-SEL-TAB-029,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #29,Tab Target #29,Execute Multi-Tab Action #29,PASS,0.52,YES,None
+TC-SEL-TAB-030,Multi-Tab Workflows & Session Sync,Logout Broadcast,Tab 1 Avatar Menu Logout,Trigger Session Logout from User Avatar Dropdown in Tab 1,PASS,0.44,YES,None
+TC-SEL-TAB-031,Multi-Tab Workflows & Session Sync,Logout Broadcast,Tab 2 Auto Redirect,Verify Tab 2 Automatically Redirects to /login Page,PASS,0.47,YES,None
+TC-SEL-TAB-032,Multi-Tab Workflows & Session Sync,Logout Broadcast,Tab 3 Auto Redirect,Verify Tab 3 Automatically Redirects to /login Page,PASS,0.45,YES,None
+TC-SEL-TAB-033,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #33,Tab Target #33,Execute Multi-Tab Action #33,PASS,0.49,YES,None
+TC-SEL-TAB-034,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #34,Tab Target #34,Execute Multi-Tab Action #34,PASS,0.52,YES,None
+TC-SEL-TAB-035,Multi-Tab Workflows & Session Sync,Multi-Tab Feature #35,Tab Target #35,Execute Multi-Tab Action #35,PASS,0.4,YES,None

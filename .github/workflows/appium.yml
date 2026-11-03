@@ -35,10 +35,16 @@ jobs:
         run: |
           python appium_test_suite/run_all_appium_tests.py
 
-      - name: Upload Excel Test Analysis Report Artifact
+      - name: Generate CSV Export
+        if: always()
+        run: python export_tests_to_csv.py
+
+      - name: Upload Excel & CSV Test Analysis Report Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: appium-test-analysis-report-excel
-          path: appium_test_suite/appium_test_analysis_report.xlsx
+          path: |
+            appium_test_suite/appium_test_analysis_report.xlsx
+            appium_tested_actions.csv
           retention-days: 30
