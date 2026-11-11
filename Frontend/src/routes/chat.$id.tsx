@@ -152,18 +152,30 @@ export default function ChatRoom() {
         {/* Action Header Icons */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-sm"
-            title="Start Video Call & Real-Time Screen Share"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('skillswap_video_return', `/chat/${m.id}`);
+                window.open('https://meet.google.com/new', '_blank');
+              }
+              router.navigate({ to: '/video/$id', params: { id: m.id } });
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition-all shadow-sm"
+            title="Start Google Meet Video Call & Screen Share"
           >
             <Video className="w-4 h-4" />
-            <span className="hidden sm:inline">Video Call</span>
+            <span className="hidden sm:inline">Google Meet Call</span>
           </button>
 
           <button
-            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
-            className="p-1.5 rounded-xl text-slate-500 hover:text-purple-600 hover:bg-purple-50 border border-slate-200 transition-colors"
-            title="Audio Call"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('skillswap_video_return', `/chat/${m.id}`);
+                window.open('https://meet.google.com/new', '_blank');
+              }
+              router.navigate({ to: '/video/$id', params: { id: m.id } });
+            }}
+            className="p-1.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 transition-colors"
+            title="Start Audio Call on Google Meet"
           >
             <Phone className="w-4 h-4" />
           </button>

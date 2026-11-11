@@ -42,6 +42,10 @@ export default function VideoHub() {
 
   const handleStartInstant = () => {
     const roomId = customRoom.trim() ? customRoom.trim().toLowerCase().replace(/\s+/g, '-') : 'live-session';
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('skillswap_video_return', '/video');
+      window.open('https://meet.google.com/new', '_blank');
+    }
     router.navigate({ to: '/video/$id', params: { id: roomId } });
   };
 
@@ -77,10 +81,10 @@ export default function VideoHub() {
             />
             <button
               onClick={handleStartInstant}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 transition-all shrink-0"
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all shrink-0 active:scale-95"
             >
               <Video className="w-4 h-4" />
-              <span>Start Instant Room</span>
+              <span>Start Google Meet Room</span>
             </button>
           </div>
         </div>
@@ -161,11 +165,17 @@ export default function VideoHub() {
                   Chat First
                 </button>
                 <button
-                  onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
-                  className="py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('skillswap_video_return', '/video');
+                      window.open('https://meet.google.com/new', '_blank');
+                    }
+                    router.navigate({ to: '/video/$id', params: { id: m.id } });
+                  }}
+                  className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <Video className="w-3.5 h-3.5" />
-                  <span>Call Now</span>
+                  <span>Meet Call</span>
                 </button>
               </div>
             </div>

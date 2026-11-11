@@ -58,8 +58,11 @@ export default function VideoRoom() {
   const [showScreenPreview, setShowScreenPreview] = useState(false); // Off by default to eliminate infinite mirror loop!
   const [screenShareError, setScreenShareError] = useState<string | null>(null);
 
-  // Layout View Modes: 'split' (side-by-side profile cards) | 'stage' (presentation focus) | 'whiteboard'
-  const [layoutMode, setLayoutMode] = useState<'split' | 'stage' | 'whiteboard'>('split');
+  // Layout View Modes: 'meet' (Google Meet Hub) | 'split' (side-by-side profile cards) | 'stage' (presentation focus) | 'whiteboard'
+  const [layoutMode, setLayoutMode] = useState<'meet' | 'split' | 'stage' | 'whiteboard'>('meet');
+  const [meetWindowRef, setMeetWindowRef] = useState<Window | null>(null);
+  const [meetActive, setMeetActive] = useState(true);
+  const [callEndedByMeet, setCallEndedByMeet] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [drawColor, setDrawColor] = useState('#8b5cf6');
   const [lineWidth, setLineWidth] = useState(4);
@@ -350,11 +353,65 @@ export default function VideoRoom() {
     }
   };
 
+  // Launch Google Meet in dedicated window/tab
+  const launchGoogleMeet = () => {
+    if (typeof window !== 'undefined') {
+      const win = window.open('https://meet.google.com/new', '_blank');
+      if (win) {
+        setMeetWindowRef(win);
+        setMeetActive(true);
+      }
+    }
+  };
+
+  // Monitor when Google Meet window is closed to automatically redirect back to SkillSwap
+  useEffect(() => {
+    if (!meetWindowRef) return;
+    const interval = setInterval(() => {
+      try {
+        if (meetWindowRef.closed) {
+          clearInterval(interval);
+          setMeetWindowRef(null);
+          setMeetActive(false);
+          setCallEndedByMeet(true);
+          setShowReviewModal(true);
+        }
+      } catch (err) {
+        // Safe cross-origin window.closed check
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [meetWindowRef]);
+
+  // End Call & Return to SkillSwap
+  const handleEndCallAndReturn = () => {
+    if (meetWindowRef && !meetWindowRef.closed) {
+      try {
+        meetWindowRef.close();
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+    setMeetWindowRef(null);
+    setMeetActive(false);
+    setShowReviewModal(true);
+  };
+
+  const returnToSkillSwap = () => {
+    setShowReviewModal(false);
+    const returnUrl = typeof window !== 'undefined' ? localStorage.getItem('skillswap_video_return') : null;
+    if (returnUrl) {
+      localStorage.removeItem('skillswap_video_return');
+      router.navigate({ to: returnUrl as any });
+    } else {
+      router.navigate({ to: '/chat/$id', params: { id } });
+    }
+  };
+
   const submitReview = () => {
     setSubmitted(true);
     setTimeout(() => {
-      setShowReviewModal(false);
-      router.navigate({ to: '/activity' });
+      returnToSkillSwap();
     }, 1200);
   };
 
@@ -404,8 +461,21 @@ export default function VideoRoom() {
           </div>
         </div>
 
-        {/* Center: View Layout Switcher (Profiles Grid vs Stage vs Whiteboard) */}
+        {/* Center: View Layout Switcher (Google Meet vs Profiles Grid vs Stage vs Whiteboard) */}
         <div className="hidden md:flex items-center bg-slate-800/80 p-1 rounded-2xl border border-slate-700/60 gap-1">
+          <button
+            onClick={() => setLayoutMode('meet')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              layoutMode === 'meet'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            }`}
+            title="Google Meet Session Hub"
+          >
+            <VideoIcon className="w-3.5 h-3.5" />
+            <span>Google Meet</span>
+          </button>
+
           <button
             onClick={() => setLayoutMode('split')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -416,20 +486,7 @@ export default function VideoRoom() {
             title="Side-by-Side Profiles Grid (Screen Share in Profile)"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Profile Grid</span>
-          </button>
-
-          <button
-            onClick={() => setLayoutMode('stage')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              layoutMode === 'stage'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-            }`}
-            title="Theater / Stage Mode"
-          >
-            <Tv className="w-3.5 h-3.5" />
-            <span>Stage View</span>
+            <span>In-App Grid</span>
           </button>
 
           <button
@@ -446,8 +503,16 @@ export default function VideoRoom() {
           </button>
         </div>
 
-        {/* Right Badges: Timer & Screen Share Status */}
+        {/* Right Badges: End Call, Timer & Screen Share Status */}
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={handleEndCallAndReturn}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md transition-all active:scale-95"
+            title="End Call & Return to SkillSwap"
+          >
+            <PhoneOff className="w-3.5 h-3.5" />
+            <span>End & Return</span>
+          </button>
           {isScreenSharing && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold animate-pulse">
               <Radio className="w-3 h-3 text-emerald-400 animate-spin" />
@@ -480,6 +545,133 @@ export default function VideoRoom() {
         {/* Stage Content Area */}
         <div className="flex-1 flex flex-col p-3 sm:p-5 gap-4 overflow-hidden">
           
+          {/* ============================================================ */}
+          {/* MODE 0: GOOGLE MEET ACTIVE HUB & RETURN CONTROLLER          */}
+          {/* ============================================================ */}
+          {layoutMode === 'meet' && (
+            <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+              {/* Google Meet Hero Status Banner */}
+              <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-3 max-w-xl">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                      <span>GOOGLE MEET SESSION ACTIVE</span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                      1-on-1 Call with {mentor.name}
+                    </h2>
+
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      Your real-time video call, audio, and screen sharing are running on <strong className="text-emerald-300">Google Meet</strong>. Switch to your Google Meet tab to present your screen and speak with your mentor.
+                    </p>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/80 border border-slate-800 p-3 rounded-2xl">
+                      <span className="text-amber-400 shrink-0 text-base">💡</span>
+                      <span>
+                        <strong>Smart Auto-Return:</strong> When you leave Google Meet and close the tab, SkillSwap will automatically detect it and return you back. You can also click <em>"End Call & Return to SkillSwap"</em> at any time.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Primary Return and Launch Actions */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto shrink-0">
+                    <button
+                      onClick={launchGoogleMeet}
+                      className="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <ExternalLink className="w-4 h-4 text-emerald-400" />
+                      <span>Reopen Google Meet</span>
+                    </button>
+
+                    <button
+                      onClick={handleEndCallAndReturn}
+                      className="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <PhoneOff className="w-4 h-4" />
+                      <span>End Call & Return to SkillSwap</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Both Participants' Profile Tiles Side-by-Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                {/* Mentor Profile Card */}
+                <div className="bg-slate-900 rounded-3xl border border-slate-800 p-6 flex flex-col justify-between shadow-xl">
+                  <div>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                      <div className="flex items-center gap-2 text-xs font-bold text-purple-400">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Verified Mentor</span>
+                      </div>
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                        Online on Meet
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4 mt-6">
+                      <img
+                        src={mentor.avatar}
+                        alt={mentor.name}
+                        className="w-20 h-20 rounded-2xl object-cover border-2 border-purple-500/40 shadow-lg"
+                      />
+                      <div>
+                        <h3 className="text-lg font-bold text-white">{mentor.name}</h3>
+                        <p className="text-xs text-purple-400 font-semibold">{mentor.expertise}</p>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{mentor.bio}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>⭐ {mentor.rating} Rating</span>
+                    <span>{mentor.sessions || 42} Swaps Done</span>
+                  </div>
+                </div>
+
+                {/* Learner Profile Card */}
+                <div className="bg-slate-900 rounded-3xl border border-slate-800 p-6 flex flex-col justify-between shadow-xl">
+                  <div>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                        <Users className="w-4 h-4" />
+                        <span>Your Learner Profile</span>
+                      </div>
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">
+                        Connected
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4 mt-6">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        You
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">Active Session Co-Host</h3>
+                        <p className="text-xs text-emerald-400 font-semibold">Video & Audio Streaming</p>
+                        <p className="text-xs text-slate-400 mt-1">Screen sharing enabled via Google Meet.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>Session Timer: {formatTime(timeLeft)}</span>
+                    <button
+                      onClick={() => setShowChat(true)}
+                      className="text-purple-400 hover:text-purple-300 font-bold"
+                    >
+                      Open Chat & Notes →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ============================================================ */}
           {/* MODE 1: PROFILES GRID (Screen share is inside each profile) */}
           {/* ============================================================ */}
@@ -1067,6 +1259,12 @@ export default function VideoRoom() {
                   <p className="text-xs text-slate-400 mt-1">How was the skill exchange and screen share experience?</p>
                 </div>
 
+                {callEndedByMeet && (
+                  <div className="text-xs text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/30 p-2 rounded-xl">
+                    Google Meet call completed! Welcome back to SkillSwap.
+                  </div>
+                )}
+
                 {/* Stars Rating */}
                 <div className="flex items-center justify-center gap-2 py-2">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -1091,16 +1289,16 @@ export default function VideoRoom() {
 
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <button
-                    onClick={() => setShowReviewModal(false)}
+                    onClick={returnToSkillSwap}
                     className="py-2.5 px-4 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold text-xs"
                   >
-                    Back to Call
+                    Skip & Return
                   </button>
                   <button
                     onClick={submitReview}
                     className="py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md"
                   >
-                    Complete & Exit
+                    Submit & Return
                   </button>
                 </div>
               </>

@@ -168,12 +168,18 @@ export default function Activity() {
                 <div className="flex items-center gap-2">
                   {it.status === 'upcoming' && (
                     <button
-                      onClick={() => router.navigate({ to: '/video/$id', params: { id: it.mentorId || 'aria-shah' } })}
-                      className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
-                      title="Join Live Video Call & Screen Share"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem('skillswap_video_return', '/activity');
+                          window.open('https://meet.google.com/new', '_blank');
+                        }
+                        router.navigate({ to: '/video/$id', params: { id: it.mentorId || 'aria-shah' } });
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                      title="Join Live Google Meet Call & Screen Share"
                     >
                       <Video className="w-3.5 h-3.5" />
-                      <span>Join Call</span>
+                      <span>Meet Call</span>
                     </button>
                   )}
                   {it.rating > 0 && (

@@ -388,12 +388,18 @@ export default function Home() {
                     Profile
                   </button>
                   <button
-                    onClick={() => router.navigate({ to: `/video/$id`, params: { id: mentor.id } })}
-                    className="py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-xs transition-colors flex items-center justify-center gap-1"
-                    title="Video Call & Real-Time Screen Share"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('skillswap_video_return', '/home');
+                        window.open('https://meet.google.com/new', '_blank');
+                      }
+                      router.navigate({ to: `/video/$id`, params: { id: mentor.id } });
+                    }}
+                    className="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                    title="Google Meet Video Call & Screen Share"
                   >
-                    <Video className="w-3.5 h-3.5" />
-                    <span>Call</span>
+                    <Video className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Meet</span>
                   </button>
                   <button
                     onClick={() => router.navigate({ to: '/book', search: { id: mentor.id } as any })}

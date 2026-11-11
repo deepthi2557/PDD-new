@@ -287,12 +287,18 @@ export default function Profile() {
                   </button>
 
                   <button
-                    onClick={() => router.navigate({ to: `/video/$id`, params: { id: m.id } })}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 font-bold text-xs sm:text-sm transition-colors"
-                    title="Video Call & Real-Time Screen Share"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('skillswap_video_return', `/profile/${m.id}`);
+                        window.open('https://meet.google.com/new', '_blank');
+                      }
+                      router.navigate({ to: `/video/$id`, params: { id: m.id } });
+                    }}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs sm:text-sm transition-colors"
+                    title="Google Meet Video Call & Screen Share"
                   >
-                    <Video className="w-4 h-4" />
-                    <span>Video Call</span>
+                    <Video className="w-4 h-4 text-emerald-600" />
+                    <span>Google Meet Call</span>
                   </button>
 
                   <button
@@ -398,11 +404,17 @@ export default function Profile() {
 
         <div className="flex items-center gap-3 w-full sm:w-auto relative z-10 shrink-0">
           <button
-            onClick={() => router.navigate({ to: '/video/$id', params: { id: m.id } })}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-purple-900/50 transition-all active:scale-[0.98]"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('skillswap_video_return', `/profile/${m.id}`);
+                window.open('https://meet.google.com/new', '_blank');
+              }
+              router.navigate({ to: '/video/$id', params: { id: m.id } });
+            }}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition-all active:scale-[0.98]"
           >
             <Video className="w-4 h-4" />
-            <span>Join 1-on-1 Video & Screen Share</span>
+            <span>Join 1-on-1 Google Meet & Screen Share</span>
           </button>
         </div>
       </div>
