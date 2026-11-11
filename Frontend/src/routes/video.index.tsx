@@ -40,13 +40,12 @@ export default function VideoHub() {
     };
   }, []);
 
-  const handleStartInstant = () => {
-    const roomId = customRoom.trim() ? customRoom.trim().toLowerCase().replace(/\s+/g, '-') : 'live-session';
+  const handleStartMeet = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('skillswap_video_return', '/video');
       window.open('https://meet.google.com/new', '_blank');
     }
-    router.navigate({ to: '/video/$id', params: { id: roomId } });
+    router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
   };
 
   return (
@@ -59,32 +58,25 @@ export default function VideoHub() {
         <div className="relative z-10 max-w-2xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
             <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-            <span>HD Real-Time Video & Screen Share</span>
+            <span>HD Real-Time Video & Screen Share via Google Meet</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            SkillSwap Live Video Classrooms
+            SkillSwap Video Calls on Google Meet
           </h1>
 
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Connect face-to-face with mentors and peers. Share your screen in real time, collaborate on the live whiteboard, and exchange skills seamlessly.
+            Connect face-to-face with mentors and peers directly on Google Meet. High-definition video, crystal clear audio, and real-time screen sharing with automatic return to SkillSwap when you finish.
           </p>
 
-          {/* Quick Instant Session Join / Start Bar */}
-          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-lg">
-            <input
-              type="text"
-              placeholder="Enter meeting room code or peer name..."
-              value={customRoom}
-              onChange={(e) => setCustomRoom(e.target.value)}
-              className="flex-1 px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-400 text-sm outline-none focus:border-purple-400 backdrop-blur-md"
-            />
+          {/* Quick Direct Launch Google Meet Button */}
+          <div className="pt-2 flex items-center gap-3">
             <button
-              onClick={handleStartInstant}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 transition-all shrink-0 active:scale-95"
+              onClick={handleStartMeet}
+              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-xl shadow-emerald-950/40 flex items-center justify-center gap-2.5 transition-all active:scale-95"
             >
-              <Video className="w-4 h-4" />
-              <span>Start Google Meet Room</span>
+              <Video className="w-5 h-5" />
+              <span>Launch Google Meet Video Call</span>
             </button>
           </div>
         </div>

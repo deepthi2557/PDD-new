@@ -26,7 +26,8 @@ import {
   LayoutGrid,
   Tv,
   ShieldCheck,
-  Radio
+  Radio,
+  Camera
 } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
@@ -87,6 +88,33 @@ export default function VideoRoom() {
 
   // Return from Google Meet Prompt
   const [showMeetReturnPrompt, setShowMeetReturnPrompt] = useState(false);
+  const [isCameraPreviewActive, setIsCameraPreviewActive] = useState(false);
+
+  const startCameraPreview = () => {
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true })
+        .then((s) => {
+          localStreamRef.current = s;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = s;
+          }
+          setIsCameraPreviewActive(true);
+        })
+        .catch((err) => console.warn(err));
+    }
+  };
+
+  const stopCameraPreview = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    setIsCameraPreviewActive(false);
+  };
 
   // Instant Video Element Connector: guarantees user sees themselves the moment the card renders
   const setLocalVideoNode = (node: HTMLVideoElement | null) => {
@@ -155,10 +183,10 @@ export default function VideoRoom() {
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Start Camera Stream on mount
+  // Start Camera Stream only when using in-app classroom (not when Google Meet is active to prevent locking webcam)
   useEffect(() => {
     let stream: MediaStream | null = null;
-    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+    if (layoutMode !== 'meet' && typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -184,7 +212,7 @@ export default function VideoRoom() {
         screenStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [layoutMode]);
 
   // Sync Local Video Ref when video state changes or component re-renders
   useEffect(() => {
@@ -367,6 +395,15 @@ export default function VideoRoom() {
 
   // Launch Google Meet in dedicated window/tab
   const launchGoogleMeet = () => {
+    // Release any local camera tracks so Google Meet has uninhibited hardware access to webcam
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
     if (typeof window !== 'undefined') {
       const win = window.open('https://meet.google.com/new', '_blank');
       if (win) {
@@ -386,25 +423,25 @@ export default function VideoRoom() {
           setMeetWindowRef(null);
           setMeetActive(false);
           setCallEndedByMeet(true);
-          setShowReviewModal(true);
+          returnToSkillSwap();
         }
       } catch (err) {
         // Safe cross-origin window.closed check
       }
-    }, 1000);
+    }, 500);
     return () => clearInterval(interval);
   }, [meetWindowRef]);
 
-  // Detect when user switches back to SkillSwap from Google Meet to offer 1-click return
+  // Detect when user switches back to SkillSwap from Google Meet to offer instant return
   useEffect(() => {
     const handleFocus = () => {
-      if (meetActive && meetWindowRef) {
+      if (meetActive) {
         setShowMeetReturnPrompt(true);
       }
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [meetActive, meetWindowRef]);
+  }, [meetActive]);
 
   // End Call & Return to SkillSwap
   const handleEndCallAndReturn = () => {
@@ -417,17 +454,20 @@ export default function VideoRoom() {
     }
     setMeetWindowRef(null);
     setMeetActive(false);
-    setShowReviewModal(true);
+    returnToSkillSwap();
   };
 
   const returnToSkillSwap = () => {
     setShowReviewModal(false);
+    setShowMeetReturnPrompt(false);
     const returnUrl = typeof window !== 'undefined' ? localStorage.getItem('skillswap_video_return') : null;
-    if (returnUrl) {
+    if (returnUrl && !returnUrl.startsWith('/video')) {
       localStorage.removeItem('skillswap_video_return');
       router.navigate({ to: returnUrl as any });
-    } else {
+    } else if (id && id !== 'google-meet' && id !== 'live-session') {
       router.navigate({ to: '/chat/$id', params: { id } });
+    } else {
+      router.navigate({ to: '/home' });
     }
   };
 
@@ -669,62 +709,48 @@ export default function VideoRoom() {
                       </span>
                     </div>
 
-                    {/* Live Camera Feed so user can SEE THEMSELVES on the video call */}
-                    <div className="mt-4 relative w-full h-56 bg-black rounded-2xl overflow-hidden border border-slate-700/80 shadow-inner flex items-center justify-center group">
-                      {isVideoOff ? (
-                        <div className="flex flex-col items-center justify-center text-slate-400 p-4 space-y-1.5">
-                          <div className="w-14 h-14 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
-                            <VideoOff className="w-6 h-6 text-red-400" />
+                    {/* Live Camera Feed or Test Preview */}
+                    <div className="mt-4 relative w-full h-56 bg-slate-950 rounded-2xl overflow-hidden border border-slate-700/80 shadow-inner flex items-center justify-center group">
+                      {isCameraPreviewActive ? (
+                        <div className="w-full h-full relative">
+                          <video
+                            ref={setLocalVideoNode}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-cover transform -scale-x-100"
+                          />
+                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-bold text-emerald-400 shadow-sm">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span>Camera Test Active</span>
                           </div>
-                          <span className="text-xs font-bold text-slate-300">Your Camera is Off</span>
-                          <span className="text-[10px] text-slate-500">Click camera button below to turn on</span>
+                          <button
+                            onClick={stopCameraPreview}
+                            className="absolute bottom-2.5 right-2.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition-colors"
+                          >
+                            Stop Preview
+                          </button>
                         </div>
                       ) : (
-                        <video
-                          ref={setLocalVideoNode}
-                          autoPlay
-                          playsInline
-                          muted
-                          className="w-full h-full object-cover transform -scale-x-100"
-                        />
+                        <div className="flex flex-col items-center justify-center text-center p-4 space-y-3">
+                          <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-md">
+                            <VideoIcon className="w-7 h-7" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-white">Your Video Streams in Google Meet</h4>
+                            <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                              Camera hardware is released to Google Meet so your webcam and screen share run at full HD.
+                            </p>
+                          </div>
+                          <button
+                            onClick={startCameraPreview}
+                            className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 inline-flex items-center gap-1.5 transition-colors"
+                          >
+                            <Camera className="w-3.5 h-3.5 text-purple-400" />
+                            <span>Test Webcam on SkillSwap</span>
+                          </button>
+                        </div>
                       )}
-
-                      {/* Top Badges: Live Camera & Speaking Indicator */}
-                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-bold text-white shadow-sm">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>You (Live Camera)</span>
-                      </div>
-
-                      {/* Bottom Quick Controls Bar on User's Camera */}
-                      <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 z-10">
-                        <button
-                          onClick={toggleMute}
-                          className={`p-2 rounded-xl border transition-all ${
-                            isMuted ? 'bg-red-500/80 text-white border-red-400' : 'bg-slate-900/80 hover:bg-slate-800 text-white border-slate-700'
-                          }`}
-                          title={isMuted ? 'Unmute Mic' : 'Mute Mic'}
-                        >
-                          {isMuted ? <MicOff className="w-3.5 h-3.5 text-white" /> : <Mic className="w-3.5 h-3.5 text-emerald-400" />}
-                        </button>
-
-                        <button
-                          onClick={toggleVideo}
-                          className={`p-2 rounded-xl border transition-all ${
-                            isVideoOff ? 'bg-red-500/80 text-white border-red-400' : 'bg-slate-900/80 hover:bg-slate-800 text-white border-slate-700'
-                          }`}
-                          title={isVideoOff ? 'Turn on Camera' : 'Turn off Camera'}
-                        >
-                          {isVideoOff ? <VideoOff className="w-3.5 h-3.5 text-white" /> : <VideoIcon className="w-3.5 h-3.5 text-emerald-400" />}
-                        </button>
-                      </div>
-
-                      {/* Speaking Waveform for You */}
-                      <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-[10px] font-bold text-slate-300">
-                        <span className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse" />
-                        <span className="w-1 h-4 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.2s]" />
-                        <span className="w-1 h-2 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.4s]" />
-                        <span className="ml-1">{isMuted ? 'Muted' : 'Speaking'}</span>
-                      </div>
                     </div>
                   </div>
 

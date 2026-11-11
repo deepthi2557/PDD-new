@@ -99,7 +99,17 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
               return (
                 <button
                   key={item.path}
-                  onClick={() => router.navigate({ to: item.path as any })}
+                  onClick={() => {
+                    if (item.path === '/video') {
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('skillswap_video_return', pathname);
+                        window.open('https://meet.google.com/new', '_blank');
+                      }
+                      router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
+                      return;
+                    }
+                    router.navigate({ to: item.path as any });
+                  }}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 ${
                     active
                       ? 'bg-purple-50 text-purple-700 shadow-sm'
@@ -170,6 +180,14 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                   key={item.path}
                   onClick={() => {
                     setMobileMenuOpen(false);
+                    if (item.path === '/video') {
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('skillswap_video_return', pathname);
+                        window.open('https://meet.google.com/new', '_blank');
+                      }
+                      router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
+                      return;
+                    }
                     router.navigate({ to: item.path as any });
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
