@@ -85,6 +85,18 @@ export default function VideoRoom() {
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
 
+  // Return from Google Meet Prompt
+  const [showMeetReturnPrompt, setShowMeetReturnPrompt] = useState(false);
+
+  // Instant Video Element Connector: guarantees user sees themselves the moment the card renders
+  const setLocalVideoNode = (node: HTMLVideoElement | null) => {
+    localVideoRef.current = node;
+    if (node && localStreamRef.current && !isVideoOff) {
+      node.srcObject = localStreamRef.current;
+      node.play().catch(() => {});
+    }
+  };
+
   // Canvas Ref
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawing = useRef(false);
@@ -383,6 +395,17 @@ export default function VideoRoom() {
     return () => clearInterval(interval);
   }, [meetWindowRef]);
 
+  // Detect when user switches back to SkillSwap from Google Meet to offer 1-click return
+  useEffect(() => {
+    const handleFocus = () => {
+      if (meetActive && meetWindowRef) {
+        setShowMeetReturnPrompt(true);
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [meetActive, meetWindowRef]);
+
   // End Call & Return to SkillSwap
   const handleEndCallAndReturn = () => {
     if (meetWindowRef && !meetWindowRef.closed) {
@@ -646,14 +669,61 @@ export default function VideoRoom() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-4 mt-6">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                        You
+                    {/* Live Camera Feed so user can SEE THEMSELVES on the video call */}
+                    <div className="mt-4 relative w-full h-56 bg-black rounded-2xl overflow-hidden border border-slate-700/80 shadow-inner flex items-center justify-center group">
+                      {isVideoOff ? (
+                        <div className="flex flex-col items-center justify-center text-slate-400 p-4 space-y-1.5">
+                          <div className="w-14 h-14 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                            <VideoOff className="w-6 h-6 text-red-400" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-300">Your Camera is Off</span>
+                          <span className="text-[10px] text-slate-500">Click camera button below to turn on</span>
+                        </div>
+                      ) : (
+                        <video
+                          ref={setLocalVideoNode}
+                          autoPlay
+                          playsInline
+                          muted
+                          className="w-full h-full object-cover transform -scale-x-100"
+                        />
+                      )}
+
+                      {/* Top Badges: Live Camera & Speaking Indicator */}
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-xs font-bold text-white shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>You (Live Camera)</span>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">Active Session Co-Host</h3>
-                        <p className="text-xs text-emerald-400 font-semibold">Video & Audio Streaming</p>
-                        <p className="text-xs text-slate-400 mt-1">Screen sharing enabled via Google Meet.</p>
+
+                      {/* Bottom Quick Controls Bar on User's Camera */}
+                      <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 z-10">
+                        <button
+                          onClick={toggleMute}
+                          className={`p-2 rounded-xl border transition-all ${
+                            isMuted ? 'bg-red-500/80 text-white border-red-400' : 'bg-slate-900/80 hover:bg-slate-800 text-white border-slate-700'
+                          }`}
+                          title={isMuted ? 'Unmute Mic' : 'Mute Mic'}
+                        >
+                          {isMuted ? <MicOff className="w-3.5 h-3.5 text-white" /> : <Mic className="w-3.5 h-3.5 text-emerald-400" />}
+                        </button>
+
+                        <button
+                          onClick={toggleVideo}
+                          className={`p-2 rounded-xl border transition-all ${
+                            isVideoOff ? 'bg-red-500/80 text-white border-red-400' : 'bg-slate-900/80 hover:bg-slate-800 text-white border-slate-700'
+                          }`}
+                          title={isVideoOff ? 'Turn on Camera' : 'Turn off Camera'}
+                        >
+                          {isVideoOff ? <VideoOff className="w-3.5 h-3.5 text-white" /> : <VideoIcon className="w-3.5 h-3.5 text-emerald-400" />}
+                        </button>
+                      </div>
+
+                      {/* Speaking Waveform for You */}
+                      <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700 text-[10px] font-bold text-slate-300">
+                        <span className="w-1 h-3 bg-emerald-400 rounded-full animate-pulse" />
+                        <span className="w-1 h-4 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.2s]" />
+                        <span className="w-1 h-2 bg-emerald-400 rounded-full animate-pulse [animation-delay:0.4s]" />
+                        <span className="ml-1">{isMuted ? 'Muted' : 'Speaking'}</span>
                       </div>
                     </div>
                   </div>
@@ -1303,6 +1373,46 @@ export default function VideoRoom() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {/* Return to SkillSwap Prompt when returning from Google Meet */}
+      {showMeetReturnPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-5">
+            <div className="w-16 h-16 rounded-3xl bg-red-500/20 text-red-400 flex items-center justify-center mx-auto border border-red-500/30">
+              <PhoneOff className="w-8 h-8" />
+            </div>
+
+            <div>
+              <h3 className="text-xl font-bold text-white">Finished Call on Google Meet?</h3>
+              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                If you have cut or left your call on Google Meet, click below to end the session and return back to SkillSwap.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2.5 pt-2">
+              <button
+                onClick={() => {
+                  setShowMeetReturnPrompt(false);
+                  handleEndCallAndReturn();
+                }}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-sm shadow-xl shadow-red-600/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <PhoneOff className="w-4 h-4" />
+                <span>Yes, Cut Call & Return to SkillSwap</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowMeetReturnPrompt(false);
+                  launchGoogleMeet();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-semibold text-xs transition-colors"
+              >
+                No, Reopen Google Meet
+              </button>
+            </div>
           </div>
         </div>
       )}
