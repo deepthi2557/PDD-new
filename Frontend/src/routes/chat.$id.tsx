@@ -155,7 +155,7 @@ export default function ChatRoom() {
             onClick={() => {
               if (typeof window !== 'undefined') {
                 localStorage.setItem('skillswap_video_return', `/chat/${m.id}`);
-                window.open('https://meet.google.com/new', '_blank');
+                window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
               }
               router.navigate({ to: '/video/$id', params: { id: m.id } });
             }}
@@ -170,7 +170,7 @@ export default function ChatRoom() {
             onClick={() => {
               if (typeof window !== 'undefined') {
                 localStorage.setItem('skillswap_video_return', `/chat/${m.id}`);
-                window.open('https://meet.google.com/new', '_blank');
+                window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
               }
               router.navigate({ to: '/video/$id', params: { id: m.id } });
             }}

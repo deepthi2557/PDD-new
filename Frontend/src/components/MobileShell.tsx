@@ -103,7 +103,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                     if (item.path === '/video') {
                       if (typeof window !== 'undefined') {
                         localStorage.setItem('skillswap_video_return', pathname);
-                        window.open('https://meet.google.com/new', '_blank');
+                        window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
                       }
                       router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
                       return;
@@ -183,7 +183,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                     if (item.path === '/video') {
                       if (typeof window !== 'undefined') {
                         localStorage.setItem('skillswap_video_return', pathname);
-                        window.open('https://meet.google.com/new', '_blank');
+                        window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
                       }
                       router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
                       return;

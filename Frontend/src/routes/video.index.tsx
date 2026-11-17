@@ -43,7 +43,7 @@ export default function VideoHub() {
   const handleStartMeet = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('skillswap_video_return', '/video');
-      window.open('https://meet.google.com/new', '_blank');
+      window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
     }
     router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
   };
@@ -160,7 +160,7 @@ export default function VideoHub() {
                   onClick={() => {
                     if (typeof window !== 'undefined') {
                       localStorage.setItem('skillswap_video_return', '/video');
-                      window.open('https://meet.google.com/new', '_blank');
+                      window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
                     }
                     router.navigate({ to: '/video/$id', params: { id: m.id } });
                   }}

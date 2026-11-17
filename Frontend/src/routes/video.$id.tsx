@@ -393,6 +393,21 @@ export default function VideoRoom() {
     }
   };
 
+  // Automatically bind to Google Meet window if already launched by navigation click
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const existingWin = window.open('', 'SkillSwapMeetWindow');
+        if (existingWin && !existingWin.closed) {
+          setMeetWindowRef(existingWin);
+          setMeetActive(true);
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }, []);
+
   // Launch Google Meet in dedicated window/tab
   const launchGoogleMeet = () => {
     // Release any local camera tracks so Google Meet has uninhibited hardware access to webcam
@@ -405,7 +420,7 @@ export default function VideoRoom() {
     }
 
     if (typeof window !== 'undefined') {
-      const win = window.open('https://meet.google.com/new', '_blank');
+      const win = window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
       if (win) {
         setMeetWindowRef(win);
         setMeetActive(true);
