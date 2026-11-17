@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   Video, 
   Monitor, 
-  Phone, 
+  MessageSquare, 
   Sparkles, 
+  ExternalLink,
   Users, 
   ArrowRight, 
   Clock, 
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { mentors, type Mentor } from '../lib/data';
 import { fetchMentors } from '../lib/api';
+import { launchGoogleMeet, setVideoReturnUrl } from '../lib/meet';
 
 export const Route = createFileRoute('/video/')({
   component: VideoHub,
@@ -21,7 +23,6 @@ export const Route = createFileRoute('/video/')({
 export default function VideoHub() {
   const router = useRouter();
   const [mentorList, setMentorList] = useState<Mentor[]>(mentors);
-  const [customRoom, setCustomRoom] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -40,12 +41,10 @@ export default function VideoHub() {
     };
   }, []);
 
-  const handleStartMeet = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('skillswap_video_return', '/video');
-      window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-    }
-    router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
+  const handleStartMeet = (mentorId = 'google-meet') => {
+    setVideoReturnUrl('/home');
+    launchGoogleMeet();
+    router.navigate({ to: '/video/$id', params: { id: mentorId } });
   };
 
   return (
@@ -70,14 +69,24 @@ export default function VideoHub() {
           </p>
 
           {/* Quick Direct Launch Google Meet Button */}
-          <div className="pt-2 flex items-center gap-3">
+          <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
-              onClick={handleStartMeet}
+              onClick={() => handleStartMeet('google-meet')}
               className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-xl shadow-emerald-950/40 flex items-center justify-center gap-2.5 transition-all active:scale-95"
             >
               <Video className="w-5 h-5" />
               <span>Launch Google Meet Video Call</span>
             </button>
+
+            <a
+              href="https://meet.google.com/new"
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Direct Link</span>
+            </a>
           </div>
         </div>
       </div>
@@ -100,17 +109,17 @@ export default function VideoHub() {
           </div>
           <h3 className="text-sm font-bold text-slate-900">HD Video & Audio Calling</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Zero install required. Runs straight in your browser or phone with dynamic noise suppression and mute controls.
+            Runs straight in your browser or phone with Google Meet's dynamic noise cancellation and background effects.
           </p>
         </div>
 
         <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-2">
           <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Sparkles className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-slate-900">Interactive Canvas Whiteboard</h3>
+          <h3 className="text-sm font-bold text-slate-900">In-Call Chat & Captions</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Draw diagrams, annotate code snippets, and instantly send canvas snapshots into the conversation chat.
+            Live automated captions, meeting chat, link sharing, and instant reactions directly inside Google Meet.
           </p>
         </div>
       </div>
@@ -120,7 +129,7 @@ export default function VideoHub() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Available Mentors for Video Calls</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Select a mentor below to launch a 1-on-1 video and screen share session immediately.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Select a mentor below to launch a 1-on-1 Google Meet video and screen share session immediately.</p>
           </div>
           <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
             {mentorList.length} Mentors Online
@@ -157,13 +166,7 @@ export default function VideoHub() {
                   Chat First
                 </button>
                 <button
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      localStorage.setItem('skillswap_video_return', '/video');
-                      window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-                    }
-                    router.navigate({ to: '/video/$id', params: { id: m.id } });
-                  }}
+                  onClick={() => handleStartMeet(m.id)}
                   className="py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <Video className="w-3.5 h-3.5" />
@@ -177,4 +180,3 @@ export default function VideoHub() {
     </div>
   );
 }
-

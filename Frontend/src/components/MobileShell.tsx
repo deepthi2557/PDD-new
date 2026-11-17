@@ -16,6 +16,7 @@ import {
   X,
   Video
 } from 'lucide-react';
+import { launchGoogleMeet, setVideoReturnUrl } from '../lib/meet';
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -101,10 +102,8 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                   key={item.path}
                   onClick={() => {
                     if (item.path === '/video') {
-                      if (typeof window !== 'undefined') {
-                        localStorage.setItem('skillswap_video_return', pathname);
-                        window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-                      }
+                      setVideoReturnUrl(pathname);
+                      launchGoogleMeet();
                       router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
                       return;
                     }
@@ -181,10 +180,8 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
                   onClick={() => {
                     setMobileMenuOpen(false);
                     if (item.path === '/video') {
-                      if (typeof window !== 'undefined') {
-                        localStorage.setItem('skillswap_video_return', pathname);
-                        window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-                      }
+                      setVideoReturnUrl(pathname);
+                      launchGoogleMeet();
                       router.navigate({ to: '/video/$id', params: { id: 'google-meet' } });
                       return;
                     }

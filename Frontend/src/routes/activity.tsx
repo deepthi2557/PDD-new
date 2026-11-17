@@ -4,6 +4,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Star, Clock, CheckCircle2, AlertTriangle, Sparkles, User, Calendar, Video } from 'lucide-react';
 import { fetchMentors } from '../lib/api';
 import { Mentor } from '../lib/data';
+import { launchGoogleMeet, setVideoReturnUrl } from '../lib/meet';
 
 export const Route = createFileRoute('/activity')({
   component: Activity,
@@ -169,10 +170,8 @@ export default function Activity() {
                   {it.status === 'upcoming' && (
                     <button
                       onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          localStorage.setItem('skillswap_video_return', '/activity');
-                          window.open('https://meet.google.com/new', '_blank');
-                        }
+                        setVideoReturnUrl('/activity');
+                        launchGoogleMeet();
                         router.navigate({ to: '/video/$id', params: { id: it.mentorId || 'aria-shah' } });
                       }}
                       className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"

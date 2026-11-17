@@ -21,6 +21,7 @@ import {
 import { categories, sortOptions, searchSuggestions, type Mentor } from '../lib/data';
 import { fetchMentors, fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
+import { launchGoogleMeet, setVideoReturnUrl } from '../lib/meet';
 
 export const Route = createFileRoute('/home')({
   component: Home,
@@ -389,10 +390,8 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        localStorage.setItem('skillswap_video_return', '/home');
-                        window.open('https://meet.google.com/new', '_blank');
-                      }
+                      setVideoReturnUrl('/home');
+                      launchGoogleMeet();
                       router.navigate({ to: `/video/$id`, params: { id: mentor.id } });
                     }}
                     className="py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs transition-colors flex items-center justify-center gap-1"

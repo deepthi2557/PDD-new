@@ -27,6 +27,7 @@ import {
 import { mentors, getReviewsForMentor, type Mentor } from '../lib/data';
 import { fetchMentorById } from '../lib/api';
 import { supabase } from '../lib/supabase';
+import { launchGoogleMeet, setVideoReturnUrl } from '../lib/meet';
 
 export const Route = createFileRoute('/profile/$id')({
   component: Profile,
@@ -288,10 +289,8 @@ export default function Profile() {
 
                   <button
                     onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        localStorage.setItem('skillswap_video_return', `/profile/${m.id}`);
-                        window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-                      }
+                      setVideoReturnUrl(`/profile/${m.id}`);
+                      launchGoogleMeet();
                       router.navigate({ to: `/video/$id`, params: { id: m.id } });
                     }}
                     className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs sm:text-sm transition-colors"
@@ -405,10 +404,8 @@ export default function Profile() {
         <div className="flex items-center gap-3 w-full sm:w-auto relative z-10 shrink-0">
           <button
             onClick={() => {
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('skillswap_video_return', `/profile/${m.id}`);
-                window.open('https://meet.google.com/new', 'SkillSwapMeetWindow');
-              }
+              setVideoReturnUrl(`/profile/${m.id}`);
+              launchGoogleMeet();
               router.navigate({ to: '/video/$id', params: { id: m.id } });
             }}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition-all active:scale-[0.98]"
